@@ -8,7 +8,9 @@ import ink.ptms.artifex.script.ScriptContainerManager
 import ink.ptms.artifex.script.ScriptEvaluator
 import taboolib.common.LifeCycle
 import taboolib.common.io.getInstance
+import taboolib.common.io.newFile
 import taboolib.common.platform.Awake
+import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import java.io.File
 
@@ -41,7 +43,15 @@ class DefaultScriptAPI : ArtifexAPI {
     }
 
     override fun runtimeLibraryFile(): File {
-        return releaseResourceFile("require/artifex-runtime.jar", true)
+        try {
+            return releaseResourceFile("runtime/artifex-runtime.jar", true)
+        } catch (ex: Throwable) {
+            val file = newFile(getDataFolder(), "runtime/artifex-runtime.jar")
+            if (file.exists()) {
+                return file
+            }
+        }
+        error("Runtime library not found!")
     }
 
     companion object {
