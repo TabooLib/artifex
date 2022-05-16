@@ -24,15 +24,25 @@ interface ScriptResult<out R> {
     /**
      * 运行报告详细信息
      */
-    data class Diagnostic(
-        val code: Int,
-        val message: String,
-        val severity: Severity,
-        val sourcePath: String?,
-        val location: ScriptSourceCode.Location?,
-        val exception: Throwable?,
-    ) {
+    data class Diagnostic(val code: Int, val message: String, val severity: Severity, val source: Source, val exception: Throwable?)
 
-        enum class Severity { DEBUG, INFO, WARNING, ERROR, FATAL }
-    }
+    /**
+     * 脚本源
+     */
+    data class Source(val path: String?, val location: ScriptSourceCode.Location?)
+
+    /**
+     * 脚本运行结果
+     */
+    data class Result(val value: ResultValue, val configuration: ScriptEvaluator.Configuration?)
+
+    /**
+     * 脚本运行结果返回值
+     */
+    data class ResultValue(val clazz: Class<*>, val instance: Any?)
+
+    /**
+     * 报告类型
+     */
+    enum class Severity { DEBUG, INFO, WARNING, ERROR, FATAL }
 }

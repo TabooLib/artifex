@@ -1,11 +1,7 @@
 package ink.ptms.artifex
 
-import ink.ptms.artifex.script.ScriptClassLoader
-import ink.ptms.artifex.script.ScriptCompiler
-import ink.ptms.artifex.script.ScriptContainerManager
-import ink.ptms.artifex.script.ScriptEvaluator
+import ink.ptms.artifex.script.*
 import java.io.File
-import java.net.URL
 
 /**
  * Artifex
@@ -27,9 +23,14 @@ interface ArtifexAPI {
     fun scriptEvaluator(): ScriptEvaluator
 
     /**
+     * 获取脚本环境
+     */
+    fun scriptEnvironment(): ScriptEnvironment
+
+    /**
      * 获取脚本类加载器
      */
-    fun scriptClassLoader(): ScriptClassLoader
+    fun scriptClassLoader(): RuntimeClassLoader
 
     /**
      * 获取脚本容器管理器

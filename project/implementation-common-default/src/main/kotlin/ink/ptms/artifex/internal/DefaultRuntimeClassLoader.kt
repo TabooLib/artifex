@@ -1,7 +1,7 @@
 package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.script.ScriptClassLoader
+import ink.ptms.artifex.script.RuntimeClassLoader
 import java.io.File
 import java.io.IOException
 import java.net.URL
@@ -15,7 +15,7 @@ import java.util.jar.Manifest
  * @author 坏黑
  * @since 2022/5/16 00:56
  */
-class DefaultScriptClassLoader(val file: File) : URLClassLoader(arrayOf(file.toURI().toURL()), Artifex::class.java.classLoader), ScriptClassLoader {
+class DefaultRuntimeClassLoader(val file: File) : URLClassLoader(arrayOf(file.toURI().toURL()), Artifex::class.java.classLoader), RuntimeClassLoader {
 
     val jar = JarFile(file)
     val url: URL = file.toURI().toURL()

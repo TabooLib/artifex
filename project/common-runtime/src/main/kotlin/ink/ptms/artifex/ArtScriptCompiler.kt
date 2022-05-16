@@ -2,6 +2,7 @@ package ink.ptms.artifex
 
 import ink.ptms.artifex.script.ScriptCompiled
 import ink.ptms.artifex.script.ScriptCompiler
+import ink.ptms.artifex.script.ScriptFileCompiled
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import taboolib.common.platform.ProxyCommandSender
 import java.io.File
@@ -15,18 +16,16 @@ import java.io.File
  */
 class ArtScriptCompiler : ScriptCompiler {
 
-    val serializeVersion = 1
-
     override fun createCompilationConfiguration(pops: ScriptRuntimeProperty): ScriptCompiler.Configuration {
         TODO("Not yet implemented")
     }
 
     override fun compileToScript(
         configuration: ScriptCompiler.Configuration,
+        name: String,
         source: String,
         sender: ProxyCommandSender,
-        report: Boolean,
-        name: String,
+        option: ScriptCompiler.Option,
     ): ScriptCompiled? {
         TODO("Not yet implemented")
     }
@@ -35,8 +34,17 @@ class ArtScriptCompiler : ScriptCompiler {
         configuration: ScriptCompiler.Configuration,
         source: File,
         sender: ProxyCommandSender,
-        report: Boolean,
+        option: ScriptCompiler.Option,
     ): ScriptCompiled? {
         TODO("Not yet implemented")
+    }
+
+    override fun getFromFile(file: File): ScriptFileCompiled? {
+        TODO("Not yet implemented")
+    }
+
+    companion object {
+
+        const val SERIALIZE_VERSION = 1
     }
 }

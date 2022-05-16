@@ -1,18 +1,13 @@
 package ink.ptms.artifex.script
 
+import java.io.File
+import java.util.Properties
+
 /**
  * @author 坏黑
  * @since 2022/5/15 23:20
  */
 interface ScriptCompiled {
-
-    /**
-     * 创建运行配置
-     *
-     * @param id 脚本序号
-     * @param props 脚本运行参数
-     */
-    fun createEvaluationConfiguration(id: String, props: ScriptRuntimeProperty): Configuration
 
     /**
      * 运行脚本
@@ -27,7 +22,7 @@ interface ScriptCompiled {
      *
      * @param configuration 脚本运行配置
      */
-    fun invoke(configuration: Configuration): ScriptResult<EvaluationResult>
+    fun invoke(configuration: ScriptEvaluator.Configuration): ScriptResult<ScriptResult.Result>
 
     /**
      * 获取脚本中的类
@@ -35,20 +30,12 @@ interface ScriptCompiled {
      * @param name 类名
      * @param configuration 脚本运行配置
      */
-    fun findClass(name: String, configuration: Configuration): ScriptResult<Class<*>>
+    fun findClass(name: String, configuration: ScriptEvaluator.Configuration): ScriptResult<Class<*>>
 
     /**
-     * 脚本运行配置
+     * 写入文件
+     * @param file 文件
+     * @param props 直接参与脚本编译的变量
      */
-    interface Configuration
-
-    /**
-     * 脚本运行结果
-     */
-    class EvaluationResult(val returnValue: ResultValue, val configuration: Configuration?)
-
-    /**
-     * 脚本运行结果返回值
-     */
-    class ResultValue(val clazz: Class<*>, val instance: Any?)
+    fun saveToFile(file: File, props: Properties)
 }

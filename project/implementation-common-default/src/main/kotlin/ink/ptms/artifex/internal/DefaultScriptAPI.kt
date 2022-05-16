@@ -2,13 +2,9 @@ package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.ArtifexAPI
-import ink.ptms.artifex.script.ScriptClassLoader
-import ink.ptms.artifex.script.ScriptCompiler
-import ink.ptms.artifex.script.ScriptContainerManager
-import ink.ptms.artifex.script.ScriptEvaluator
+import ink.ptms.artifex.script.*
 import taboolib.common.LifeCycle
 import taboolib.common.io.getInstance
-import taboolib.common.io.newFile
 import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
@@ -23,7 +19,8 @@ import java.io.File
  */
 class DefaultScriptAPI : ArtifexAPI {
 
-    val scriptClassLoader = DefaultScriptClassLoader(runtimeLibraryFile())
+    val scriptEnvironment = DefaultScriptEnvironment()
+    val scriptClassLoader = DefaultRuntimeClassLoader(runtimeLibraryFile())
     val scriptContainerManager = DefaultScriptContainerManager()
 
     override fun scriptCompiler(): ScriptCompiler {
@@ -34,7 +31,11 @@ class DefaultScriptAPI : ArtifexAPI {
         return scriptClassLoader.findClass("ink.ptms.artifex.ArtScriptEvaluator").getInstance(true)!!.get() as ScriptEvaluator
     }
 
-    override fun scriptClassLoader(): ScriptClassLoader {
+    override fun scriptEnvironment(): ScriptEnvironment {
+        return scriptEnvironment
+    }
+
+    override fun scriptClassLoader(): RuntimeClassLoader {
         return scriptClassLoader
     }
 
@@ -46,12 +47,8 @@ class DefaultScriptAPI : ArtifexAPI {
         try {
             return releaseResourceFile("runtime/artifex-runtime.jar", true)
         } catch (ex: Throwable) {
-            val file = newFile(getDataFolder(), "runtime/artifex-runtime.jar")
-            if (file.exists()) {
-                return file
-            }
+            return File(getDataFolder(), "runtime/artifex-runtime.jar").takeIf { it.exists() } ?: error("Runtime library not found!")
         }
-        error("Runtime library not found!")
     }
 
     companion object {
