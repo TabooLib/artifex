@@ -1,6 +1,48 @@
 # Artifex
 
-**模块结构如下**
+Artifex 提供了完善的 Kotlin Script (.kts) 运行环境，且支持 [TabooLib](https://github.com/taboolib/taboolib) 全特性。
+
+```kotlin
+val compiledScript = Artifex.api().scriptCompiler().compile {
+
+    // 传入源文件
+    it.source(File(getDataFolder(), "test.kts"))
+
+    it.onReport { r ->
+        if (r.severity > ScriptResult.Severity.DEBUG) {
+            warning(r.message)
+        }
+    }
+
+    it.onSuccess { r ->
+        // 生成 jar 文件
+        r.generateScriptJar(newFile(getDataFolder(), "test.jar"))
+    }
+
+    it.onFailure {
+        warning("编译失败")
+    }
+}
+
+// 运行脚本
+scriptCompiled.invoke(...)
+```
+
+## 使用方式
+
+Artifex 可基于 Bukkit & BungeeCord 环境下运行：
+
+1. 构建项目
+```
+./gradlew build
+```
+2. 在 `/plugin/build/libs` 目录中获取 **插件** 文件
+3. 在 `/project/common-runtime/build/libs` 目录中获取 **运行库** 文件
+4. 将 **运行库** 文件放入 `plugins/Artifex/runtime` 目录下并更名为 `core.jar`
+
+> 也可在 `Github Actions` 中直接获取
+
+## 模块结构
 
 * **common**
     * 核心模块
@@ -8,24 +50,23 @@
     * 不含任何业务逻辑
 
 * **common-runtime**
-    * 运行环境模块
-    * 依赖 `kotlin.script.experimental` 的类文件必须在此模块中运行
+    * 独立运行环境
+    * 依赖 `kotlin.script.experimental` 的类文件必须在此模块中编写
 
 * **controller**
-  * 控制器模块
-  * 不实现任何逻辑，仅提供基于 Minecraft 游戏内的控制方法（例如：命令、配置）
+    * 游戏内控制器
+    * 不实现任何逻辑，仅提供基于 Minecraft 游戏内的脚本控制方法（例如：命令、配置）
 
 * **implementation-bukkit**
-    * 实现了 `common` 模块中的平台适配类型接口
+    * 实现了 `common` 模块中的平台适配相关接口
     * 提供了 `Bukkit` 专用特性
     * 依赖 `org.bukkit`
 
 * **implementation-bungee**
-    * 实现了 `common` 模块中的平台适配类型接口
+    * 实现了 `common` 模块中的平台适配相关接口
     * 提供了 `BungeeCord` 专用特性
     * 依赖 `net.md_5.bungee`
 
 * **implementation-common-default**
-    * 实现模块
-    * 实现了 `common` 模块中的通用类型接口
+    * 实现了 `common` 模块中的通用接口
     * 不依赖 `kotlin.script.experimental`

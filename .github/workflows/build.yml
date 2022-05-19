@@ -28,4 +28,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Artifacts
-          path: build/libs/
+          path: |
+            plugin/build/libs/
+            project/common-runtime/build/libs/
