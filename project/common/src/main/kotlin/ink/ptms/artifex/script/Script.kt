@@ -15,4 +15,12 @@ abstract class Script {
      * 释放脚本资源（卸载脚本）
      */
     abstract fun release()
+
+    /**
+     * 开放接口，用于从外部进行调用，
+     * 这只是 Artifex 的规范，不是必须遵守的写法
+     */
+    open fun invoke(method: String, args: Array<out Any>): Any? {
+        return null
+    }
 }

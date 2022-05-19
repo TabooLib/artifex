@@ -6,6 +6,7 @@ plugins {
 
 taboolib {
     install("common")
+    install("module-configuration")
     options("skip-taboolib-relocate")
     classifier = null
     version = taboolib_version

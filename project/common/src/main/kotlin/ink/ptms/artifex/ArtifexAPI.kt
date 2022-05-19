@@ -28,7 +28,12 @@ interface ArtifexAPI {
     fun scriptEnvironment(): ScriptEnvironment
 
     /**
-     * 获取脚本类加载器
+     * 获取 ScriptMetaHandler
+     */
+    fun scriptMetaHandler(): ScriptMetaHandler
+
+    /**
+     * 获取运行库模块的类加载器
      */
     fun scriptClassLoader(): RuntimeClassLoader
 

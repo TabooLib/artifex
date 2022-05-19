@@ -32,7 +32,7 @@ interface ScriptFileCompiled : ScriptCompiled {
     fun propsDescription(): String
 
     /**
-     * 序列化
+     * 序列化类文件
      */
     fun toByteArray(): ByteArray
 }

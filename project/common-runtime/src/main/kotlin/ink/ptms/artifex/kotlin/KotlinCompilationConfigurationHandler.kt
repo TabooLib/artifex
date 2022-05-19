@@ -41,11 +41,14 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
         }.asSuccess()
     }
 
-    fun File.findIncludeScripts(script: String): Set<File> {
+    /**
+     * 获取目录下所有名称相同的脚本
+     */
+    fun File.findIncludeScripts(name: String): Set<File> {
         if (isDirectory) {
-            return listFiles()?.flatMap { it.findScripts() }?.toSet() ?: emptySet()
+            return listFiles()?.flatMap { it.findIncludeScripts(name) }?.toSet() ?: emptySet()
         }
-        if (name == script || (nameWithoutExtension == script && extension == "kts")) {
+        if (name == name || (nameWithoutExtension == name && extension == "kts")) {
             return setOf(this)
         }
         return emptySet()

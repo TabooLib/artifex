@@ -23,16 +23,24 @@ class DefaultScriptAPI : ArtifexAPI {
     val scriptClassLoader = DefaultRuntimeClassLoader(runtimeLibraryFile())
     val scriptContainerManager = DefaultScriptContainerManager()
 
+    val scriptCompiler = loadRuntimeClass<ScriptCompiler>("ArtScriptCompiler")
+    val scriptEvaluator = loadRuntimeClass<ScriptEvaluator>("ArtScriptEvaluator")
+    val scriptMetaHandler = loadRuntimeClass<ScriptMetaHandler>("ArtScriptMetaHandler")
+
     override fun scriptCompiler(): ScriptCompiler {
-        return scriptClassLoader.findClass("ink.ptms.artifex.ArtScriptCompiler").getInstance(true)!!.get() as ScriptCompiler
+        return scriptCompiler
     }
 
     override fun scriptEvaluator(): ScriptEvaluator {
-        return scriptClassLoader.findClass("ink.ptms.artifex.ArtScriptEvaluator").getInstance(true)!!.get() as ScriptEvaluator
+        return scriptEvaluator
     }
 
     override fun scriptEnvironment(): ScriptEnvironment {
         return scriptEnvironment
+    }
+
+    override fun scriptMetaHandler(): ScriptMetaHandler {
+        return scriptMetaHandler
     }
 
     override fun scriptClassLoader(): RuntimeClassLoader {
@@ -44,11 +52,16 @@ class DefaultScriptAPI : ArtifexAPI {
     }
 
     override fun runtimeLibraryFile(): File {
-        try {
-            return releaseResourceFile("runtime/artifex-runtime.jar", true)
+        return try {
+            releaseResourceFile("runtime/artifex-runtime.jar", true)
         } catch (ex: Throwable) {
-            return File(getDataFolder(), "runtime/artifex-runtime.jar").takeIf { it.exists() } ?: error("Runtime library not found!")
+            File(getDataFolder(), "runtime/artifex-runtime.jar").takeIf { it.exists() } ?: error("Runtime library not found!")
         }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T> loadRuntimeClass(name: String): T {
+        return scriptClassLoader.findClass("ink.ptms.artifex.$name").getInstance(true)!!.get() as T
     }
 
     companion object {

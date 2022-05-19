@@ -1,13 +1,15 @@
 package ink.ptms.artifex.script
 
-import java.io.File
-import java.util.Properties
-
 /**
  * @author 坏黑
  * @since 2022/5/15 23:20
  */
 interface ScriptCompiled {
+
+    /**
+     * 获取脚本名称
+     */
+    fun name(): String
 
     /**
      * 运行脚本
@@ -33,9 +35,7 @@ interface ScriptCompiled {
     fun findClass(name: String, configuration: ScriptEvaluator.Configuration): ScriptResult<Class<*>>
 
     /**
-     * 写入文件
-     * @param file 文件
-     * @param props 直接参与脚本编译的变量
+     * 生成 ScriptMeta 对象
      */
-    fun saveToFile(file: File, props: Properties)
+    fun generateScriptMeta(): ScriptMeta
 }
