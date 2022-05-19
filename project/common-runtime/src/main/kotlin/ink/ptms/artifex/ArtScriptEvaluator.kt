@@ -17,13 +17,16 @@ import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
  */
 class ArtScriptEvaluator : ScriptEvaluator {
 
-    val scriptingHost = BasicJvmScriptingHost()
-
     override fun createEvaluationConfiguration(id: String, props: ScriptRuntimeProperty): ScriptEvaluator.Configuration {
         TODO("Not yet implemented")
     }
 
     override fun eval(file: File, sender: ProxyCommandSender, option: ScriptEvaluator.Option): CompletableFuture<ScriptResult<ScriptResult.Result>> {
         TODO("Not yet implemented")
+    }
+
+    companion object {
+
+        val scriptingHost = BasicJvmScriptingHost()
     }
 }

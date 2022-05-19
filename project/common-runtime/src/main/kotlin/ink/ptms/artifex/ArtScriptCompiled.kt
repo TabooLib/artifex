@@ -1,6 +1,7 @@
 package ink.ptms.artifex
 
 import ink.ptms.artifex.script.*
+import java.io.File
 import kotlin.script.experimental.api.CompiledScript
 
 /**
@@ -10,7 +11,7 @@ import kotlin.script.experimental.api.CompiledScript
  * @author 坏黑
  * @since 2022/5/18 23:56
  */
-class ArtScriptCompiled(val kotlinScript: CompiledScript, meta: ScriptMeta? = null) : ScriptCompiled {
+class ArtScriptCompiled(val kotlinScript: CompiledScript, val hash: String, meta: ScriptMeta? = null) : ScriptCompiled {
 
     val meta = meta ?: Artifex.api().scriptMetaHandler().getScriptMeta(this)
 
@@ -28,6 +29,10 @@ class ArtScriptCompiled(val kotlinScript: CompiledScript, meta: ScriptMeta? = nu
 
     override fun findClass(name: String, configuration: ScriptEvaluator.Configuration): ScriptResult<Class<*>> {
         TODO("Not yet implemented")
+    }
+
+    override fun generateScriptJar(file: File) {
+        meta.generateJar(file)
     }
 
     override fun generateScriptMeta(): ScriptMeta {

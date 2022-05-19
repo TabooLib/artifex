@@ -5,16 +5,17 @@ plugins {
 }
 
 taboolib {
-    install("common")
+    description {
+        name(rootProject.name)
+    }
+    install("common", "common-5")
     install("module-configuration")
-    options("skip-taboolib-relocate")
+    install("expansion-command-helper")
+    options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
     classifier = null
     version = taboolib_version
-    exclude("taboolib")
-    relocate("io.github.lukehutch", "taboolib.library")
 }
 
 dependencies {
     api(project(":project:common"))
-    compileOnly("io.github:fast-classpath-scanner:3.1.13")
 }

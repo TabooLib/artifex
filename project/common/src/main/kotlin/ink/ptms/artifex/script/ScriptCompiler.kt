@@ -1,7 +1,8 @@
 package ink.ptms.artifex.script
 
-import taboolib.common.platform.ProxyCommandSender
 import java.io.File
+import java.io.InputStream
+import java.util.function.Consumer
 
 /**
  * @author 坏黑
@@ -15,39 +16,63 @@ interface ScriptCompiler {
     fun createCompilationConfiguration(pops: ScriptRuntimeProperty): Configuration
 
     /**
-     * 将字符串编译成脚本对象
-     *
-     * @param configuration 编译配置
-     * @param name 脚本名称
-     * @param source 脚本内容
-     * @param sender 日志接收者
-     * @param option 选项
+     * 编译
      */
-    fun compileToScript(configuration: Configuration, name: String, source: String, sender: ProxyCommandSender, option: Option): ScriptCompiled?
-
-    /**
-     * 将源文件编译成脚本对象
-     *
-     * @param configuration 编译配置
-     * @param source 脚本文件
-     * @param sender 日志接收者
-     * @param option 选项
-     */
-    fun compileToScript(configuration: Configuration, source: File, sender: ProxyCommandSender, option: Option): ScriptCompiled?
-
-    /**
-     * 从编译文件读取为脚本对象
-     * @param file 编译文件（.art）
-     */
-    fun getFromFile(file: File): ScriptFileCompiled?
-
-    /**
-     * 脚本编译选项
-     */
-    interface Option
+    fun compile(compiler: Consumer<Compiler>): ScriptCompiled?
 
     /**
      * 脚本编译配置
      */
     interface Configuration
+
+    /**
+     * 脚本编译器
+     */
+    interface Compiler {
+
+        /**
+         * 使用编译配置
+         */
+        fun configuration(configuration: Configuration)
+
+        /**
+         * 主类名称
+         */
+        fun main(name: String)
+
+        /**
+         * 源文件
+         */
+        fun source(file: File)
+
+        /**
+         * 源文件
+         */
+        fun source(source: String)
+
+        /**
+         * 源文件
+         */
+        fun source(byteArray: ByteArray)
+
+        /**
+         * 源文件
+         */
+        fun source(inputStream: InputStream)
+
+        /**
+         * 当汇报信息时调用
+         */
+        fun onReport(func: Consumer<ScriptResult.Diagnostic>)
+
+        /**
+         * 当编译完成时调用
+         */
+        fun onSuccess(func: Consumer<ScriptCompiled>)
+
+        /**
+         * 当编译失败时调用
+         */
+        fun onFailure(func: Runnable)
+    }
 }

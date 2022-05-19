@@ -29,4 +29,9 @@ interface ScriptSourceCode {
      * @param locationInText concrete location of the source code in file
      */
     data class LocationWithId(val codeLocationId: String, val locationInText: Location)
+
+    companion object {
+
+        const val SERIALIZE_VERSION = 1
+    }
 }

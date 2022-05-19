@@ -21,4 +21,8 @@ interface ScriptMetaHandler {
      */
     fun getScriptMeta(file: File): ScriptMeta
 
+    /**
+     * 从文件中获取版本信息（源代码版本）
+     */
+    fun getScriptVersion(file: File): String
 }

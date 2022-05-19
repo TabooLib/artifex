@@ -4,6 +4,7 @@ import ink.ptms.artifex.ArtScript
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.Import
 import ink.ptms.artifex.Include
+import ink.ptms.artifex.script.ScriptCompiler
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import org.jetbrains.kotlin.mainKts.CompilerOptions
 import java.util.*
@@ -24,6 +25,12 @@ class KotlinCompilationConfiguration(val props: ScriptRuntimeProperty) : ScriptC
         jvm {
             dependenciesFromClassContext(KotlinCompilationConfiguration::class, wholeClasspath = true)
             compilerOptions("-jvm-target", "1.8")
+            // 避免版本检查
+            // Some JAR files in the classpath have the Kotlin Runtime library bundled into them.
+            // This may cause difficult to debug problems if there's a different version of the Kotlin Runtime library in the classpath.
+            // Consider removing these libraries from the classpath
+            // Library has Kotlin runtime bundled into it
+            compilerOptions("-Xskip-runtime-version-check")
         }
         refineConfiguration {
             onAnnotations(Include::class, Import::class, CompilerOptions::class, handler = KotlinCompilationConfigurationHandler())
@@ -35,4 +42,4 @@ class KotlinCompilationConfiguration(val props: ScriptRuntimeProperty) : ScriptC
         map += "runArgs" to Properties::class
         providedProperties(*map.toTypedArray())
     }
-)
+), ScriptCompiler.Configuration

@@ -20,4 +20,5 @@ taboolib {
 
 dependencies {
     api(project(":project:common"))
+    compileOnly("net.md_5.bungee:BungeeCord:1")
 }

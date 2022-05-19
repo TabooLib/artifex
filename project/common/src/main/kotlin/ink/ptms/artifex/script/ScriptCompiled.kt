@@ -1,5 +1,7 @@
 package ink.ptms.artifex.script
 
+import java.io.File
+
 /**
  * @author 坏黑
  * @since 2022/5/15 23:20
@@ -33,6 +35,11 @@ interface ScriptCompiled {
      * @param configuration 脚本运行配置
      */
     fun findClass(name: String, configuration: ScriptEvaluator.Configuration): ScriptResult<Class<*>>
+
+    /**
+     * 生成 Jar 并写入文件
+     */
+    fun generateScriptJar(file: File)
 
     /**
      * 生成 ScriptMeta 对象

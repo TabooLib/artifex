@@ -13,6 +13,11 @@ import java.io.File
 interface ArtifexAPI {
 
     /**
+     * 获取跨平台工具
+     */
+    fun platformHelper(): PlatformHelper
+
+    /**
      * 获取脚本编译器
      */
     fun scriptCompiler(): ScriptCompiler
@@ -46,4 +51,9 @@ interface ArtifexAPI {
      * 获取运行库文件
      */
     fun runtimeLibraryFile(): File
+
+    /**
+     * 获取接口信息
+     */
+    fun status(): Map<String, String>
 }

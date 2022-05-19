@@ -1,6 +1,4 @@
-package ink.ptms.artifex
-
-import ink.ptms.artifex.script.ScriptRuntimeProperty
+package ink.ptms.artifex.script
 
 /**
  * 脚本运行选项

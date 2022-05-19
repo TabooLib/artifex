@@ -11,6 +11,10 @@
     * 运行环境模块
     * 依赖 `kotlin.script.experimental` 的类文件必须在此模块中运行
 
+* **controller**
+  * 控制器模块
+  * 不实现任何逻辑，仅提供基于 Minecraft 游戏内的控制方法（例如：命令、配置）
+
 * **implementation-bukkit**
     * 实现了 `common` 模块中的平台适配类型接口
     * 提供了 `Bukkit` 专用特性
