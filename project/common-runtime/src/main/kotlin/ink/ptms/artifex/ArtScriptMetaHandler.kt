@@ -7,6 +7,7 @@ import taboolib.common.reflect.Reflex.Companion.getProperty
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.io.File
+import java.util.StringJoiner
 import java.util.jar.JarFile
 import kotlin.script.experimental.api.KotlinType
 import kotlin.script.experimental.util.PropertiesCollection
@@ -58,15 +59,29 @@ class ArtScriptMetaHandler : ScriptMetaHandler {
         }
     }
 
+    override fun getScriptName(file: File): String {
+        return getScriptMetaData(file) { version, meta ->
+            when (version) {
+                1 -> meta.getString("name").toString()
+                else -> error("Unsupported version ${meta.getInt("version")}")
+            }
+        }
+    }
+
     override fun getScriptVersion(file: File): String {
+        return getScriptMetaData(file) { version, meta ->
+            when (version) {
+                1 -> meta.getString("version.file").toString()
+                else -> error("Unsupported version ${meta.getInt("version")}")
+            }
+        }
+    }
+
+    fun <T> getScriptMetaData(file: File, func: (Int, Configuration) -> T): T {
         val jarFile = JarFile(file)
         val metaEntry = jarFile.getJarEntry("meta.json") ?: error("Script meta not found")
         val meta = Configuration.loadFromString(jarFile.getInputStream(metaEntry).reader().readText(), Type.JSON)
-        return when (meta.getInt("version.compiler")) {
-            // 2022.5.19 第一版
-            1 -> meta.getString("version.file").toString()
-            else -> error("Unsupported version ${meta.getInt("version")}")
-        }
+        return func(meta.getInt("version.compiler"), meta)
     }
 
     interface Reader {

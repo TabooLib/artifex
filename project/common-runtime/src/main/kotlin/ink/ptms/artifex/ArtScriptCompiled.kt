@@ -1,8 +1,12 @@
 package ink.ptms.artifex
 
+import ink.ptms.artifex.kotlin.diagnostic
 import ink.ptms.artifex.script.*
+import ink.ptms.artifex.script.ScriptEvaluator
+import kotlinx.coroutines.runBlocking
+import taboolib.common.platform.function.info
 import java.io.File
-import kotlin.script.experimental.api.CompiledScript
+import kotlin.script.experimental.api.*
 
 /**
  * Artifex
@@ -19,12 +23,35 @@ class ArtScriptCompiled(val kotlinScript: CompiledScript, val hash: String, meta
         return meta.name()
     }
 
-    override fun invoke(id: String, props: ScriptRuntimeProperty) {
-        TODO("Not yet implemented")
+    override fun invoke(id: String, props: ScriptRuntimeProperty): ScriptResult<ScriptResult.Result> {
+        return invoke(Artifex.api().scriptEvaluator().createEvaluationConfiguration(id, props))
     }
 
     override fun invoke(configuration: ScriptEvaluator.Configuration): ScriptResult<ScriptResult.Result> {
-        TODO("Not yet implemented")
+        return runBlocking {
+            val result = ArtScriptEvaluator.scriptingHost.evaluator(kotlinScript, configuration as ScriptEvaluationConfiguration)
+            if (result is ResultWithDiagnostics.Success) {
+                // 返回值映射到 Artifex 类型
+                val resultValue = when (val value = result.value.returnValue) {
+                    is ResultValue.Value -> {
+                        ScriptResult.Result.Value(value.name, value.value, value.type, value.scriptClass?.java, value.scriptInstance)
+                    }
+                    is ResultValue.Unit -> {
+                        ScriptResult.Result.Unit(value.scriptClass!!.java, value.scriptInstance)
+                    }
+                    is ResultValue.Error -> {
+                        ScriptResult.Result.Error(value.error, value.wrappingException, value.scriptClass?.java)
+                    }
+                    ResultValue.NotEvaluated -> {
+                        ScriptResult.Result.NotEvaluated
+                    }
+                    else -> error("Unsupported return value ${value.javaClass.simpleName}")
+                }
+                ArtScriptResult(resultValue, result.reports.map { diagnostic(it) }, true)
+            } else {
+                ArtScriptResult(null, result.reports.map { diagnostic(it) }, false)
+            }
+        }
     }
 
     override fun findClass(name: String, configuration: ScriptEvaluator.Configuration): ScriptResult<Class<*>> {

@@ -1,0 +1,2 @@
+compile-referenced-build-failed: 'The referenced script could not complete the build'
+compile-referenced-cycle: 'The currently referenced script {0} is compiling'

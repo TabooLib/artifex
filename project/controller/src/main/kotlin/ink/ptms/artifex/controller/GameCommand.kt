@@ -1,8 +1,10 @@
 package ink.ptms.artifex.controller
 
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.mainCommand
+import taboolib.common.platform.command.subCommand
 import taboolib.expansion.createHelper
 
 /**
@@ -18,5 +20,12 @@ object GameCommand {
     @CommandBody
     val main = mainCommand {
         createHelper()
+    }
+
+    @CommandBody
+    val test = subCommand {
+        execute<ProxyCommandSender> { sender, context, argument ->
+            GameTest.active()
+        }
     }
 }

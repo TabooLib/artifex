@@ -22,17 +22,6 @@ interface ScriptEvaluator {
     fun createEvaluationConfiguration(id: String, props: ScriptRuntimeProperty): Configuration
 
     /**
-     * 运行脚本文件，
-     * 当满足以下条件时重新编译源代码：
-     * 1. 文件被修改
-     * 2. providedProperties 中属性的数量、名称或类型被修改
-     *
-     * @param sender 日志接收者
-     * @param option 选项
-     */
-    fun eval(file: File, sender: ProxyCommandSender, option: Option): CompletableFuture<ScriptResult<ScriptResult.Result>>
-
-    /**
      * 脚本运行选项
      */
     interface Option

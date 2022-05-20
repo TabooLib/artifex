@@ -9,6 +9,7 @@ plugins {
 
 taboolib {
     install("common")
+    install("module-lang")
     install("module-configuration")
     options("skip-taboolib-relocate")
     classifier = null

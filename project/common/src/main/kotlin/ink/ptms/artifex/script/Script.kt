@@ -14,7 +14,7 @@ abstract class Script {
     /**
      * 释放脚本资源（卸载脚本）
      */
-    abstract fun release()
+    open fun release() {}
 
     /**
      * 开放接口，用于从外部进行调用，

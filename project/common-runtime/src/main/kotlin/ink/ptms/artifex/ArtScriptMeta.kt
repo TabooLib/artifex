@@ -3,7 +3,6 @@ package ink.ptms.artifex
 import ink.ptms.artifex.script.ScriptCompiled
 import ink.ptms.artifex.script.ScriptMeta
 import ink.ptms.artifex.script.ScriptSourceCode
-import taboolib.common.io.digest
 import taboolib.common.io.newFile
 import taboolib.common.reflect.Reflex.Companion.invokeConstructor
 import taboolib.module.configuration.Configuration
@@ -11,7 +10,6 @@ import taboolib.module.configuration.Type
 import java.io.File
 import java.io.FileOutputStream
 import java.math.BigInteger
-import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.jar.JarEntry
 import java.util.zip.ZipOutputStream

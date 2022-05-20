@@ -19,7 +19,7 @@ interface ScriptCompiled {
      * @param id 脚本序号
      * @param props 脚本运行参数
      */
-    fun invoke(id: String, props: ScriptRuntimeProperty)
+    fun invoke(id: String, props: ScriptRuntimeProperty): ScriptResult<ScriptResult.Result>
 
     /**
      * 运行脚本

@@ -1,16 +1,20 @@
 package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.KotlinCompilationConfiguration
-import ink.ptms.artifex.script.*
+import ink.ptms.artifex.kotlin.diagnostic
+import ink.ptms.artifex.script.ScriptCompiled
+import ink.ptms.artifex.script.ScriptCompiler
+import ink.ptms.artifex.script.ScriptResult
+import ink.ptms.artifex.script.ScriptRuntimeProperty
 import kotlinx.coroutines.runBlocking
 import taboolib.common.io.digest
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Consumer
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
-import kotlin.script.experimental.api.ScriptDiagnostic
-import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.api.valueOrNull
 import kotlin.script.experimental.host.StringScriptSource
 
@@ -21,7 +25,9 @@ import kotlin.script.experimental.host.StringScriptSource
  * @author 坏黑
  * @since 2022/5/16 00:06
  */
-class ArtScriptCompiler : ScriptCompiler {
+object ArtScriptCompiler : ScriptCompiler {
+
+    val compileQueue = CopyOnWriteArraySet<String>()
 
     override fun createCompilationConfiguration(pops: ScriptRuntimeProperty): ScriptCompiler.Configuration {
         return KotlinCompilationConfiguration(pops)
@@ -36,32 +42,13 @@ class ArtScriptCompiler : ScriptCompiler {
             result.reports.forEach { impl.onReport?.accept(diagnostic(it)) }
             val compiledScript = result.valueOrNull()
             if (compiledScript != null) {
+                // ClassLoader: org.jetbrains.kotlin.scripting.compiler.plugin.impl.CompiledScriptClassLoader
                 ArtScriptCompiled(compiledScript, impl.source!!.digest("sha-1")).also { impl.onSuccess?.accept(it) }
             } else {
                 impl.onFailure?.run()
                 null
             }
         }
-    }
-
-    fun position(position: SourceCode.Position): ScriptSourceCode.Position {
-        return ScriptSourceCode.Position(position.line, position.col, position.absolutePos)
-    }
-
-    fun diagnostic(diagnostic: ScriptDiagnostic): ScriptResult.Diagnostic {
-        val loc = diagnostic.location
-        val location = if (loc != null) {
-            ScriptSourceCode.Location(position(loc.start), if (loc.end != null) position(loc.end!!) else null)
-        } else {
-            null
-        }
-        return ScriptResult.Diagnostic(
-            diagnostic.code,
-            diagnostic.message,
-            ScriptResult.Severity.valueOf(diagnostic.severity.name),
-            ScriptResult.Source(diagnostic.sourcePath, location),
-            diagnostic.exception
-        )
     }
 
     class CompilerImpl : ScriptCompiler.Compiler {

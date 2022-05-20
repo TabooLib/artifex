@@ -22,6 +22,10 @@ abstract class ArtScript(val baseId: String): Script() {
 
     val scriptContainer = Artifex.api().scriptContainerManager().register(Artifex.api().scriptContainerManager().createContainer(this))
 
+    override fun id(): String {
+        return baseId
+    }
+
     /**
      * 注册监听器（简写别名）
      */

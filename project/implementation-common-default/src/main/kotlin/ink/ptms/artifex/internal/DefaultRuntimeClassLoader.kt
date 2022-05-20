@@ -2,7 +2,6 @@ package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.RuntimeClassLoader
-import taboolib.common.platform.function.info
 import java.io.File
 import java.io.IOException
 import java.net.URL

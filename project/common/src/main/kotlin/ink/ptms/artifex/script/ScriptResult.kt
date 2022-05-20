@@ -32,14 +32,42 @@ interface ScriptResult<out R> {
     data class Source(val path: String?, val location: ScriptSourceCode.Location?)
 
     /**
-     * 脚本运行结果
-     */
-    data class Result(val value: ResultValue, val configuration: ScriptEvaluator.Configuration?)
-
-    /**
      * 脚本运行结果返回值
      */
-    data class ResultValue(val clazz: Class<*>, val instance: Any?)
+    sealed class Result(val scriptClass: Class<*>?, val instance: Any?) {
+
+        /**
+         * 正常结果
+         */
+        class Value(val name: String, val value: Any?, val type: String, scriptClass: Class<*>?, instance: Any?) : Result(scriptClass, instance) {
+
+            override fun toString(): String = "$name: $type = $value"
+        }
+
+        /**
+         * 无返回值
+         */
+        class Unit(scriptClass: Class<*>, instance: Any?) : Result(scriptClass, instance) {
+
+            override fun toString(): String = "Unit"
+        }
+
+        /**
+         * 错误结果
+         */
+        class Error(val error: Throwable, val wrappingException: Throwable? = null, scriptClass: Class<*>? = null) : Result(scriptClass, null) {
+
+            override fun toString(): String {
+                error.printStackTrace()
+                return error.toString()
+            }
+        }
+
+        /**
+         * 未执行成功
+         */
+        object NotEvaluated : Result(null, null)
+    }
 
     /**
      * 报告类型

@@ -1,5 +1,7 @@
 package ink.ptms.artifex.kotlin
 
+import ink.ptms.artifex.Artifex
+import ink.ptms.artifex.script.ScriptEvaluator
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import kotlin.script.experimental.api.ScriptEvaluationConfiguration
 import kotlin.script.experimental.api.constructorArgs
@@ -15,13 +17,13 @@ import kotlin.script.experimental.jvm.loadDependencies
 class KotlinEvaluationConfiguration(val id: String, val props: ScriptRuntimeProperty) : ScriptEvaluationConfiguration(
     {
         constructorArgs(id)
-        scriptsInstancesSharing(false)
+        scriptsInstancesSharing(true)
         jvm {
-            baseClassLoader(KotlinCompilationConfiguration::class.java.classLoader)
+            baseClassLoader(KotlinScript::class.java.classLoader)
             loadDependencies(false)
         }
         val map = props.providedProperties.map { it.key.toString() to it.value }.toMutableList<Pair<String, *>>()
         map += "runArgs" to props.runArgs
         providedProperties(*map.toTypedArray())
     }
-)
+), ScriptEvaluator.Configuration
