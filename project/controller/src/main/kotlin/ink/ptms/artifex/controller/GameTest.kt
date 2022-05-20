@@ -9,6 +9,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.warning
+import taboolib.common.reflect.Reflex.Companion.getProperty
 import java.io.File
 
 object GameTest {
@@ -18,7 +19,7 @@ object GameTest {
         val time = System.currentTimeMillis()
 
         val scriptCompiled = Artifex.api().scriptCompiler().compile {
-            it.source(File(getDataFolder(), "script/test.kts"))
+            it.source(File(getDataFolder(), "scripts/test.kts"))
             it.onReport { r ->
                 if (r.severity > ScriptResult.Severity.DEBUG) {
                     warning(r.toString())
@@ -34,7 +35,13 @@ object GameTest {
         } ?: return
 
         val scriptResult = scriptCompiled.invoke("Test", ScriptRuntimeProperty())
+
         info("脚本1 运行结果 $scriptResult")
         info("耗时: ${System.currentTimeMillis() - time}")
+
+        scriptResult.reports().forEach {
+            warning(it.message)
+            it.exception?.printStackTrace()
+        }
     }
 }

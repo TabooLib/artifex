@@ -19,7 +19,7 @@ interface ScriptEnvironment {
     /**
      * classpath 中缺少依赖文件将会产生 Unresolved reference 错误
      */
-    fun setupClasspath()
+    fun getClasspath(input: List<Class<*>>): List<File>
 
     /**
      * 加载脚本中所需的 import 列表

@@ -7,6 +7,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.PlatformFactory
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common.reflect.Reflex.Companion.getProperty
 
 /**
  * Artifex
@@ -22,11 +23,26 @@ object ArtifexBukkit : Plugin(), PlatformHelper  {
         releaseResourceFile("runtime/bukkit.jar", true)
     }
 
+    override fun plugin(name: String): Any? {
+        return Bukkit.getPluginManager().getPlugin(name)
+    }
+
+    override fun plugins(): List<Any> {
+        return Bukkit.getPluginManager().plugins.toList()
+    }
+
     override fun onLoad() {
         PlatformFactory.registerAPI<PlatformHelper>(this)
     }
 
-    override fun plugin(name: String): Any? {
-        return Bukkit.getPluginManager().getPlugin(name)
+    override fun onActive() {
+        kotlin.runCatching {
+            val accessSelf = javaClass.classLoader.getProperty<MutableSet<String>>("seenIllegalAccess", false)
+            if (accessSelf != null) {
+                Bukkit.getPluginManager().plugins.forEach { plugin ->
+                    accessSelf.add(plugin.name)
+                }
+            }
+        }
     }
 }

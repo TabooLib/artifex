@@ -29,4 +29,8 @@ object ArtifexBungee : Plugin(), PlatformHelper {
     override fun plugin(name: String): Any? {
         return BungeeCord.getInstance().pluginManager.getPlugin(name)
     }
+
+    override fun plugins(): List<Any> {
+        return BungeeCord.getInstance().pluginManager.plugins.toList()
+    }
 }

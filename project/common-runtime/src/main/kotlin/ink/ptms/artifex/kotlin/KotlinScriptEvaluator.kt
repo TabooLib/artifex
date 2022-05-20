@@ -1,78 +1,68 @@
-/*
- * Copyright 2010-2019 JetBrains s.r.o. and Kotlin Programming Language contributors.
- * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
- */
-
 package ink.ptms.artifex.kotlin
 
-import taboolib.common.platform.function.info
+import taboolib.common.reflect.Reflex.Companion.invokeMethod
 import java.lang.reflect.InvocationTargetException
 import kotlin.reflect.KClass
 import kotlin.script.experimental.api.*
+import kotlin.script.experimental.jvm.jvm
+import kotlin.script.experimental.util.PropertiesCollection
 
-class KotlinScriptEvaluator : ScriptEvaluator {
+open class KotlinScriptEvaluator : ScriptEvaluator {
+
+    private val jvmScriptEvaluationKt = Class.forName("kotlin.script.experimental.jvm.JvmScriptEvaluationKt")
 
     override suspend operator fun invoke(
         compiledScript: CompiledScript,
         scriptEvaluationConfiguration: ScriptEvaluationConfiguration,
     ): ResultWithDiagnostics<EvaluationResult> = try {
         compiledScript.getClass(scriptEvaluationConfiguration).onSuccess { scriptClass ->
-            compiledScript.otherScripts.mapSuccess { invoke(it, scriptEvaluationConfiguration) }.onSuccess { importedScriptsEvalResults ->
 
-                val refinedEvalConfiguration = scriptEvaluationConfiguration.refineBeforeEvaluation(compiledScript).valueOr {
+            val sharedConfiguration = scriptEvaluationConfiguration.getOrPrepareShared(scriptClass.java.classLoader)
+
+            compiledScript.otherScripts.mapSuccess { invoke(it, sharedConfiguration) }.onSuccess { importedScriptsEvalResults ->
+
+                val configuration = sharedConfiguration.refineBeforeEvaluation(compiledScript).valueOr {
                     return@invoke ResultWithDiagnostics.Failure(it.reports)
                 }
 
                 val resultValue = try {
-                    val instance = scriptClass.evalWithConfigAndOtherScriptsResults(refinedEvalConfiguration, importedScriptsEvalResults)
-
+                    val instance = scriptClass.evalWithConfigAndOtherScriptsResults(configuration, importedScriptsEvalResults)
                     compiledScript.resultField?.let { (name, type) ->
-                        val resultValue = scriptClass.java.getDeclaredField(name).apply { isAccessible = true }.get(instance)
-                        ResultValue.Value(name, resultValue, type.typeName, scriptClass, instance)
+                        val field = scriptClass.java.getDeclaredField(name).apply { isAccessible = true }
+                        ResultValue.Value(name, field.get(instance), type.typeName, scriptClass, instance)
                     } ?: ResultValue.Unit(scriptClass, instance)
-
                 } catch (e: InvocationTargetException) {
                     ResultValue.Error(e.targetException ?: e, e, scriptClass)
-                } catch (e: Throwable) {
-                    ResultValue.Error(e, e, scriptClass)
                 }
 
-                info("resultValue $resultValue")
-
-                EvaluationResult(resultValue, refinedEvalConfiguration).let {
-                    // sharedScripts?.put(scriptClass, it)
-                    ResultWithDiagnostics.Success(it)
-                }
+                EvaluationResult(resultValue, configuration).let { ResultWithDiagnostics.Success(it) }
             }
         }
     } catch (e: Throwable) {
         ResultWithDiagnostics.Failure(e.asDiagnostics(path = compiledScript.sourceLocationId))
     }
 
-    private fun KClass<*>.evalWithConfigAndOtherScriptsResults(
-        refinedEvalConfiguration: ScriptEvaluationConfiguration,
-        importedScriptsEvalResults: List<EvaluationResult>,
-    ): Any {
+    private fun KClass<*>.evalWithConfigAndOtherScriptsResults(configuration: ScriptEvaluationConfiguration, results: List<EvaluationResult>): Any {
         val args = ArrayList<Any?>()
 
-        refinedEvalConfiguration[ScriptEvaluationConfiguration.previousSnippets]?.let {
+        configuration[ScriptEvaluationConfiguration.previousSnippets]?.let {
             if (it.isNotEmpty()) {
                 args.add(it.toTypedArray())
             }
         }
 
-        refinedEvalConfiguration[ScriptEvaluationConfiguration.constructorArgs]?.let {
+        configuration[ScriptEvaluationConfiguration.constructorArgs]?.let {
             args.addAll(it)
         }
 
-        importedScriptsEvalResults.forEach {
+        results.forEach {
             args.add(it.returnValue.scriptInstance)
         }
 
-        refinedEvalConfiguration[ScriptEvaluationConfiguration.implicitReceivers]?.let {
+        configuration[ScriptEvaluationConfiguration.implicitReceivers]?.let {
             args.addAll(it)
         }
-        refinedEvalConfiguration[ScriptEvaluationConfiguration.providedProperties]?.forEach {
+        configuration[ScriptEvaluationConfiguration.providedProperties]?.forEach {
             args.add(it.value)
         }
 
@@ -85,5 +75,11 @@ class KotlinScriptEvaluator : ScriptEvaluator {
         } finally {
             Thread.currentThread().contextClassLoader = saveClassLoader
         }
+    }
+
+    private fun ScriptEvaluationConfiguration.getOrPrepareShared(classLoader: ClassLoader): ScriptEvaluationConfiguration {
+        val jvm = ScriptEvaluationConfiguration.jvm
+        val actualClassLoader = jvmScriptEvaluationKt.invokeMethod<PropertiesCollection.Key<ClassLoader>>("getActualClassLoader", jvm, fixed = true)!!
+        return if (this[actualClassLoader] == null) with { actualClassLoader(classLoader) } else this
     }
 }

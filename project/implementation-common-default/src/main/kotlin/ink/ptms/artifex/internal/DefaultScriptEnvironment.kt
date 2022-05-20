@@ -9,6 +9,7 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import java.io.File
+import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
 
@@ -28,12 +29,23 @@ class DefaultScriptEnvironment : ScriptEnvironment {
         return globalImports
     }
 
-    override fun setupClasspath() {
-        val classpath = ArrayList<File>()
-        classpath += File(getDataFolder(), "runtime").listFiles()!!.filter { it.nameWithoutExtension != "core" && it.extension == "jar" }
-        classpath += File("plugins").listFiles()!!.filter { it.extension == "jar" }
-        val separator = if (System.getProperty("os.name").lowercase().contains("windows")) ";" else ":"
-        System.setProperty("kotlin.script.classpath", classpath.joinToString(separator) { it.path })
+//    override fun setupClasspath() {
+//        val classpath = ArrayList<File>()
+//        classpath += File(getDataFolder(), "runtime").listFiles()!!.filter { it.nameWithoutExtension != "core" && it.extension == "jar" }
+//        classpath += File("plugins").listFiles()!!.filter { it.extension == "jar" }
+//        val separator = if (System.getProperty("os.name").lowercase().contains("windows")) ";" else ":"
+//        System.setProperty("kotlin.script.classpath", classpath.joinToString(separator) { it.path })
+//    }
+
+    override fun getClasspath(input: List<Class<*>>): List<File> {
+        val dependencies = ArrayList<File?>()
+        // 运行库
+        dependencies += File(getDataFolder(), "runtime").listFiles()!!.filter { it.extension == "jar" }
+        // 插件列表
+        dependencies += Artifex.api().platformHelper().plugins().map { file(it.javaClass) }
+        // 预设
+        dependencies += input.map { file(it) }
+        return dependencies.filterNotNull()
     }
 
     override fun setupGlobalImports() {
@@ -81,5 +93,9 @@ class DefaultScriptEnvironment : ScriptEnvironment {
 
     override fun loadFunctionsFromFile(file: File): List<String> {
         return file.readLines(StandardCharsets.UTF_8).filter { it.isNotBlank() }
+    }
+
+    fun file(clazz: Class<*>): File? {
+        return clazz.protectionDomain.codeSource?.location?.file?.let { File(URLDecoder.decode(it, "UTF-8")) }
     }
 }

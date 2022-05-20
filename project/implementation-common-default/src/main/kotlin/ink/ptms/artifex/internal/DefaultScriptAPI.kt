@@ -32,7 +32,7 @@ object DefaultScriptAPI : ArtifexAPI {
     @Awake(LifeCycle.LOAD)
     fun init() {
         Artifex.register(DefaultScriptAPI)
-        Artifex.api().scriptEnvironment().setupClasspath()
+//        Artifex.api().scriptEnvironment().setupClasspath()
         Artifex.api().scriptEnvironment().setupGlobalImports()
     }
 

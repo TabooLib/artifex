@@ -11,7 +11,6 @@ import taboolib.common.io.digest
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Consumer
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
@@ -34,18 +33,20 @@ object ArtScriptCompiler : ScriptCompiler {
     }
 
     override fun compile(compiler: Consumer<ScriptCompiler.Compiler>): ScriptCompiled? {
-        val impl = CompilerImpl().also { compiler.accept(it) }
-        impl.source ?: error("Script content is empty")
         return runBlocking {
-            val configuration = impl.configuration as ScriptCompilationConfiguration
-            val result = ArtScriptEvaluator.scriptingHost.compiler(StringScriptSource(impl.source!!, impl.main), configuration)
-            result.reports.forEach { impl.onReport?.accept(diagnostic(it)) }
+            val compilerImpl = CompilerImpl().also { compiler.accept(it) }
+            val configuration = compilerImpl.configuration as ScriptCompilationConfiguration
+            val scriptSource = StringScriptSource(compilerImpl.source ?: error("Script content is empty"), compilerImpl.main)
+            val result = ArtScriptEvaluator.scriptingHost.compiler(scriptSource, configuration)
+            // 编译日志
+            result.reports.forEach { compilerImpl.onReport?.accept(diagnostic(it)) }
+            // 编译结果
             val compiledScript = result.valueOrNull()
             if (compiledScript != null) {
                 // ClassLoader: org.jetbrains.kotlin.scripting.compiler.plugin.impl.CompiledScriptClassLoader
-                ArtScriptCompiled(compiledScript, impl.source!!.digest("sha-1")).also { impl.onSuccess?.accept(it) }
+                ArtScriptCompiled(compiledScript, compilerImpl.source!!.digest("sha-1")).also { compilerImpl.onSuccess?.accept(it) }
             } else {
-                impl.onFailure?.run()
+                compilerImpl.onFailure?.run()
                 null
             }
         }

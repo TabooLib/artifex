@@ -2,6 +2,8 @@ package ink.ptms.artifex.kotlin
 
 import ink.ptms.artifex.script.ScriptResult
 import ink.ptms.artifex.script.ScriptSourceCode
+import java.io.File
+import java.net.URLDecoder
 import kotlin.script.experimental.api.ScriptDiagnostic
 import kotlin.script.experimental.api.SourceCode
 

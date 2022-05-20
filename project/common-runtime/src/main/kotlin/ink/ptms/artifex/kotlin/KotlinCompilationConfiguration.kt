@@ -7,11 +7,16 @@ import ink.ptms.artifex.Include
 import ink.ptms.artifex.script.ScriptCompiler
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import org.jetbrains.kotlin.mainKts.CompilerOptions
+import taboolib.common.platform.function.getDataFolder
+import java.io.File
+import java.net.URLDecoder
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.jvm.dependenciesFromClassContext
 import kotlin.script.experimental.jvm.jvm
+import kotlin.script.experimental.jvm.updateClasspath
 
 /**
  * 编译配置
@@ -19,11 +24,12 @@ import kotlin.script.experimental.jvm.jvm
 @Suppress("SimplifiableCallChain")
 class KotlinCompilationConfiguration(val props: ScriptRuntimeProperty) : ScriptCompilationConfiguration(
     {
+        val classpath = Artifex.api().scriptEnvironment().getClasspath(listOf(KotlinCompilationConfiguration::class.java))
+        updateClasspath(classpath)
         baseClass(ArtScript::class)
         defaultImports(Include::class, Import::class, CompilerOptions::class)
         defaultImports.append(Artifex.api().scriptEnvironment().getGlobalImports())
         jvm {
-            dependenciesFromClassContext(KotlinCompilationConfiguration::class, wholeClasspath = true)
             compilerOptions("-jvm-target", "1.8")
             // 避免版本检查
             // Some JAR files in the classpath have the Kotlin Runtime library bundled into them.
