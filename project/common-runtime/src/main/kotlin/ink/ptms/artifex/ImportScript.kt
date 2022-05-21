@@ -4,7 +4,6 @@ import ink.ptms.artifex.kotlin.diagnostic
 import ink.ptms.artifex.kotlin.nonExists
 import ink.ptms.artifex.kotlin.scriptsFile
 import ink.ptms.artifex.script.ScriptRuntimeProperty
-import taboolib.common.platform.function.getDataFolder
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.script.experimental.api.*
@@ -30,33 +29,41 @@ class ImportScript(
         if (scriptFile == null || scriptFile.nonExists()) {
             error("Import script not found")
         }
-        val container = Artifex.api().scriptContainerManager().get(scriptClassFQName)
-        return if (container == null) {
-            invokeLibrary(File(scriptsFile, ".build/${scriptFile.nameWithoutExtension}.jar"))
-        } else {
-            ResultWithDiagnostics.Success(container.script().javaClass.kotlin)
+        return synchronized(lock) {
+            val container = Artifex.api().scriptContainerManager().get(scriptClassFQName)
+            if (container == null) {
+                invokeLibrary(File(scriptsFile, ".build/${scriptFile.nameWithoutExtension}.jar"))
+            } else {
+                ResultWithDiagnostics.Success(container.script().javaClass.kotlin)
+            }
         }
     }
 
-    fun instance(): ResultWithDiagnostics<EvaluationResult> {
-        val container = Artifex.api().scriptContainerManager().get(scriptClassFQName)
-            ?: return ResultWithDiagnostics.Success(EvaluationResult(ResultValue.NotEvaluated, null))
-        val script = container.script()
-        return ResultWithDiagnostics.Success(EvaluationResult(ResultValue.Unit(script.javaClass.kotlin, script), null))
+    @Suppress("FoldInitializerAndIfToElvis")
+    fun getInstance(): ResultWithDiagnostics<EvaluationResult> {
+        synchronized(lock) {
+            val container = Artifex.api().scriptContainerManager().get(scriptClassFQName)
+            if (container == null) {
+                return ResultWithDiagnostics.Success(EvaluationResult(ResultValue.NotEvaluated, null))
+            }
+            val script = container.script()
+            return ResultWithDiagnostics.Success(EvaluationResult(ResultValue.Unit(script.javaClass.kotlin, script), null))
+        }
+    }
+
+    fun invokeLibrary(file: File): ResultWithDiagnostics<KClass<*>> {
+        val meta = Artifex.api().scriptMetaHandler().getScriptMeta(file)
+        val result = meta.generateScriptCompiled().invoke(meta.name(), ScriptRuntimeProperty())
+        val diagnostics = result.reports().map { diagnostic(it) }
+        return if (result.isSuccessful()) {
+            ResultWithDiagnostics.Success(result.value()!!.scriptClass!!.kotlin, diagnostics)
+        } else {
+            ResultWithDiagnostics.Failure(diagnostics)
+        }
     }
 
     companion object {
 
-        @Synchronized
-        fun invokeLibrary(file: File): ResultWithDiagnostics<KClass<*>> {
-            val meta = Artifex.api().scriptMetaHandler().getScriptMeta(file)
-            val result = meta.generateScriptCompiled().invoke(meta.name(), ScriptRuntimeProperty())
-            val diagnostics = result.reports().map { diagnostic(it) }
-            return if (result.isSuccessful()) {
-                ResultWithDiagnostics.Success(result.value()!!.scriptClass!!.kotlin, diagnostics)
-            } else {
-                ResultWithDiagnostics.Failure(diagnostics)
-            }
-        }
+        val lock = Any()
     }
 }

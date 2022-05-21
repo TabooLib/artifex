@@ -18,7 +18,7 @@ import java.io.Closeable
  * @since 2021/12/28 2:37 AM
  */
 @Suppress("LeakingThis")
-abstract class ArtScript(val baseId: String): Script() {
+abstract class ArtScript(val baseId: String) : Script() {
 
     val scriptContainer = Artifex.api().scriptContainerManager().register(Artifex.api().scriptContainerManager().createContainer(this))
 

@@ -51,24 +51,27 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
                 scriptsFile.searchFile { isKts(name) }.forEach { file ->
                     includeScripts += FileScriptSource(file)
                     importScript += file
-                    // 检查构建文件
-                    val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
-                    if (buildFile.nonExists()) {
-                        val compileReports = ArrayList<ScriptResult.Diagnostic>()
-                        val compiled = Artifex.api().scriptCompiler().compile { c ->
-                            c.source(file)
-                            c.onReport { r -> compileReports += r }
-                        }
-                        // 编译失败
-                        if (compiled == null) {
-                            val diagnostic = ArrayList<ScriptDiagnostic>()
-                            val error = console().asLangText("compile-referenced-build-failed")
-                            diagnostic += ScriptDiagnostic(-1, error, ScriptDiagnostic.Severity.ERROR, scriptPath)
-                            compileReports.forEach { r -> diagnostic += diagnostic(r) }
-                            return ResultWithDiagnostics.Failure(diagnostic)
-                        } else {
-                            // 生成脚本编译文件
-                            compiled.generateScriptJar(newFile(buildFile))
+                    // 检查运行环境
+                    if (Artifex.api().scriptContainerManager().get(file.nameWithoutExtension.toClassIdentifier()) == null) {
+                        // 检查构建文件
+                        val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
+                        if (buildFile.nonExists()) {
+                            val compileReports = ArrayList<ScriptResult.Diagnostic>()
+                            val compiled = Artifex.api().scriptCompiler().compile { c ->
+                                c.source(file)
+                                c.onReport { r -> compileReports += r }
+                            }
+                            // 编译失败
+                            if (compiled == null) {
+                                val diagnostic = ArrayList<ScriptDiagnostic>()
+                                val error = console().asLangText("compile-referenced-build-failed")
+                                diagnostic += ScriptDiagnostic(-1, error, ScriptDiagnostic.Severity.ERROR, scriptPath)
+                                compileReports.forEach { r -> diagnostic += diagnostic(r) }
+                                return ResultWithDiagnostics.Failure(diagnostic)
+                            } else {
+                                // 生成脚本编译文件
+                                compiled.generateScriptJar(newFile(buildFile))
+                            }
                         }
                     }
                 }

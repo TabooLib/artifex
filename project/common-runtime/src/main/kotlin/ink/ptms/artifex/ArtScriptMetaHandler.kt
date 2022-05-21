@@ -122,20 +122,20 @@ class ArtScriptMetaHandler : ScriptMetaHandler {
             // 依赖脚本
             fun load(otherName: String): List<CompiledScript> {
                 return meta.getStringList("scripts.$otherName.dependencies").map {
-                    val result = if (meta.contains("scripts.$otherName.result")) {
-                        meta.getString("scripts.$otherName.result.name")!! to meta.getString("scripts.$otherName.result.type")!!
+                    val result = if (meta.contains("scripts.$it.result")) {
+                        meta.getString("scripts.$it.result.name")!! to meta.getString("scripts.$it.result.type")!!
                     } else {
                         null
                     }
                     val compiledScript = KJvmCompiledScript::class.java.invokeConstructor(
-                        otherName,
+                        it,
                         ScriptCompilationConfiguration.Default,
-                        otherName,
+                        it,
                         result,
-                        load(otherName),
-                        compilerOutputFiles
+                        load(it),
+                        ArtScriptMeta.compiledModuleClass.invokeConstructor(compilerOutputFiles)
                     )
-                    val scriptFile = importScripts.firstOrNull { it.second == otherName }?.first
+                    val scriptFile = importScripts.firstOrNull { i -> i.second == it }?.first
                     checkImportScript(scriptFile, compiledScript, compilerOutputFiles, importScripts)
                 }
             }

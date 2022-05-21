@@ -1,7 +1,6 @@
 package ink.ptms.artifex.kotlin
 
 import ink.ptms.artifex.ImportScript
-import taboolib.common.reflect.Reflex.Companion.getProperty
 import taboolib.common.reflect.Reflex.Companion.invokeMethod
 import java.lang.reflect.InvocationTargetException
 import kotlin.reflect.KClass
@@ -46,7 +45,7 @@ open class KotlinScriptEvaluator : ScriptEvaluator {
                 compiledScript.otherScripts.mapSuccess { eval(mainLoader, compilerOutputFiles, it, sharedConfiguration) }.onSuccess { importedScriptsEvalResults ->
                     // 如果为引用脚本类型则不执行，直接从 ContainerManager 中获取对应实例
                     if (compiledScript is ImportScript) {
-                        return@eval compiledScript.instance()
+                        return@eval compiledScript.getInstance()
                     }
                     // 运行前调用
                     val configuration = sharedConfiguration.refineBeforeEvaluation(compiledScript).valueOr {
