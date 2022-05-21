@@ -2,11 +2,12 @@ package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.diagnostic
 import ink.ptms.artifex.script.*
-import ink.ptms.artifex.script.ScriptEvaluator
 import kotlinx.coroutines.runBlocking
-import taboolib.common.platform.function.info
 import java.io.File
-import kotlin.script.experimental.api.*
+import kotlin.script.experimental.api.CompiledScript
+import kotlin.script.experimental.api.ResultValue
+import kotlin.script.experimental.api.ResultWithDiagnostics
+import kotlin.script.experimental.api.ScriptEvaluationConfiguration
 
 /**
  * Artifex
@@ -52,10 +53,6 @@ class ArtScriptCompiled(val kotlinScript: CompiledScript, val hash: String, meta
                 ArtScriptResult(null, result.reports.map { diagnostic(it) }, false)
             }
         }
-    }
-
-    override fun findClass(name: String, configuration: ScriptEvaluator.Configuration): ScriptResult<Class<*>> {
-        TODO("Not yet implemented")
     }
 
     override fun generateScriptJar(file: File) {

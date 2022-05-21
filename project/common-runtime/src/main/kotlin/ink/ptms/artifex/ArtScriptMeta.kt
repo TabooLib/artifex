@@ -1,5 +1,6 @@
 package ink.ptms.artifex
 
+import ink.ptms.artifex.kotlin.scriptClassFQName
 import ink.ptms.artifex.script.ScriptCompiled
 import ink.ptms.artifex.script.ScriptMeta
 import ink.ptms.artifex.script.ScriptSourceCode
@@ -9,10 +10,9 @@ import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.io.File
 import java.io.FileOutputStream
-import java.math.BigInteger
-import java.security.MessageDigest
 import java.util.jar.JarEntry
 import java.util.zip.ZipOutputStream
+import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.api.KotlinType
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
 import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
@@ -27,6 +27,7 @@ import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
 class ArtScriptMeta(
     val name: String,
     val resultField: Pair<String, String>?,
+    val includeScripts: List<CompiledScript>,
     val compilerOutputFiles: Map<String, ByteArray>,
     val providedProperties: List<Pair<String, String>>,
     val hash: String
@@ -51,14 +52,43 @@ class ArtScriptMeta(
 
     override fun generateMeta(): Configuration {
         val json = Configuration.empty(Type.JSON)
+        // 名称
         json["name"] = name
-        if (resultField != null) {
-            json["result.name"] = resultField.first
-            json["result.type"] = resultField.second
-        }
+        // 版本
         json["version.compiler"] = ScriptSourceCode.SERIALIZE_VERSION
         json["version.file"] = hash
+        // 构建参数
         json["properties"] = providedProperties.map { mapOf("name" to it.first, "type" to it.second) }
+        // 返回结果
+        fun result(name: String, resultField: Pair<String, String>) {
+            json["scripts.$name.result.name"] = resultField.first
+            json["scripts.$name.result.type"] = resultField.second
+        }
+        if (resultField != null) {
+            result(name, resultField)
+        }
+        // 依赖脚本
+        if (includeScripts.isNotEmpty()) {
+            fun add(name: String, scripts: List<CompiledScript>) {
+                if (scripts.isNotEmpty()) {
+                    json["scripts.$name.dependencies"] = scripts.map { it.scriptClassFQName() }
+                    scripts.forEach {
+                        val otherName = it.scriptClassFQName()
+                        // 是否为特殊的引用脚本类型
+                        if (it is ImportScript) {
+                            json["scripts.$otherName.import"] = true
+                            json["scripts.$otherName.file"] = it.scriptFile?.nameWithoutExtension
+                        }
+                        // 返回结果
+                        if (it.resultField != null) {
+                            result(otherName, it.resultField!!.first to it.resultField!!.second.typeName)
+                        }
+                        add(otherName, it.otherScripts)
+                    }
+                }
+            }
+            add(name, includeScripts)
+        }
         return json
     }
 
@@ -71,16 +101,10 @@ class ArtScriptMeta(
             ScriptCompilationConfiguration.Default,
             name,
             if (resultField != null) resultField.first to KotlinType(resultField.second) else null,
-            emptyList<Any>(),
+            includeScripts,
             compiledModuleClass.invokeConstructor(compilerOutputFiles)
         )
         return ArtScriptCompiled(compiledScript, hash, this)
-    }
-
-    fun ByteArray.digest(algorithm: String): String {
-        val digest = MessageDigest.getInstance(algorithm)
-        digest.update(this)
-        return BigInteger(1, digest.digest()).toString(16)
     }
 
     companion object {

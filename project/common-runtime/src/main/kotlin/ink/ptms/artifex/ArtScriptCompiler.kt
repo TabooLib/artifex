@@ -1,21 +1,24 @@
 package ink.ptms.artifex
 
-import ink.ptms.artifex.kotlin.KotlinCompilationConfiguration
-import ink.ptms.artifex.kotlin.diagnostic
+import ink.ptms.artifex.kotlin.*
 import ink.ptms.artifex.script.ScriptCompiled
 import ink.ptms.artifex.script.ScriptCompiler
 import ink.ptms.artifex.script.ScriptResult
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import kotlinx.coroutines.runBlocking
 import taboolib.common.io.digest
+import taboolib.common.platform.function.info
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Consumer
+import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
+import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.api.valueOrNull
 import kotlin.script.experimental.host.StringScriptSource
+import kotlin.script.experimental.host.toScriptSource
 
 /**
  * Artifex
@@ -36,15 +39,28 @@ object ArtScriptCompiler : ScriptCompiler {
         return runBlocking {
             val compilerImpl = CompilerImpl().also { compiler.accept(it) }
             val configuration = compilerImpl.configuration as ScriptCompilationConfiguration
-            val scriptSource = StringScriptSource(compilerImpl.source ?: error("Script content is empty"), compilerImpl.main)
-            val result = ArtScriptEvaluator.scriptingHost.compiler(scriptSource, configuration)
+            val result = ArtScriptEvaluator.scriptingHost.compiler(compilerImpl.source ?: error("Script content is empty"), configuration)
             // 编译日志
             result.reports.forEach { compilerImpl.onReport?.accept(diagnostic(it)) }
             // 编译结果
             val compiledScript = result.valueOrNull()
             if (compiledScript != null) {
+                // 移除引用脚本
+                val compiledConfiguration = compiledScript.compilationConfiguration as ScriptCompiledConfiguration
+                val compilerOutputFiles = compiledScript.compilerOutputFiles() as MutableMap
+                val otherScripts = compiledScript.otherScripts as? MutableList<CompiledScript> ?: ArrayList()
+                val imports = compiledConfiguration.importScript.map { it to it.nameWithoutExtension.toClassIdentifier() }
+                // 移除引用脚本的构建文件
+                imports.forEach { compilerOutputFiles.remove("${it.second}.class") }
+                // 替换脚本对象
+                val others = otherScripts.map {
+                    val find = imports.firstOrNull { i -> i.second == it.scriptClassFQName() } ?: return@map it
+                    checkImportScript(find.first, it, compilerOutputFiles, imports)
+                }
+                otherScripts.clear()
+                otherScripts.addAll(others)
                 // ClassLoader: org.jetbrains.kotlin.scripting.compiler.plugin.impl.CompiledScriptClassLoader
-                ArtScriptCompiled(compiledScript, compilerImpl.source!!.digest("sha-1")).also { compilerImpl.onSuccess?.accept(it) }
+                ArtScriptCompiled(compiledScript, compilerImpl.source!!.text.digest("sha-1")).also { compilerImpl.onSuccess?.accept(it) }
             } else {
                 compilerImpl.onFailure?.run()
                 null
@@ -55,8 +71,7 @@ object ArtScriptCompiler : ScriptCompiler {
     class CompilerImpl : ScriptCompiler.Compiler {
 
         var configuration: ScriptCompiler.Configuration = KotlinCompilationConfiguration(ScriptRuntimeProperty())
-        var main = "Script"
-        var source: String? = null
+        var source: SourceCode? = null
         var onReport: Consumer<ScriptResult.Diagnostic>? = null
         var onSuccess: Consumer<ScriptCompiled>? = null
         var onFailure: Runnable? = null
@@ -65,25 +80,20 @@ object ArtScriptCompiler : ScriptCompiler {
             this.configuration = configuration
         }
 
-        override fun main(name: String) {
-            this.main = name
-        }
-
         override fun source(file: File) {
-            this.source = file.readText()
-            this.main = file.nameWithoutExtension
+            this.source = file.toScriptSource()
         }
 
-        override fun source(source: String) {
-            this.source = source
+        override fun source(main: String, source: String) {
+            this.source = StringScriptSource(source, main)
         }
 
-        override fun source(byteArray: ByteArray) {
-            this.source = byteArray.toString(StandardCharsets.UTF_8)
+        override fun source(main: String, byteArray: ByteArray) {
+            this.source(main, byteArray.toString(StandardCharsets.UTF_8))
         }
 
-        override fun source(inputStream: InputStream) {
-            this.source = inputStream.readBytes().toString(StandardCharsets.UTF_8)
+        override fun source(main: String, inputStream: InputStream) {
+            this.source(main, inputStream.readBytes().toString(StandardCharsets.UTF_8))
         }
 
         override fun onReport(func: Consumer<ScriptResult.Diagnostic>) {

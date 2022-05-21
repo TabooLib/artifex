@@ -1,9 +1,12 @@
 package ink.ptms.artifex.kotlin
 
+import ink.ptms.artifex.ImportScript
+import taboolib.common.reflect.Reflex.Companion.getProperty
 import taboolib.common.reflect.Reflex.Companion.invokeMethod
 import java.lang.reflect.InvocationTargetException
 import kotlin.reflect.KClass
 import kotlin.script.experimental.api.*
+import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.util.PropertiesCollection
 
@@ -14,35 +17,68 @@ open class KotlinScriptEvaluator : ScriptEvaluator {
     override suspend operator fun invoke(
         compiledScript: CompiledScript,
         scriptEvaluationConfiguration: ScriptEvaluationConfiguration,
-    ): ResultWithDiagnostics<EvaluationResult> = try {
-        compiledScript.getClass(scriptEvaluationConfiguration).onSuccess { scriptClass ->
-
-            val sharedConfiguration = scriptEvaluationConfiguration.getOrPrepareShared(scriptClass.java.classLoader)
-
-            compiledScript.otherScripts.mapSuccess { invoke(it, sharedConfiguration) }.onSuccess { importedScriptsEvalResults ->
-
-                val configuration = sharedConfiguration.refineBeforeEvaluation(compiledScript).valueOr {
-                    return@invoke ResultWithDiagnostics.Failure(it.reports)
-                }
-
-                val resultValue = try {
-                    val instance = scriptClass.evalWithConfigAndOtherScriptsResults(configuration, importedScriptsEvalResults)
-                    compiledScript.resultField?.let { (name, type) ->
-                        val field = scriptClass.java.getDeclaredField(name).apply { isAccessible = true }
-                        ResultValue.Value(name, field.get(instance), type.typeName, scriptClass, instance)
-                    } ?: ResultValue.Unit(scriptClass, instance)
-                } catch (e: InvocationTargetException) {
-                    ResultValue.Error(e.targetException ?: e, e, scriptClass)
-                }
-
-                EvaluationResult(resultValue, configuration).let { ResultWithDiagnostics.Success(it) }
-            }
-        }
-    } catch (e: Throwable) {
-        ResultWithDiagnostics.Failure(e.asDiagnostics(path = compiledScript.sourceLocationId))
+    ): ResultWithDiagnostics<EvaluationResult> {
+        return eval(null, compiledScript.compilerOutputFiles(), compiledScript, scriptEvaluationConfiguration)
     }
 
-    private fun KClass<*>.evalWithConfigAndOtherScriptsResults(configuration: ScriptEvaluationConfiguration, results: List<EvaluationResult>): Any {
+    private suspend fun eval(
+        parentLoader: KotlinScriptClassLoader?,
+        compilerOutputFiles: Map<String, ByteArray>,
+        compiledScript: CompiledScript,
+        scriptEvaluationConfiguration: ScriptEvaluationConfiguration,
+    ): ResultWithDiagnostics<EvaluationResult> {
+        return try {
+
+            var mainLoader: KotlinScriptClassLoader? = null
+            val classLoaded = if (compiledScript is KJvmCompiledScript) {
+                mainLoader = parentLoader ?: KotlinScriptClassLoader(compilerOutputFiles, ArrayList())
+                mainLoader.loadClass(compiledScript.scriptClassFQName).kotlin.also {
+                    mainLoader.runningClasses[compiledScript.scriptClassFQName] = it.java
+                }.asSuccess()
+            } else {
+                compiledScript.getClass(scriptEvaluationConfiguration)
+            }
+
+            classLoaded.onSuccess { scriptClass ->
+
+                val sharedConfiguration = scriptEvaluationConfiguration.getOrPrepareShared(scriptClass.java.classLoader)
+
+                compiledScript.otherScripts.mapSuccess { eval(mainLoader, compilerOutputFiles, it, sharedConfiguration) }.onSuccess { importedScriptsEvalResults ->
+                    // 如果为引用脚本类型则不执行，直接从 ContainerManager 中获取对应实例
+                    if (compiledScript is ImportScript) {
+                        return@eval compiledScript.instance()
+                    }
+                    // 运行前调用
+                    val configuration = sharedConfiguration.refineBeforeEvaluation(compiledScript).valueOr {
+                        return@eval ResultWithDiagnostics.Failure(it.reports)
+                    }
+                    // 执行脚本并通过发射获取返回值
+                    val resultValue = try {
+                        val instance = scriptClass.eval(configuration, importedScriptsEvalResults)
+                        if (compiledScript.resultField != null) {
+                            val name = compiledScript.resultField!!.first
+                            val type = compiledScript.resultField!!.second
+                            val resultField = scriptClass.java.getDeclaredField(name).apply { isAccessible = true }
+                            ResultValue.Value(name, resultField.get(instance), type.typeName, scriptClass, instance)
+                        } else {
+                            ResultValue.Unit(scriptClass, instance)
+                        }
+                    } catch (e: InvocationTargetException) {
+                        ResultValue.Error(e.targetException ?: e, e, scriptClass)
+                    }
+
+                    EvaluationResult(resultValue, configuration).let { ResultWithDiagnostics.Success(it) }
+                }
+            }
+        } catch (e: Throwable) {
+            ResultWithDiagnostics.Failure(e.asDiagnostics(path = compiledScript.sourceLocationId))
+        }
+    }
+
+    /**
+     * 运行脚本，参数顺序不可修改
+     */
+    private fun KClass<*>.eval(configuration: ScriptEvaluationConfiguration, results: List<EvaluationResult>): Any {
         val args = ArrayList<Any?>()
 
         configuration[ScriptEvaluationConfiguration.previousSnippets]?.let {
@@ -50,14 +86,26 @@ open class KotlinScriptEvaluator : ScriptEvaluator {
                 args.add(it.toTypedArray())
             }
         }
-
         configuration[ScriptEvaluationConfiguration.constructorArgs]?.let {
             args.addAll(it)
         }
 
+        // 依赖脚本处理
+        val relation = ArrayList<ClassLoader>()
         results.forEach {
-            args.add(it.returnValue.scriptInstance)
+            val value = it.returnValue
+            val scriptInstance = value.scriptInstance
+            args.add(scriptInstance)
+
+            // 关联引用脚本的类加载器
+            val classLoader = scriptInstance?.javaClass?.classLoader
+            if (classLoader != null) {
+                relation += classLoader
+            }
         }
+
+        // 注册关联类加载器
+        (java.classLoader as KotlinScriptClassLoader).relation += relation
 
         configuration[ScriptEvaluationConfiguration.implicitReceivers]?.let {
             args.addAll(it)
@@ -70,8 +118,11 @@ open class KotlinScriptEvaluator : ScriptEvaluator {
 
         val saveClassLoader = Thread.currentThread().contextClassLoader
         Thread.currentThread().contextClassLoader = java.classLoader
+
         return try {
             ctor.newInstance(*args.toArray())
+        } catch (ex: IllegalArgumentException) {
+            throw IllegalStateException("$args => $ctor", ex)
         } finally {
             Thread.currentThread().contextClassLoader = saveClassLoader
         }

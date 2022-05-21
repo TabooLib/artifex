@@ -36,11 +36,6 @@ interface ScriptCompiler {
         fun configuration(configuration: Configuration)
 
         /**
-         * 主类名称
-         */
-        fun main(name: String)
-
-        /**
          * 源文件
          */
         fun source(file: File)
@@ -48,17 +43,17 @@ interface ScriptCompiler {
         /**
          * 源文件
          */
-        fun source(source: String)
+        fun source(main: String, source: String)
 
         /**
          * 源文件
          */
-        fun source(byteArray: ByteArray)
+        fun source(main: String, byteArray: ByteArray)
 
         /**
          * 源文件
          */
-        fun source(inputStream: InputStream)
+        fun source(main: String, inputStream: InputStream)
 
         /**
          * 当汇报信息时调用

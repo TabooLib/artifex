@@ -15,13 +15,3 @@ import kotlin.script.experimental.util.PropertiesCollection
     evaluationConfiguration = KotlinEvaluationConfiguration::class
 )
 class KotlinScript(val args: Array<String>)
-
-internal val JvmScriptEvaluationConfigurationKeys.actualClassLoader by PropertiesCollection.key<ClassLoader?>(isTransient = true)
-
-internal val JvmScriptEvaluationConfigurationKeys.scriptsInstancesSharingMap by PropertiesCollection.key<MutableMap<KClass<*>, EvaluationResult>>(
-    isTransient = true
-)
-
-fun main() {
-    ScriptEvaluationConfiguration.jvm.actualClassLoader.invoke(KotlinScript::class.java.classLoader)
-}

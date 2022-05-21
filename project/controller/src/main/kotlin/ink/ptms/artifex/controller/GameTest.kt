@@ -23,6 +23,7 @@ object GameTest {
             it.onReport { r ->
                 if (r.severity > ScriptResult.Severity.DEBUG) {
                     warning(r.toString())
+                    r.exception?.printStackTrace()
                 }
             }
             it.onSuccess { r ->

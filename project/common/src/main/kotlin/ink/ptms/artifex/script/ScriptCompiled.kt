@@ -29,14 +29,6 @@ interface ScriptCompiled {
     fun invoke(configuration: ScriptEvaluator.Configuration): ScriptResult<ScriptResult.Result>
 
     /**
-     * 获取脚本中的类
-     *
-     * @param name 类名
-     * @param configuration 脚本运行配置
-     */
-    fun findClass(name: String, configuration: ScriptEvaluator.Configuration): ScriptResult<Class<*>>
-
-    /**
      * 生成 Jar 并写入文件
      */
     fun generateScriptJar(file: File)

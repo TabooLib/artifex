@@ -19,6 +19,10 @@ class DefaultScriptContainer(val script: Script): ScriptContainer {
         return script.id()
     }
 
+    override fun script(): Script {
+        return script
+    }
+
     override fun record(resource: Runnable) {
         resources += Closeable { resource.run() }
     }

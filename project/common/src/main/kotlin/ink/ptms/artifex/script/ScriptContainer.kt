@@ -12,6 +12,11 @@ interface ScriptContainer {
     fun id(): String
 
     /**
+     * 脚本对象
+     */
+    fun script(): Script
+
+    /**
      * 记录脚本资源
      */
     fun record(resource: Runnable)
