@@ -1,20 +1,12 @@
 package ink.ptms.artifex.kotlin
 
-import ink.ptms.artifex.ArtScript
-import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.Import
-import ink.ptms.artifex.Include
+import ink.ptms.artifex.*
 import ink.ptms.artifex.script.ScriptCompiler
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import org.jetbrains.kotlin.mainKts.CompilerOptions
-import taboolib.common.platform.function.getDataFolder
-import java.io.File
-import java.net.URLDecoder
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 import kotlin.script.experimental.api.*
-import kotlin.script.experimental.jvm.dependenciesFromClassContext
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvm.updateClasspath
 
@@ -24,11 +16,13 @@ import kotlin.script.experimental.jvm.updateClasspath
 @Suppress("SimplifiableCallChain")
 class KotlinCompilationConfiguration(val props: ScriptRuntimeProperty) : ScriptCompilationConfiguration(
     {
-        val classpath = Artifex.api().scriptEnvironment().getClasspath(listOf(KotlinCompilationConfiguration::class.java))
+        val classpath = Artifex.api().getScriptEnvironment().getClasspath(listOf(KotlinCompilationConfiguration::class.java))
         updateClasspath(classpath)
+        updateClasspath(props.defaultClasspath)
         baseClass(ArtScript::class)
-        defaultImports(Include::class, Import::class, CompilerOptions::class)
-        defaultImports.append(Artifex.api().scriptEnvironment().getGlobalImports())
+        defaultImports(Art::class, Include::class, Import::class, CompilerOptions::class)
+        defaultImports.append(Artifex.api().getScriptEnvironment().getGlobalImports())
+        defaultImports.append(props.defaultImports)
         jvm {
             compilerOptions("-jvm-target", "1.8")
             // 避免版本检查
@@ -39,7 +33,7 @@ class KotlinCompilationConfiguration(val props: ScriptRuntimeProperty) : ScriptC
             compilerOptions("-Xskip-runtime-version-check")
         }
         refineConfiguration {
-            onAnnotations(Include::class, Import::class, CompilerOptions::class, handler = KotlinCompilationConfigurationHandler())
+            onAnnotations(Art::class, Include::class, Import::class, CompilerOptions::class, handler = KotlinCompilationConfigurationHandler())
         }
         ide {
             acceptedLocations(ScriptAcceptedLocation.Everywhere)

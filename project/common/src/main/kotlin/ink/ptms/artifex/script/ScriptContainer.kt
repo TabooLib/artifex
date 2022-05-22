@@ -19,7 +19,12 @@ interface ScriptContainer {
     /**
      * 记录脚本资源
      */
-    fun record(resource: Runnable)
+    fun resource(name: String, resource: Runnable)
+
+    /**
+     * 获取所有脚本资源的名称
+     */
+    fun resources(): List<String>
 
     /**
      * 释放所有资源

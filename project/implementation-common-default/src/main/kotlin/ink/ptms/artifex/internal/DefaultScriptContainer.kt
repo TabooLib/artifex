@@ -13,18 +13,22 @@ import java.util.concurrent.CopyOnWriteArrayList
 class DefaultScriptContainer(val script: Script): ScriptContainer {
 
     private var isRunning = true
-    private val resources = CopyOnWriteArrayList<Closeable>()
+    private val resources = CopyOnWriteArrayList<Pair<String, Closeable>>()
 
     override fun id(): String {
-        return script.id()
+        return script.baseId()
     }
 
     override fun script(): Script {
         return script
     }
 
-    override fun record(resource: Runnable) {
-        resources += Closeable { resource.run() }
+    override fun resource(name: String, resource: Runnable) {
+        resources += name to Closeable { resource.run() }
+    }
+
+    override fun resources(): List<String> {
+        return resources.map { it.first }
     }
 
     override fun release() {
@@ -36,11 +40,11 @@ class DefaultScriptContainer(val script: Script): ScriptContainer {
                 ex.printStackTrace()
             }
             try {
-                resources.forEach { it.close() }
+                resources.forEach { it.second.close() }
             } catch (ex: Throwable) {
                 ex.printStackTrace()
             }
-            Artifex.api().scriptContainerManager().unregister(this)
+            Artifex.api().getScriptContainerManager().unregister(this)
         }
     }
 

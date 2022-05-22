@@ -14,6 +14,16 @@ interface ScriptCompiled {
     fun name(): String
 
     /**
+     * 获取嵌入的其他脚本名称
+     */
+    fun otherIncludeScripts(): List<String>
+
+    /**
+     * 获取引用的其他脚本名称
+     */
+    fun otherImportScripts(): List<String>
+
+    /**
      * 运行脚本
      *
      * @param id 脚本序号

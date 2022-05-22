@@ -2,6 +2,7 @@ package ink.ptms.artifex.script
 
 import java.io.File
 import java.io.InputStream
+import java.util.Properties
 import java.util.function.Consumer
 
 /**
@@ -34,6 +35,12 @@ interface ScriptCompiler {
          * 使用编译配置
          */
         fun configuration(configuration: Configuration)
+
+        /**
+         * 参与编译的构造参数
+         * 该方法将会覆盖之前设置的编译配置
+         */
+        fun configuration(property: ScriptRuntimeProperty)
 
         /**
          * 源文件

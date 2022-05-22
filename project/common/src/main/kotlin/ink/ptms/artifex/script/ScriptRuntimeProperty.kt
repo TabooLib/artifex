@@ -1,7 +1,9 @@
 package ink.ptms.artifex.script
 
 import taboolib.common.io.digest
+import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * @author 坏黑
@@ -9,6 +11,16 @@ import java.util.*
  */
 @Suppress("SimplifiableCallChain")
 class ScriptRuntimeProperty {
+
+    /**
+     * 默认引用
+     */
+    val defaultImports = ArrayList<String>()
+
+    /**
+     * 默认 classpath
+     */
+    val defaultClasspath = ArrayList<File>()
 
     /**
      * 通过 runArgs 关键字调用的变量容器
@@ -25,6 +37,12 @@ class ScriptRuntimeProperty {
     /**
      * 签名
      */
-    val digest: String
-        get() = providedProperties.map { it.key.toString() to it.value.javaClass.name }.toMap().toString().digest("sha-1")
+    fun digest(): String {
+        return providedProperties.map { it.key.toString() to it.value.javaClass.name }.toMap().toString().digest("sha-1")
+    }
+
+    companion object {
+
+        val defaultDigest = "{}".digest("sha-1")
+    }
 }

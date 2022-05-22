@@ -21,54 +21,54 @@ import java.io.File
  */
 object DefaultScriptAPI : ArtifexAPI {
 
-    val scriptEnvironment = DefaultScriptEnvironment()
-    val scriptClassLoader by lazy { DefaultRuntimeClassLoader(runtimeLibraryFile()) }
-    val scriptContainerManager = DefaultScriptContainerManager()
+    private val environment = DefaultScriptEnvironment()
+    private val classLoader by lazy { DefaultRuntimeClassLoader(getRuntimeLibraryFile()) }
+    private val containerManager = DefaultScriptContainerManager()
 
-    val scriptCompiler = loadRuntimeClass<ScriptCompiler>("ArtScriptCompiler")
-    val scriptEvaluator = loadRuntimeClass<ScriptEvaluator>("ArtScriptEvaluator")
-    val scriptMetaHandler = loadRuntimeClass<ScriptMetaHandler>("ArtScriptMetaHandler")
+    private val compiler = loadRuntimeClass<ScriptCompiler>("ArtScriptCompiler")
+    private val evaluator = loadRuntimeClass<ScriptEvaluator>("ArtScriptEvaluator")
+    private val metaHandler = loadRuntimeClass<ScriptMetaHandler>("ArtScriptMetaHandler")
 
     @Awake(LifeCycle.LOAD)
     fun init() {
         Artifex.register(DefaultScriptAPI)
-        Artifex.api().scriptEnvironment().setupGlobalImports()
+        Artifex.api().getScriptEnvironment().setupGlobalImports()
     }
 
     @Awake(LifeCycle.DISABLE)
     fun cancel() {
-        scriptClassLoader.close()
+        classLoader.close()
     }
 
-    override fun platformHelper(): PlatformHelper {
+    override fun getPlatformHelper(): PlatformHelper {
         return PlatformFactory.getAPI()
     }
 
-    override fun scriptCompiler(): ScriptCompiler {
-        return scriptCompiler
+    override fun getScriptCompiler(): ScriptCompiler {
+        return compiler
     }
 
-    override fun scriptEvaluator(): ScriptEvaluator {
-        return scriptEvaluator
+    override fun getScriptEvaluator(): ScriptEvaluator {
+        return evaluator
     }
 
-    override fun scriptEnvironment(): ScriptEnvironment {
-        return scriptEnvironment
+    override fun getScriptEnvironment(): ScriptEnvironment {
+        return environment
     }
 
-    override fun scriptMetaHandler(): ScriptMetaHandler {
-        return scriptMetaHandler
+    override fun getScriptMetaHandler(): ScriptMetaHandler {
+        return metaHandler
     }
 
-    override fun scriptClassLoader(): RuntimeClassLoader {
-        return scriptClassLoader
+    override fun getScriptClassLoader(): RuntimeClassLoader {
+        return classLoader
     }
 
-    override fun scriptContainerManager(): ScriptContainerManager {
-        return scriptContainerManager
+    override fun getScriptContainerManager(): ScriptContainerManager {
+        return containerManager
     }
 
-    override fun runtimeLibraryFile(): File {
+    override fun getRuntimeLibraryFile(): File {
         return try {
             releaseResourceFile("runtime/core.jar", true)
         } catch (ex: Throwable) {
@@ -76,21 +76,22 @@ object DefaultScriptAPI : ArtifexAPI {
         }
     }
 
-    override fun status(): Map<String, String> {
+    override fun getStatus(): Map<String, String> {
         val map = HashMap<String, String>()
         kotlin.runCatching {
-            map["ScriptCompiler"] = scriptCompiler().javaClass.name
-            map["ScriptEvaluator"] = scriptEvaluator().javaClass.name
-            map["ScriptEnvironment"] = scriptEnvironment().javaClass.name
-            map["ScriptMetaHandler"] = scriptMetaHandler().javaClass.name
-            map["RuntimeClassLoader"] = scriptClassLoader().javaClass.name
-            map["ScriptContainerManager"] = scriptContainerManager().javaClass.name
+            map["PlatformHelper"] = getPlatformHelper().javaClass.name
+            map["ScriptCompiler"] = getScriptCompiler().javaClass.name
+            map["ScriptEvaluator"] = getScriptEvaluator().javaClass.name
+            map["ScriptEnvironment"] = getScriptEnvironment().javaClass.name
+            map["ScriptMetaHandler"] = getScriptMetaHandler().javaClass.name
+            map["RuntimeClassLoader"] = getScriptClassLoader().javaClass.name
+            map["ScriptContainerManager"] = getScriptContainerManager().javaClass.name
         }
         return map
     }
 
     @Suppress("UNCHECKED_CAST")
     fun <T> loadRuntimeClass(name: String): T {
-        return scriptClassLoader.findClass("ink.ptms.artifex.$name").getInstance(true)!!.get() as T
+        return classLoader.findClass("ink.ptms.artifex.$name").getInstance(true)!!.get() as T
     }
 }

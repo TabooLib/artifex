@@ -1,9 +1,9 @@
 package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.diagnostic
-import ink.ptms.artifex.kotlin.nonExists
 import ink.ptms.artifex.kotlin.scriptsFile
 import ink.ptms.artifex.script.ScriptRuntimeProperty
+import ink.ptms.artifex.script.nonExists
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.script.experimental.api.*
@@ -30,7 +30,7 @@ class ImportScript(
             error("Import script not found")
         }
         return synchronized(lock) {
-            val container = Artifex.api().scriptContainerManager().get(scriptClassFQName)
+            val container = Artifex.api().getScriptContainerManager().get(scriptClassFQName)
             if (container == null) {
                 invokeLibrary(File(scriptsFile, ".build/${scriptFile.nameWithoutExtension}.jar"))
             } else {
@@ -42,7 +42,7 @@ class ImportScript(
     @Suppress("FoldInitializerAndIfToElvis")
     fun getInstance(): ResultWithDiagnostics<EvaluationResult> {
         synchronized(lock) {
-            val container = Artifex.api().scriptContainerManager().get(scriptClassFQName)
+            val container = Artifex.api().getScriptContainerManager().get(scriptClassFQName)
             if (container == null) {
                 return ResultWithDiagnostics.Success(EvaluationResult(ResultValue.NotEvaluated, null))
             }
@@ -52,7 +52,7 @@ class ImportScript(
     }
 
     fun invokeLibrary(file: File): ResultWithDiagnostics<KClass<*>> {
-        val meta = Artifex.api().scriptMetaHandler().getScriptMeta(file)
+        val meta = Artifex.api().getScriptMetaHandler().getScriptMeta(file)
         val result = meta.generateScriptCompiled().invoke(meta.name(), ScriptRuntimeProperty())
         val diagnostics = result.reports().map { diagnostic(it) }
         return if (result.isSuccessful()) {

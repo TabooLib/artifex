@@ -1,5 +1,6 @@
 package ink.ptms.artifex.kotlin
 
+import ink.ptms.artifex.script.ScriptCompiled
 import ink.ptms.artifex.script.ScriptEvaluator
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import kotlin.script.experimental.api.ScriptEvaluationConfiguration
@@ -13,9 +14,9 @@ import kotlin.script.experimental.jvm.loadDependencies
 /**
  * 运行配置
  */
-class KotlinEvaluationConfiguration(val id: String, val props: ScriptRuntimeProperty) : ScriptEvaluationConfiguration(
+class KotlinEvaluationConfiguration(val id: String, val props: ScriptRuntimeProperty, val script: ScriptCompiled) : ScriptEvaluationConfiguration(
     {
-        constructorArgs(id)
+        constructorArgs(id, script)
         scriptsInstancesSharing(false)
         jvm {
             baseClassLoader(KotlinScript::class.java.classLoader)

@@ -9,7 +9,17 @@ abstract class Script {
     /**
      * 脚本序号
      */
-    abstract fun id(): String
+    abstract fun baseId(): String
+
+    /**
+     * 脚本对象
+     */
+    abstract fun baseScript(): ScriptCompiled
+
+    /**
+     * 脚本容器
+     */
+    abstract fun container(): ScriptContainer
 
     /**
      * 释放脚本资源（卸载脚本）

@@ -15,45 +15,45 @@ interface ArtifexAPI {
     /**
      * 获取跨平台工具
      */
-    fun platformHelper(): PlatformHelper
+    fun getPlatformHelper(): PlatformHelper
 
     /**
      * 获取脚本编译器
      */
-    fun scriptCompiler(): ScriptCompiler
+    fun getScriptCompiler(): ScriptCompiler
 
     /**
      * 获取脚本执行器
      */
-    fun scriptEvaluator(): ScriptEvaluator
+    fun getScriptEvaluator(): ScriptEvaluator
 
     /**
      * 获取脚本环境
      */
-    fun scriptEnvironment(): ScriptEnvironment
+    fun getScriptEnvironment(): ScriptEnvironment
 
     /**
      * 获取 ScriptMetaHandler
      */
-    fun scriptMetaHandler(): ScriptMetaHandler
+    fun getScriptMetaHandler(): ScriptMetaHandler
 
     /**
      * 获取运行库模块的类加载器
      */
-    fun scriptClassLoader(): RuntimeClassLoader
+    fun getScriptClassLoader(): RuntimeClassLoader
 
     /**
      * 获取脚本容器管理器
      */
-    fun scriptContainerManager(): ScriptContainerManager
+    fun getScriptContainerManager(): ScriptContainerManager
 
     /**
      * 获取运行库文件
      */
-    fun runtimeLibraryFile(): File
+    fun getRuntimeLibraryFile(): File
 
     /**
      * 获取接口信息
      */
-    fun status(): Map<String, String>
+    fun getStatus(): Map<String, String>
 }

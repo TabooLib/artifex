@@ -72,5 +72,8 @@ interface ScriptResult<out R> {
     /**
      * 报告类型
      */
-    enum class Severity { DEBUG, INFO, WARNING, ERROR, FATAL }
+    enum class Severity(val color: String) {
+
+        DEBUG("§8"), INFO("§7"), WARNING("§6"), ERROR("§c"), FATAL("§4")
+    }
 }

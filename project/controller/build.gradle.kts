@@ -5,11 +5,8 @@ plugins {
 }
 
 taboolib {
-    description {
-        name(rootProject.name)
-    }
     install("common", "common-5")
-    install("module-configuration")
+    install("module-configuration", "module-lang")
     install("expansion-command-helper")
     options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
     classifier = null

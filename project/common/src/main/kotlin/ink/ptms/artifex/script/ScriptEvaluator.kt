@@ -1,9 +1,5 @@
 package ink.ptms.artifex.script
 
-import taboolib.common.platform.ProxyCommandSender
-import java.io.File
-import java.util.concurrent.CompletableFuture
-
 /**
  * Artifex
  * ink.ptms.artifex.script.ScriptEvaluator
@@ -18,13 +14,9 @@ interface ScriptEvaluator {
      *
      * @param id 脚本序号
      * @param props 脚本运行参数
+     * @param script 脚本对象
      */
-    fun createEvaluationConfiguration(id: String, props: ScriptRuntimeProperty): Configuration
-
-    /**
-     * 脚本运行选项
-     */
-    interface Option
+    fun createEvaluationConfiguration(id: String, props: ScriptRuntimeProperty, script: ScriptCompiled): Configuration
 
     /**
      * 脚本运行配置

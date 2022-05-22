@@ -1,6 +1,7 @@
 package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.diagnostic
+import ink.ptms.artifex.kotlin.scriptClassFQName
 import ink.ptms.artifex.script.*
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -18,14 +19,22 @@ import kotlin.script.experimental.api.ScriptEvaluationConfiguration
  */
 class ArtScriptCompiled(val kotlinScript: CompiledScript, val hash: String, meta: ScriptMeta? = null) : ScriptCompiled {
 
-    val meta = meta ?: Artifex.api().scriptMetaHandler().getScriptMeta(this)
+    val meta = meta ?: Artifex.api().getScriptMetaHandler().getScriptMeta(this)
 
     override fun name(): String {
         return meta.name()
     }
 
+    override fun otherIncludeScripts(): List<String> {
+        return kotlinScript.otherScripts.filter { it !is ImportScript }.map { it.scriptClassFQName() }
+    }
+
+    override fun otherImportScripts(): List<String> {
+        return kotlinScript.otherScripts.filterIsInstance<ImportScript>().map { it.scriptClassFQName() }
+    }
+
     override fun invoke(id: String, props: ScriptRuntimeProperty): ScriptResult<ScriptResult.Result> {
-        return invoke(Artifex.api().scriptEvaluator().createEvaluationConfiguration(id, props))
+        return invoke(Artifex.api().getScriptEvaluator().createEvaluationConfiguration(id, props, this))
     }
 
     override fun invoke(configuration: ScriptEvaluator.Configuration): ScriptResult<ScriptResult.Result> {

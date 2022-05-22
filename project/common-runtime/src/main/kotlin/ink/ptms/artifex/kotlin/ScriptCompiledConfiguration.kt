@@ -10,11 +10,8 @@ import kotlin.script.experimental.api.ScriptCompilationConfiguration
  * @author 坏黑
  * @since 2022/5/20 18:02
  */
-class ScriptCompiledConfiguration(
-    val importScript: List<File>,
-    baseConfigurations: ScriptCompilationConfiguration,
-    body: Builder.() -> Unit,
-) : ScriptCompilationConfiguration(listOf(baseConfigurations), body) {
+class ScriptCompiledConfiguration(val importScript: List<File>, configuration: ScriptCompilationConfiguration, body: Builder.() -> Unit) :
+    ScriptCompilationConfiguration(listOf(configuration), body) {
 
     override fun toString(): String {
         return "ScriptCompiledConfiguration(importScript=$importScript) ${super.toString()}"

@@ -1,6 +1,8 @@
 package ink.ptms.artifex
 
 import ink.ptms.artifex.script.Script
+import ink.ptms.artifex.script.ScriptCompiled
+import ink.ptms.artifex.script.ScriptContainer
 import taboolib.common.TabooLibCommon
 import taboolib.common.platform.Platform
 import taboolib.common.platform.command.CommandBuilder
@@ -18,12 +20,20 @@ import java.io.Closeable
  * @since 2021/12/28 2:37 AM
  */
 @Suppress("LeakingThis")
-abstract class ArtScript(val baseId: String) : Script() {
+abstract class ArtScript(val baseId: String, val baseScript: ArtScriptCompiled) : Script() {
 
-    val scriptContainer = Artifex.api().scriptContainerManager().register(Artifex.api().scriptContainerManager().createContainer(this))
+    val scriptContainer = Artifex.api().getScriptContainerManager().register(Artifex.api().getScriptContainerManager().createContainer(this))
 
-    override fun id(): String {
+    override fun baseId(): String {
         return baseId
+    }
+
+    override fun baseScript(): ScriptCompiled {
+        return baseScript
+    }
+
+    override fun container(): ScriptContainer {
+        return scriptContainer
     }
 
     /**
@@ -42,7 +52,8 @@ abstract class ArtScript(val baseId: String) : Script() {
             Platform.BUNGEE -> registerBungeeListener(T::class.java, priority.level, ignoreCancelled, event)
             else -> error("Unsupported")
         }
-        scriptContainer.record { unregisterListener(listener) }
+        // listener:PlayerJoinEvent
+        scriptContainer.resource("listener:${T::class.java.simpleName}") { unregisterListener(listener) }
     }
 
     /**
@@ -70,7 +81,7 @@ abstract class ArtScript(val baseId: String) : Script() {
             permissionChildren,
             commandBuilder
         )
-        scriptContainer.record {
+        scriptContainer.resource("command:$name") {
             unregisterCommand(name)
             aliases.forEach { unregisterCommand(it) }
         }
@@ -88,7 +99,7 @@ abstract class ArtScript(val baseId: String) : Script() {
         executor: PlatformExecutor.PlatformTask.() -> Unit,
     ): PlatformExecutor.PlatformTask {
         val task = taboolib.common.platform.function.submit(now, async, delay, period, commit, executor)
-        scriptContainer.record { task.cancel() }
+        scriptContainer.resource("task-${if (async) "async" else "sync"}:$period") { task.cancel() }
         return task
     }
 }

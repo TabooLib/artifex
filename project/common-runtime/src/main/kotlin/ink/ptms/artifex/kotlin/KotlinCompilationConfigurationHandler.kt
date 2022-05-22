@@ -4,11 +4,11 @@ import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.Import
 import ink.ptms.artifex.Include
 import ink.ptms.artifex.script.ScriptResult
+import ink.ptms.artifex.script.nonExists
+import ink.ptms.artifex.script.toClassIdentifier
 import org.jetbrains.kotlin.mainKts.CompilerOptions
-import org.jetbrains.kotlin.scripting.scriptFileName
 import taboolib.common.io.newFile
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.info
 import taboolib.module.lang.asLangText
 import java.io.File
@@ -42,22 +42,29 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
         val importClasses = ArrayList<String>()
         annotations.filterByAnnotationType<Import>().flatMap { it.annotation.name.toList() }.forEach { name ->
             // 判定为插件
-            if (Artifex.api().platformHelper().plugin(name.substringBefore(':')) != null) {
+            if (Artifex.api().getPlatformHelper().plugin(name.substringBefore(':')) != null) {
                 // 获取插件信息
-                importClasses += Artifex.api().scriptEnvironment().loadImportFromPlugin(name)
+                importClasses += Artifex.api().getScriptEnvironment().loadImportFromPlugin(name)
             }
             // 判定为脚本
             else {
-                scriptsFile.searchFile { isKts(name) }.forEach { file ->
+                val files = scriptsFile.searchFile { isKts(name) }
+                if (files.isEmpty()) {
+                    val diagnostic = ArrayList<ScriptDiagnostic>()
+                    val error = console().asLangText("compile-referenced-not-found", name)
+                    diagnostic += ScriptDiagnostic(-1, error, ScriptDiagnostic.Severity.ERROR, scriptPath)
+                    return ResultWithDiagnostics.Failure(diagnostic)
+                }
+                files.forEach { file ->
                     includeScripts += FileScriptSource(file)
                     importScript += file
                     // 检查运行环境
-                    if (Artifex.api().scriptContainerManager().get(file.nameWithoutExtension.toClassIdentifier()) == null) {
+                    if (Artifex.api().getScriptContainerManager().get(file.nameWithoutExtension.toClassIdentifier()) == null) {
                         // 检查构建文件
                         val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
                         if (buildFile.nonExists()) {
                             val compileReports = ArrayList<ScriptResult.Diagnostic>()
-                            val compiled = Artifex.api().scriptCompiler().compile { c ->
+                            val compiled = Artifex.api().getScriptCompiler().compile { c ->
                                 c.source(file)
                                 c.onReport { r -> compileReports += r }
                             }

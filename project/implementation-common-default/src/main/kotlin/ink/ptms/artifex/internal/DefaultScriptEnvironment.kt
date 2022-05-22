@@ -3,10 +3,8 @@ package ink.ptms.artifex.internal
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.ScriptEnvironment
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
-import taboolib.common.io.newFile
 import taboolib.common.io.taboolibId
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import java.io.File
 import java.net.URLDecoder
@@ -34,7 +32,7 @@ class DefaultScriptEnvironment : ScriptEnvironment {
         // 运行库
         dependencies += File(getDataFolder(), "runtime").listFiles()!!.filter { it.extension == "jar" }
         // 插件列表
-        dependencies += Artifex.api().platformHelper().plugins().map { file(it.javaClass) }
+        dependencies += Artifex.api().getPlatformHelper().plugins().map { file(it.javaClass) }
         // 预设
         dependencies += input.map { file(it) }
         return dependencies.filterNotNull()
@@ -65,7 +63,7 @@ class DefaultScriptEnvironment : ScriptEnvironment {
             return pluginImports[name]!!
         }
         val args = name.split(":")
-        val plugin = Artifex.api().platformHelper().plugin(args[0]) ?: return emptyList()
+        val plugin = Artifex.api().getPlatformHelper().plugin(args[0]) ?: return emptyList()
         // 默认添加插件主类所在的包
         // 如果是 TabooLib 项目则进行特殊兼容
         val javaName = plugin.javaClass.name

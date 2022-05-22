@@ -1,22 +1,21 @@
 package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.*
-import ink.ptms.artifex.script.ScriptCompiled
-import ink.ptms.artifex.script.ScriptCompiler
-import ink.ptms.artifex.script.ScriptResult
-import ink.ptms.artifex.script.ScriptRuntimeProperty
+import ink.ptms.artifex.script.*
 import kotlinx.coroutines.runBlocking
 import taboolib.common.io.digest
-import taboolib.common.platform.function.info
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
+import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Consumer
+import kotlin.collections.ArrayList
 import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
 import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.api.valueOrNull
+import kotlin.script.experimental.host.FileScriptSource
 import kotlin.script.experimental.host.StringScriptSource
 import kotlin.script.experimental.host.toScriptSource
 
@@ -59,8 +58,10 @@ object ArtScriptCompiler : ScriptCompiler {
                 }
                 otherScripts.clear()
                 otherScripts.addAll(others)
-                // ClassLoader: org.jetbrains.kotlin.scripting.compiler.plugin.impl.CompiledScriptClassLoader
-                ArtScriptCompiled(compiledScript, compilerImpl.source!!.text.digest("sha-1")).also { compilerImpl.onSuccess?.accept(it) }
+                // 参数签名
+                val digest = (configuration as? KotlinCompilationConfiguration)?.props?.digest() ?: ScriptRuntimeProperty.defaultDigest
+                val hash = "${digest}#${compilerImpl.source!!.text}".digest("sha-1")
+                ArtScriptCompiled(compiledScript, hash).also { compilerImpl.onSuccess?.accept(it) }
             } else {
                 compilerImpl.onFailure?.run()
                 null
@@ -80,12 +81,16 @@ object ArtScriptCompiler : ScriptCompiler {
             this.configuration = configuration
         }
 
+        override fun configuration(property: ScriptRuntimeProperty) {
+            this.configuration = KotlinCompilationConfiguration(property)
+        }
+
         override fun source(file: File) {
-            this.source = file.toScriptSource()
+            this.source = FileScriptSource(file, "@file:Art\n${file.readText()}")
         }
 
         override fun source(main: String, source: String) {
-            this.source = StringScriptSource(source, main)
+            this.source = StringScriptSource("@file:Art\n$source", main)
         }
 
         override fun source(main: String, byteArray: ByteArray) {

@@ -76,7 +76,8 @@ java
 
 taboolib
 
-ink.ptms.glaikit.scripting
+ink.ptms.artifex.Artifex
+ink.ptms.artifex.scripting
 
 -org.bukkit.craftbukkit
 -org.bukkit.command

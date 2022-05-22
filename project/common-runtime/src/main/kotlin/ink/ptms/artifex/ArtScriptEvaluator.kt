@@ -2,6 +2,7 @@ package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.KotlinEvaluationConfiguration
 import ink.ptms.artifex.kotlin.KotlinScriptEvaluator
+import ink.ptms.artifex.script.ScriptCompiled
 import ink.ptms.artifex.script.ScriptEvaluator
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
@@ -17,7 +18,7 @@ object ArtScriptEvaluator : ScriptEvaluator {
 
     val scriptingHost = BasicJvmScriptingHost(evaluator = KotlinScriptEvaluator())
 
-    override fun createEvaluationConfiguration(id: String, props: ScriptRuntimeProperty): ScriptEvaluator.Configuration {
-        return KotlinEvaluationConfiguration(id, props)
+    override fun createEvaluationConfiguration(id: String, props: ScriptRuntimeProperty, script: ScriptCompiled): ScriptEvaluator.Configuration {
+        return KotlinEvaluationConfiguration(id, props, script)
     }
 }
