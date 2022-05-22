@@ -14,7 +14,9 @@ command-script-execute:
   - '&7[Artifex] &7正在运行...'
   - '&7[Artifex] &7> 运行参数:&f {0}'
   - '&7[Artifex] &7> 编译参数:&f {1}'
-command-script-execute-error: '&c[Artifex] &c> 运行结果异常:&7 {0}'
+command-script-execute-error:
+  - '&c[Artifex] &c> 运行结果异常: (详细信息已发送到控制台)'
+  - '&c[Artifex] &c> {0}'
 command-script-execute-value: '&c[Artifex] &7> 运行结果:&f {0} ({1})'
 command-script-execute-successful: '&7[Artifex] &a运行成功 &7({0}s)'
 command-script-execute-failed: '&7[Artifex] &c运行失败 &7({0}s)'
@@ -28,7 +30,9 @@ command-script-invoke-info:
   - '&7[Artifex] &7Invoking...'
   - '&7[Artifex] &7> :method:&f {0}'
   - '&7[Artifex] &7> :args:&f {1}'
-command-script-invoke-error: '&c[Artifex] &c> 运行结果异常:&7 {0}'
+command-script-invoke-error:
+  - '&c[Artifex] &c> 运行结果异常: (详细信息已发送到控制台)'
+  - '&c[Artifex] &c> {0}'
 command-script-invoke-value: '&c[Artifex] &7> 运行结果:&f {0} ({1})'
 command-script-invoke-value-null: '&c[Artifex] &7> 没有运行结果'
 command-script-release-error:

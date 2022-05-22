@@ -10,7 +10,7 @@ fun reloadFile(file: File, sender: ProxyCommandSender, args: Map<String, Any>, p
     // 检查依赖关系
     val implementations = container.implementations()
     if (implementations.isNotEmpty()) {
-        sender.sendLang("command-script-reload-warning", file.nameWithoutExtension, implementations)
+        sender.sendLang("command-script-reload-warning", file.nameWithoutExtension, implementations.map { it.id() })
     }
     if (file.extension == "jar") {
         // 释放脚本并重新运行

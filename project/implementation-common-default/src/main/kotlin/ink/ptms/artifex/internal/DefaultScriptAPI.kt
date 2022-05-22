@@ -31,6 +31,7 @@ object DefaultScriptAPI : ArtifexAPI {
 
     @Awake(LifeCycle.LOAD)
     fun init() {
+        releaseFile()
         Artifex.register(DefaultScriptAPI)
         Artifex.api().getScriptEnvironment().setupGlobalImports()
     }
@@ -38,6 +39,13 @@ object DefaultScriptAPI : ArtifexAPI {
     @Awake(LifeCycle.DISABLE)
     fun cancel() {
         classLoader.close()
+    }
+
+    fun releaseFile() {
+        kotlin.runCatching {
+            releaseResourceFile("runtime/core.jar", true)
+            releaseResourceFile("runtime/bridge.jar", true)
+        }
     }
 
     override fun getPlatformHelper(): PlatformHelper {
@@ -69,11 +77,7 @@ object DefaultScriptAPI : ArtifexAPI {
     }
 
     override fun getRuntimeLibraryFile(): File {
-        return try {
-            releaseResourceFile("runtime/core.jar", true)
-        } catch (ex: Throwable) {
-            File(getDataFolder(), "runtime/core.jar").takeIf { it.exists() } ?: error("Runtime library not found!")
-        }
+        return File(getDataFolder(), "runtime/core.jar").takeIf { it.exists() } ?: error("Runtime library not found!")
     }
 
     override fun getStatus(): Map<String, String> {

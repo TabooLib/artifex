@@ -9,7 +9,6 @@ import ink.ptms.artifex.script.toClassIdentifier
 import org.jetbrains.kotlin.mainKts.CompilerOptions
 import taboolib.common.io.newFile
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.info
 import taboolib.module.lang.asLangText
 import java.io.File
 import kotlin.script.experimental.api.*

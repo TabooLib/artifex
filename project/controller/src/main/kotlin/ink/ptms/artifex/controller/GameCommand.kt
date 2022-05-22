@@ -3,7 +3,10 @@ package ink.ptms.artifex.controller
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.controller.internal.*
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.command.*
+import taboolib.common.platform.command.CommandBody
+import taboolib.common.platform.command.CommandHeader
+import taboolib.common.platform.command.mainCommand
+import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.submit
 import taboolib.common5.Demand
 import taboolib.expansion.createHelper
@@ -216,15 +219,6 @@ object GameCommand {
                 }
             }
         }
-    }
-
-    /**
-     * 查看某脚本文件的详细信息
-     *
-     * art detail <文件名>
-     */
-    @CommandBody
-    val detail = subCommand {
     }
 
     fun parseType(value: String): Any {

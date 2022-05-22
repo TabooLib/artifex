@@ -15,6 +15,7 @@ fun invokeScript(sender: ProxyCommandSender, name: String, method: String, args:
             sender.sendLang("command-script-invoke-value-null")
         }
     } catch (ex: Throwable) {
-        sender.sendLang("command-script-invoke-error", ex.message.toString())
+        sender.sendLang("command-script-invoke-error", ex.toString())
+        ex.printStackTrace()
     }
 }

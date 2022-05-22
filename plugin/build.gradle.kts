@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation(project(":project:common"))
+    implementation(project(":project:common-bridge"))
     implementation(project(":project:controller"))
     implementation(project(":project:implementation-bukkit"))
     implementation(project(":project:implementation-bungee"))

@@ -7,17 +7,14 @@ import taboolib.common.io.digest
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
-import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Consumer
-import kotlin.collections.ArrayList
 import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
 import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.api.valueOrNull
 import kotlin.script.experimental.host.FileScriptSource
 import kotlin.script.experimental.host.StringScriptSource
-import kotlin.script.experimental.host.toScriptSource
 
 /**
  * Artifex
@@ -42,7 +39,7 @@ object ArtScriptCompiler : ScriptCompiler {
             // 编译日志
             result.reports.forEach { compilerImpl.onReport?.accept(diagnostic(it)) }
             // 编译结果
-            val compiledScript = result.valueOrNull()
+            val compiledScript = result.valueOrNull()?.remap()
             if (compiledScript != null) {
                 // 移除引用脚本
                 val compiledConfiguration = compiledScript.compilationConfiguration as ScriptCompiledConfiguration

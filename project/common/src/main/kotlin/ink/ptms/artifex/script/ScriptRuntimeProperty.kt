@@ -3,7 +3,6 @@ package ink.ptms.artifex.script
 import taboolib.common.io.digest
 import java.io.File
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * @author 坏黑

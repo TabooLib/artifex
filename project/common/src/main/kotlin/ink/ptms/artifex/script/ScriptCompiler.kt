@@ -2,7 +2,6 @@ package ink.ptms.artifex.script
 
 import java.io.File
 import java.io.InputStream
-import java.util.Properties
 import java.util.function.Consumer
 
 /**

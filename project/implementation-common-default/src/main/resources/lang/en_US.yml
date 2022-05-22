@@ -14,7 +14,9 @@ command-script-execute:
   - '&7[Artifex] &7Executing...'
   - '&7[Artifex] &7> :runArgs:&f {0}'
   - '&7[Artifex] &7> :providedProperties:&f {1}'
-command-script-execute-error: '&c[Artifex] &c> Error Result:&7 {0}'
+command-script-execute-error:
+  - '&c[Artifex] &c> Error Result: (Details in the console)'
+  - '&c[Artifex] &c> {0}'
 command-script-execute-value: '&c[Artifex] &7> Execute Result:&f {0} ({1})'
 command-script-execute-successful: '&7[Artifex] &aEXECUTE SUCCESSFUL&7 in {0}s'
 command-script-execute-failed: '&7[Artifex] &cEXECUTE FAILED&7 in {0}s'
@@ -28,7 +30,9 @@ command-script-invoke-info:
   - '&7[Artifex] &7Invoking...'
   - '&7[Artifex] &7> :method:&f {0}'
   - '&7[Artifex] &7> :args:&f {1}'
-command-script-invoke-error: '&c[Artifex] &c> Error Result:&7 {0}'
+command-script-invoke-error:
+  - '&c[Artifex] &c> Error Result: (Details in the console)'
+  - '&c[Artifex] &c> {0}'
 command-script-invoke-value: '&c[Artifex] &7> Invoke Result:&f {0} ({1})'
 command-script-invoke-value-null: '&c[Artifex] &7> No Result'
 command-script-release-error:

@@ -26,7 +26,7 @@ fun File.searchFile(match: File.() -> Boolean): Set<File> {
     }
 }
 
-fun getVersion(props: Map<String, Any>, file: File): String {
+fun getScriptVersion(file: File, props: Map<String, Any>): String {
     val property = ScriptRuntimeProperty().also { property ->
         property.providedProperties.putAll(props)
     }
@@ -114,7 +114,7 @@ fun checkCompile(file: File, sender: ProxyCommandSender, props: Map<String, Any>
                 null
             }
             if (version != null) {
-                val hash = getVersion(props, file)
+                val hash = getScriptVersion(file, props)
                 if (hash != version) {
                     sender.sendLang("command-script-recompiled", version, hash)
                     compileFile(file, sender, props) ?: return false

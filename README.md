@@ -33,12 +33,14 @@ scriptCompiled.invoke(...)
 Artifex 可基于 Bukkit & BungeeCord 环境下运行：
 
 1. 构建项目
+
 ```
 ./gradlew build
 ```
-2. 在 `/plugin/build/libs` 目录中获取 **插件** 文件
-3. 在 `/project/common-runtime/build/libs` 目录中获取 **运行库** 文件
-4. 将 **运行库** 文件放入 `plugins/Artifex/runtime` 目录下并更名为 `core.jar`
+
+1. 在 `/plugin/build/libs` 目录中获取 **插件** 文件
+2. 将 `/project/common-runtime/build/libs` 目录中的 `common-runtime-1.0.0.jar` 文件放入 `plugins/Artifex/runtime` 目录下并更名为 `core.jar`
+3. 将 `/project/common-bridge/build/libs` 目录中的 `common-bridge-1.0.0-origin.jar` 文件放入 `plugins/Artifex/runtime` 目录下并更名为 `bridge.jar`
 
 > 也可在 `Github Actions` 中直接获取
 

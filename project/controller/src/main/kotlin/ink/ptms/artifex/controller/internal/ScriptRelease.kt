@@ -3,7 +3,6 @@ package ink.ptms.artifex.controller.internal
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.ScriptContainer
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.implementations
 import taboolib.module.lang.sendLang
 import java.io.File
 
@@ -15,7 +14,7 @@ fun releaseFile(file: File, sender: ProxyCommandSender, force: Boolean) {
         if (force) {
             releaseScript(container.second, sender)
         } else {
-            sender.sendLang("command-script-release-error", file.nameWithoutExtension, implementations)
+            sender.sendLang("command-script-release-error", file.nameWithoutExtension, implementations.map { it.id() })
         }
     } else {
         container.second.release()

@@ -35,7 +35,8 @@ fun runJarFile(file: File, sender: ProxyCommandSender, args: Map<String, Any>, p
     // 汇报运行结果
     when (val value = result.value()) {
         is ScriptResult.Result.Error -> {
-            sender.sendLang("command-script-execute-error", value.error.message.toString())
+            sender.sendLang("command-script-execute-error", value.error.toString())
+            value.error.printStackTrace()
         }
         is ScriptResult.Result.Value -> {
             sender.sendLang("command-script-execute-value", value.value.toString(), value.type)
