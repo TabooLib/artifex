@@ -11,7 +11,7 @@ fun getProject(file: File): ScriptProject? {
 }
 
 fun runProject(file: File, sender: ProxyCommandSender): Boolean {
-    if (checkProjectRunning(file, sender)) {
+    if (!checkProjectRunning(file, sender)) {
         return false
     }
     val project = getProject(file)?.also { it.reload() } ?: Artifex.api().getScriptProjectManager().loadProject(file)
@@ -20,7 +20,7 @@ fun runProject(file: File, sender: ProxyCommandSender): Boolean {
 }
 
 fun releaseProject(file: File, sender: ProxyCommandSender): Boolean {
-    if (checkProjectNotRunning(file, sender)) {
+    if (!checkProjectNotRunning(file, sender)) {
         return false
     }
     getProject(file)!!.release(sender)
@@ -28,7 +28,7 @@ fun releaseProject(file: File, sender: ProxyCommandSender): Boolean {
 }
 
 fun reloadProject(file: File, sender: ProxyCommandSender): Boolean {
-    if (checkProjectNotRunning(file, sender)) {
+    if (!checkProjectNotRunning(file, sender)) {
         return false
     }
     val project = getProject(file)!!
@@ -41,7 +41,7 @@ fun reloadProject(file: File, sender: ProxyCommandSender): Boolean {
 fun checkProjectRunning(file: File, sender: ProxyCommandSender): Boolean {
     val project = getProject(file)
     if (project != null && project.isRunning()) {
-        sender.sendLang("command-script-is-running", file.nameWithoutExtension)
+        sender.sendLang("command-project-is-running", file.nameWithoutExtension)
         return false
     }
     return true
@@ -50,7 +50,7 @@ fun checkProjectRunning(file: File, sender: ProxyCommandSender): Boolean {
 fun checkProjectNotRunning(file: File, sender: ProxyCommandSender): Boolean {
     val project = getProject(file)
     if (project == null || !project.isRunning()) {
-        sender.sendLang("command-script-is-not-running", file.nameWithoutExtension)
+        sender.sendLang("command-project-is-not-running", file.nameWithoutExtension)
         return false
     }
     return true
