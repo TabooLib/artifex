@@ -64,6 +64,10 @@ object DefaultScriptAPI : ArtifexAPI {
         return classLoader
     }
 
+    override fun getScriptProjectManager(): ScriptProjectManager {
+        return PlatformFactory.getAPI()
+    }
+
     override fun getScriptContainerManager(): ScriptContainerManager {
         return containerManager
     }

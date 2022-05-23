@@ -30,4 +30,14 @@ interface ScriptContainerManager {
      * 获取所有脚本容器
      */
     fun getAll(): List<ScriptContainer>
+
+    /**
+     * 获取脚本数据
+     */
+    fun getExchangeData(name: String): MutableMap<String, Any>
+
+    /**
+     * 注销脚本数据
+     */
+    fun resetExchangeData(name: String)
 }

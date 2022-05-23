@@ -20,6 +20,15 @@ import kotlin.script.experimental.util.filterByAnnotationType
  */
 class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurationHandler {
 
+    fun searchFile(scriptPath: String?, file: String): Set<File> {
+        return if (scriptPath != null) {
+            // 先从当前目录开始找，找不到再从根目录找
+            File(scriptPath).parentFile.searchFile { isKts(file) }.ifEmpty { scriptsFile.searchFile { isKts(file) } }
+        } else {
+            scriptsFile.searchFile { isKts(file) }
+        }
+    }
+
     override operator fun invoke(context: ScriptConfigurationRefinementContext): ResultWithDiagnostics<ScriptCompilationConfiguration> {
         val anno = ScriptCollectedData.collectedAnnotations
         val annotations = context.collectedData?.get(anno)?.takeIf { it.isNotEmpty() } ?: return context.compilationConfiguration.asSuccess()
@@ -31,7 +40,7 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
         val includeScripts = ArrayList<FileScriptSource>()
         annotations.filterByAnnotationType<Include>().flatMap { it.annotation.name.toList() }.forEach { name ->
             // 搜索脚本文件
-            scriptsFile.searchFile { isKts(name) }.forEach { file ->
+            searchFile(scriptPath, name).forEach { file ->
                 includeScripts += FileScriptSource(file)
             }
         }
@@ -47,7 +56,7 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
             }
             // 判定为脚本
             else {
-                val files = scriptsFile.searchFile { isKts(name) }
+                val files = searchFile(scriptPath, name)
                 if (files.isEmpty()) {
                     val diagnostic = ArrayList<ScriptDiagnostic>()
                     val error = console().asLangText("compile-referenced-not-found", name)

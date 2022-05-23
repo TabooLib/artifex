@@ -16,16 +16,16 @@ fun releaseFile(file: File, sender: ProxyCommandSender, force: Boolean) {
         } else {
             sender.sendLang("command-script-release-error", file.nameWithoutExtension, implementations.map { it.id() })
         }
-    } else {
-        container.second.release()
+    } else if (container.second.release()) {
         sender.sendLang("command-script-release", container.second.id())
     }
 }
 
-fun releaseScript(container: ScriptContainer, sender: ProxyCommandSender) {
-    container.implementations().forEach { releaseScript(it, sender) }
-    container.release()
-    sender.sendLang("command-script-release", container.id())
+fun releaseScript(container: ScriptContainer, sender: ProxyCommandSender, info: Boolean = true) {
+    container.implementations().forEach { releaseScript(it, sender, info) }
+    if (container.release() && info) {
+        sender.sendLang("command-script-release", container.id())
+    }
 }
 
 fun ScriptContainer.implementations(): List<ScriptContainer> {

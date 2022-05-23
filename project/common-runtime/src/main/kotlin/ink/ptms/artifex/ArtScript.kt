@@ -24,4 +24,17 @@ abstract class ArtScript(val baseId: String, val baseScript: ArtScriptCompiled) 
     override fun container(): ScriptContainer {
         return scriptContainer
     }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> exchangeData(name: String): T? {
+        return container().exchangeData(name)
+    }
+
+    override fun exchangeData(name: String, value: Any) {
+        container().exchangeData(name, value)
+    }
+
+    override fun exchangeData(): MutableMap<String, Any> {
+        return container().exchangeData()
+    }
 }

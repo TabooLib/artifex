@@ -4,7 +4,7 @@ package ink.ptms.artifex.script
  * @author 坏黑
  * @since 2022/4/17 02:35
  */
-interface ScriptContainer {
+interface ScriptContainer : Exchanges {
 
     /**
      * 脚本序号
@@ -29,7 +29,7 @@ interface ScriptContainer {
     /**
      * 释放所有资源
      */
-    fun release()
+    fun release(): Boolean
 
     /**
      * 脚本是否在运行状态

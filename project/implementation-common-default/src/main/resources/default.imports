@@ -73,6 +73,7 @@ java
 -taboolib.library.jarrelocator
 -taboolib.library.kether
 -taboolib.module.kether.action
+-taboolib.module.lang
 
 taboolib
 

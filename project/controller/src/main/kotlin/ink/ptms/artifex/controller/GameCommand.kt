@@ -28,6 +28,9 @@ object GameCommand {
         createHelper()
     }
 
+    @CommandBody
+    val project = GameCommandProject
+
     /**
      * 运行脚本，通过命令运行的脚本在参数上仅支持基本类型推断
      * 若不存在编译文件则自动编译，反之则通过文件哈希值判断是否需要重新编译

@@ -11,23 +11,38 @@ import java.io.File
 
 val scriptsFile = File(getDataFolder(), "scripts")
 
-fun file(file: String): File? {
-    return scriptsFile.searchFile { file == nameWithoutExtension }.firstOrNull()
+fun projects(): List<String> {
+    return scriptsFile.searchFile(onlyScript = false) { name == "project.yml" }.map { it.parentFile.name }
 }
 
-fun files(jar: Boolean = true): List<String> {
-    return scriptsFile.searchFile { extension == "kts" || (jar && extension == "jar") }.map { it.nameWithoutExtension }
+fun file(file: String, root: File = scriptsFile, onlyScript: Boolean = true): File? {
+    return root.searchFile(onlyScript) { file == nameWithoutExtension }.firstOrNull()
 }
 
-fun File.searchFile(match: File.() -> Boolean): Set<File> {
+fun files(jars: Boolean = true): List<String> {
+    return scriptsFile.searchFile { extension == "kts" || (jars && extension == "jar") }.map { it.nameWithoutExtension }
+}
+
+fun File.searchFile(onlyScript: Boolean = true, match: File.() -> Boolean): Set<File> {
     if (name.startsWith('.') || name.startsWith('@')) {
         return emptySet()
     }
     return when {
-        isDirectory -> listFiles()?.flatMap { it.searchFile(match) }?.toSet() ?: emptySet()
+        isDirectory -> {
+            val listFiles = listFiles()
+            if (onlyScript && listFiles?.any { it.name == "project.yml" } == true) {
+                emptySet()
+            } else {
+                listFiles?.flatMap { it.searchFile(onlyScript, match) }?.toSet() ?: emptySet()
+            }
+        }
         match(this) -> setOf(this)
         else -> emptySet()
     }
+}
+
+fun File.searchProject(project: String): File? {
+    return searchFile(onlyScript = false) { name == "project.yml" && parentFile.name == project }.firstOrNull()?.parentFile
 }
 
 fun getScriptVersion(file: File, props: Map<String, Any>): String {

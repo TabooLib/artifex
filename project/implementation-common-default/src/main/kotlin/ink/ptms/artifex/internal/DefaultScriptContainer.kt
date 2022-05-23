@@ -1,9 +1,11 @@
 package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
+import ink.ptms.artifex.script.Exchanges
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.ScriptContainer
 import java.io.Closeable
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
@@ -14,6 +16,7 @@ class DefaultScriptContainer(val script: Script): ScriptContainer {
 
     private var isRunning = true
     private val resources = CopyOnWriteArrayList<Pair<String, Closeable>>()
+    private val data = ConcurrentHashMap<String, Any>()
 
     override fun id(): String {
         return script.baseId()
@@ -31,7 +34,7 @@ class DefaultScriptContainer(val script: Script): ScriptContainer {
         return resources.map { it.first }
     }
 
-    override fun release() {
+    override fun release(): Boolean {
         if (isRunning) {
             isRunning = false
             try {
@@ -45,10 +48,27 @@ class DefaultScriptContainer(val script: Script): ScriptContainer {
                 ex.printStackTrace()
             }
             Artifex.api().getScriptContainerManager().unregister(this)
+            Artifex.api().getScriptContainerManager().resetExchangeData(id())
+            data.clear()
+            return true
         }
+        return false
     }
 
     override fun isRunning(): Boolean {
         return isRunning
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T> exchangeData(name: String): T? {
+        return data[name] as? T
+    }
+
+    override fun exchangeData(name: String, value: Any) {
+        data[name] = value
+    }
+
+    override fun exchangeData(): MutableMap<String, Any> {
+        return data
     }
 }

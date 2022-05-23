@@ -4,7 +4,7 @@ package ink.ptms.artifex.script
  * @author 坏黑
  * @since 2022/5/15 23:12
  */
-abstract class Script {
+abstract class Script : Exchanges {
 
     /**
      * 脚本序号

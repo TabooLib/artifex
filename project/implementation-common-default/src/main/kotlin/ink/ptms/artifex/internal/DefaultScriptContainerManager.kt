@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 class DefaultScriptContainerManager : ScriptContainerManager {
 
     val activeScriptContainers = ConcurrentHashMap<String, ScriptContainer>()
+    val activeScriptMap = ConcurrentHashMap<String, MutableMap<String, Any>>()
 
     override fun createContainer(script: Script): ScriptContainer {
         return DefaultScriptContainer(script)
@@ -32,5 +33,19 @@ class DefaultScriptContainerManager : ScriptContainerManager {
 
     override fun getAll(): List<ScriptContainer> {
         return activeScriptContainers.values.toList()
+    }
+
+    override fun getExchangeData(name: String): MutableMap<String, Any> {
+        return if (activeScriptMap.containsKey(name)) {
+            activeScriptMap[name]!!
+        } else {
+            val map = ConcurrentHashMap<String, Any>()
+            activeScriptMap[name] = map
+            map
+        }
+    }
+
+    override fun resetExchangeData(name: String) {
+        activeScriptMap.remove(name)
     }
 }

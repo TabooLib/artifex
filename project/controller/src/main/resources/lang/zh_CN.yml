@@ -53,6 +53,12 @@ command-script-status-resource-task-async: '&7[Artifex] &8     - &7调度器: &f
 command-script-status-resource-custom: '&7[Artifex] &8     - &7{0}: &f{1}'
 command-script-status-import: '&7[Artifex] &8  = &7引用脚本'
 command-script-status-import-name: '&7[Artifex] &8     - &f{0}'
+command-script-status-empty-project: '&7[Artifex] &7没有工程.'
+command-script-status-project: '&7[Artifex] &7当前工程:'
+command-script-status-project-name: '&7[Artifex] &8- &f{0} &8({1})'
+command-script-status-project-name-running: '&7[Artifex] &8- &a&n{0}&r &8({1})'
+command-project-not-found: '&c[Artifex] &c工程 {0} 不存在'
 
 project-start: '&7[Artifex] &7正在启动 {0}...'
+project-release: '&7[Artifex] &7正在释放 {0}...'
 project-loaded: '&7[Artifex] &7已加载 {0} 个项目.'

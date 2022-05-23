@@ -43,6 +43,11 @@ interface ArtifexAPI {
     fun getScriptClassLoader(): RuntimeClassLoader
 
     /**
+     * 获取脚本项目管理器
+     */
+    fun getScriptProjectManager(): ScriptProjectManager
+
+    /**
      * 获取脚本容器管理器
      */
     fun getScriptContainerManager(): ScriptContainerManager

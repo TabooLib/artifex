@@ -8,7 +8,7 @@ plugins {
 }
 
 taboolib {
-    install("common", "common-5")
+    install("common", "common-5", "module-lang", "module-configuration")
     options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
     classifier = null
     version = taboolib_version

@@ -57,7 +57,6 @@ taboolib.module.configuration.util.*
 taboolib.module.configuration.*
 taboolib.module.database.*
 taboolib.module.kether.*
-taboolib.module.lang.*
 taboolib.module.nms.*
 taboolib.module.ui.*
 taboolib.library.xseries.*
