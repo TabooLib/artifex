@@ -9,23 +9,25 @@ import taboolib.module.lang.sendLang
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-fun runFile(file: File, sender: ProxyCommandSender, args: Map<String, Any>, props: Map<String, Any>, mount: Boolean = false) {
+fun runFile(file: File, sender: ProxyCommandSender, args: Map<String, Any>, props: Map<String, Any>, mount: Boolean = false, info: Boolean = true) {
     if (file.extension == "jar") {
-        submit { runJarFile(file, sender, args, props, mount) }
+        submit { runJarFile(file, sender, args, props, mount, info) }
     }
     // 默认视为 .kts 文件并检查编译
-    else if (checkFileNotRunning(file, sender) && checkCompile(file, sender, props)) {
+    else if (checkFileNotRunning(file, sender) && checkCompile(file, sender, props, info)) {
         val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
         if (buildFile.exists()) {
-            submit { runJarFile(buildFile, sender, args, props, mount) }
+            submit { runJarFile(buildFile, sender, args, props, mount, info) }
         }
     }
 }
 
-fun runJarFile(file: File, sender: ProxyCommandSender, args: Map<String, Any>, props: Map<String, Any>, mount: Boolean): Boolean {
+fun runJarFile(file: File, sender: ProxyCommandSender, args: Map<String, Any>, props: Map<String, Any>, mount: Boolean, info: Boolean = true): Boolean {
     val time = System.currentTimeMillis()
     val meta = checkJarFileNotRunning(file, sender) ?: return false
-    sender.sendLang("command-script-execute", args, props)
+    if (info) {
+        sender.sendLang("command-script-execute", args, props)
+    }
     val result = meta.generateScriptCompiled().invoke(meta.name(), ScriptRuntimeProperty().also { property ->
         property.runArgs.putAll(args)
         property.providedProperties.putAll(props)

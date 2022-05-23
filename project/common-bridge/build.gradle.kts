@@ -17,14 +17,18 @@ taboolib {
 
 dependencies {
     api(project(":project:common"))
+    implementation(project(":project:common-bridge-bukkit"))
+    implementation(project(":project:common-bridge-bungee"))
 }
 
 tasks {
     withType<ShadowJar> {
         archiveClassifier.set("origin")
         dependencies {
-            include(dependency("1:1:1"))
+            include(project(":project:common-bridge-bukkit"))
+            include(project(":project:common-bridge-bungee"))
         }
+        relocate("kotlin1510", "kotlin")
     }
     build {
         dependsOn(shadowJar)

@@ -29,12 +29,12 @@ interface ScriptEnvironment {
     /**
      * 从文件中读取 import 列表
      */
-    fun loadImportsFromFile(file: File, classLoader: ClassLoader? = null): List<String>
+    fun loadImportsFromFile(file: File, classLoader: List<ClassLoader>): List<String>
 
     /**
      * 从字符串中读取 import 列表
      */
-    fun loadImportsFromString(str: List<String>, classLoader: ClassLoader? = null): List<String>
+    fun loadImportsFromString(str: List<String>, classLoader: List<ClassLoader>): List<String>
 
     /**
      * 从插件中加载，可传入插件名称或特定包名

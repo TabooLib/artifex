@@ -1,6 +1,7 @@
 package ink.ptms.artifex.controller.internal
 
 import ink.ptms.artifex.Artifex
+import ink.ptms.artifex.controller.GameLoader
 import ink.ptms.artifex.script.*
 import taboolib.common.io.digest
 import taboolib.common.platform.ProxyCommandSender
@@ -19,8 +20,11 @@ fun files(jar: Boolean = true): List<String> {
 }
 
 fun File.searchFile(match: File.() -> Boolean): Set<File> {
+    if (name.startsWith('.') || name.startsWith('@')) {
+        return emptySet()
+    }
     return when {
-        isDirectory && !name.startsWith('.') -> listFiles()?.flatMap { it.searchFile(match) }?.toSet() ?: emptySet()
+        isDirectory -> listFiles()?.flatMap { it.searchFile(match) }?.toSet() ?: emptySet()
         match(this) -> setOf(this)
         else -> emptySet()
     }
@@ -36,7 +40,7 @@ fun getScriptVersion(file: File, props: Map<String, Any>): String {
 
 fun reportResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender) {
     // > INFO: (138, 13): This annotation is not applicable to target 'expression' and use site target '@file'
-    if (report.severity > ScriptResult.Severity.DEBUG) {
+    if (report.severity > ScriptResult.Severity.DEBUG && GameLoader.ignoreWarning.none { report.message.contains(it) }) {
         val loc = report.source.location
         val pos = if (loc != null) "(${loc.start.line}, ${loc.start.col}): " else ""
         sender.sendMessage("${report.severity.color}> ${report.severity}: ${pos}${report.message}")
@@ -101,7 +105,7 @@ fun checkFileRunning(file: File, sender: ProxyCommandSender): Pair<ScriptMeta?, 
     return meta to container
 }
 
-fun checkCompile(file: File, sender: ProxyCommandSender, props: Map<String, Any>): Boolean {
+fun checkCompile(file: File, sender: ProxyCommandSender, props: Map<String, Any>, info: Boolean = true): Boolean {
     if (file.extension == "kts") {
         // 检查编译文件
         val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
@@ -117,14 +121,14 @@ fun checkCompile(file: File, sender: ProxyCommandSender, props: Map<String, Any>
                 val hash = getScriptVersion(file, props)
                 if (hash != version) {
                     sender.sendLang("command-script-recompiled", version, hash)
-                    compileFile(file, sender, props) ?: return false
+                    compileFile(file, sender, props, info) ?: return false
                 }
             } else {
-                compileFile(file, sender, props) ?: return false
+                compileFile(file, sender, props, info) ?: return false
             }
         } else {
             sender.sendLang("command-script-compile")
-            compileFile(file, sender, props) ?: return false
+            compileFile(file, sender, props, info) ?: return false
         }
         return true
     }

@@ -11,11 +11,11 @@ import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-fun compileFile(file: File, sender: ProxyCommandSender, props: Map<String, Any>): ScriptCompiled? {
+fun compileFile(file: File, sender: ProxyCommandSender, props: Map<String, Any>, info: Boolean = true): ScriptCompiled? {
     return if (file.extension == "kts") {
         val time = System.currentTimeMillis()
         val future = CompletableFuture<Void>()
-        val platformTask = submit(period = 20, delay = 20) {
+        val platformTask = submit(async = true, period = 20, delay = 20) {
             // > 1s
             val seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
             if (seconds > 0) {
@@ -24,7 +24,9 @@ fun compileFile(file: File, sender: ProxyCommandSender, props: Map<String, Any>)
         }
         // > Compiling...
         // > Provided-Properties: {}
-        sender.sendLang("command-script-compile-info", props)
+        if (info) {
+            sender.sendLang("command-script-compile-info", props)
+        }
         future.thenAccept { platformTask.cancel() }
         Artifex.api().getScriptCompiler().compile {
             it.source(file)

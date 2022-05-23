@@ -78,6 +78,7 @@ taboolib
 
 ink.ptms.artifex.Artifex
 ink.ptms.artifex.bridge
+ink.ptms.artifex.scripting
 
 -org.bukkit.craftbukkit
 -org.bukkit.command

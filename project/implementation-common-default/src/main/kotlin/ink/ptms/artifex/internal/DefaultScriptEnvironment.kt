@@ -3,6 +3,7 @@ package ink.ptms.artifex.internal
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.ScriptEnvironment
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
+import taboolib.common.io.newFile
 import taboolib.common.io.taboolibId
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
@@ -39,21 +40,22 @@ class DefaultScriptEnvironment : ScriptEnvironment {
     }
 
     override fun setupGlobalImports() {
+        val classLoader = listOf(DefaultScriptEnvironment::class.java.classLoader, Artifex.api().getScriptClassLoader() as ClassLoader)
         pluginImports.clear()
         globalImports.clear()
-        globalImports.addAll(loadImportsFromFile(releaseResourceFile("default.imports")))
+        globalImports.addAll(loadImportsFromFile(releaseResourceFile("default.imports"), classLoader).also {
+            newFile(getDataFolder(), ".out/default.imports").writeText(it.joinToString("\n"))
+        })
         globalImports.addAll(loadFunctionsFromFile(releaseResourceFile("default.functions")))
     }
 
-    override fun loadImportsFromFile(file: File, classLoader: ClassLoader?): List<String> {
+    override fun loadImportsFromFile(file: File, classLoader: List<ClassLoader>): List<String> {
         return loadImportsFromString(file.readLines(StandardCharsets.UTF_8), classLoader)
     }
 
-    override fun loadImportsFromString(str: List<String>, classLoader: ClassLoader?): List<String> {
+    override fun loadImportsFromString(str: List<String>, classLoader: List<ClassLoader>): List<String> {
         val scanner = FastClasspathScanner(*str.filter { it.isNotBlank() }.toTypedArray())
-        if (classLoader != null) {
-            scanner.addClassLoader(classLoader)
-        }
+        classLoader.forEach { scanner.addClassLoader(it) }
         val classes = scanner.alwaysScanClasspathElementRoot(false).scan().namesOfAllClasses
         return classes.map { it.substringBeforeLast(".") }.filter { it.isNotEmpty() }.toSet().map { "$it.*" }
     }
@@ -74,10 +76,11 @@ class DefaultScriptEnvironment : ScriptEnvironment {
         }
         // 插入用户片段
         val extra = if (args.size > 1) args[1].split(",").toTypedArray() else emptyArray()
-        val imports = loadImportsFromString(listOf("!!", main, *extra, "-$main.$taboolibId"), plugin.javaClass.classLoader)
+        val imports = loadImportsFromString(listOf("!!", main, *extra, "-$main.$taboolibId"), listOf(plugin.javaClass.classLoader))
         if (imports.isNotEmpty()) {
             pluginImports[name] = imports
         }
+        newFile(getDataFolder(), ".out/plugin.$name.imports").writeText(imports.joinToString("\n"))
         return imports
     }
 

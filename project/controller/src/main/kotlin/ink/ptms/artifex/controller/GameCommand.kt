@@ -206,7 +206,12 @@ object GameCommand {
                     if (container.resources().isNotEmpty()) {
                         sender.sendLang("command-script-status-resource")
                         container.resources().sorted().forEach {
-                            sender.sendLang("command-script-status-resource-${it.substringBefore(':')}", it.substringAfter(':'))
+                            val type = it.substringBefore(':')
+                            if (type.startsWith("@")) {
+                                sender.sendLang("command-script-status-resource-custom", type.substring(1), it.substringAfter(':'))
+                            } else {
+                                sender.sendLang("command-script-status-resource-$type", it.substringAfter(':'))
+                            }
                         }
                     }
                     val otherScripts = container.script().baseScript().otherImportScripts()
