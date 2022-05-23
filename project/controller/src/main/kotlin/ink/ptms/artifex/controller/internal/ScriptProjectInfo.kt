@@ -54,28 +54,27 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
 
     override fun run(sender: ProxyCommandSender): Boolean {
         sender.sendLang("project-start", name())
-        // 启动所有脚本
+        // 编译
         val scripts = compileFiles() ?: return false
+        // 运行
         scripts.forEach { runFile(it, sender) }
         return true
     }
 
     override fun reload(sender: ProxyCommandSender): Boolean {
         sender.sendLang("project-reload", name())
-        val scripts = compileFiles() ?: return false
-        runningScripts.forEach { releaseScript(it.container(), sender, false) }
-        runningScripts.clear()
-        Artifex.api().getScriptContainerManager().resetExchangeData(id)
+        // 编译脚本
+        val scripts = compileFiles() ?: return false // 若未成功编译则不会继续执行
+        // 释放脚本
+        releaseAll(sender)
+        // 运行
         scripts.forEach { runFile(it, sender) }
         return true
     }
 
     override fun release(sender: ProxyCommandSender) {
         sender.sendLang("project-release", name())
-        // 卸载所有脚本
-        runningScripts.forEach { releaseScript(it.container(), sender, false) }
-        runningScripts.clear()
-        Artifex.api().getScriptContainerManager().resetExchangeData(id)
+        releaseAll(sender)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -115,6 +114,7 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
     }
 
     fun compileFile(scriptFile: File, sender: ProxyCommandSender): File? {
+        // 脚本不在运行 && 检查编译
         if (checkFileNotRunning(scriptFile, sender) && checkCompile(scriptFile, sender, emptyMap(), false)) {
             val buildFile = File(scriptsFile, ".build/${scriptFile.nameWithoutExtension}.jar")
             if (buildFile.exists()) {
@@ -133,5 +133,11 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
             container().exchangeData()["@project"] = this@ScriptProjectInfo
             runningScripts += this
         }
+    }
+
+    fun releaseAll(sender: ProxyCommandSender) {
+        runningScripts.forEach { releaseScript(it.container(), sender, false) }
+        runningScripts.clear()
+        Artifex.api().getScriptContainerManager().resetExchangeData(id)
     }
 }
