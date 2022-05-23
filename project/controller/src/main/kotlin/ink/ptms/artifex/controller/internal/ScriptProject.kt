@@ -14,7 +14,7 @@ fun runProject(file: File, sender: ProxyCommandSender): Boolean {
     if (!checkProjectRunning(file, sender)) {
         return false
     }
-    val project = getProject(file)?.also { it.reload() } ?: Artifex.api().getScriptProjectManager().loadProject(file)
+    val project = getProject(file)?.also { it.reloadConfig() } ?: Artifex.api().getScriptProjectManager().loadProject(file)
     project.run(sender)
     return true
 }
@@ -32,9 +32,8 @@ fun reloadProject(file: File, sender: ProxyCommandSender): Boolean {
         return false
     }
     val project = getProject(file)!!
-    project.release(sender)
-    project.reload()
-    project.run(sender)
+    project.reloadConfig()
+    project.reload(sender)
     return true
 }
 

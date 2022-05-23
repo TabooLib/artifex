@@ -19,7 +19,7 @@ import kotlin.collections.ArrayList
  * @author 坏黑
  * @since 2022/5/23 13:28
  */
-class ScriptProjectInfo(val file: File, val root: Configuration): ScriptProject {
+class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject {
 
     private val exchangeData = ConcurrentHashMap<String, Any>()
     private val runningScripts = ArrayList<Script>()
@@ -32,7 +32,7 @@ class ScriptProjectInfo(val file: File, val root: Configuration): ScriptProject 
     val autoMount: Boolean
         get() = root.getBoolean("auto-mount")
 
-    override fun reload() {
+    override fun reloadConfig() {
         root.reload()
     }
 
@@ -52,17 +52,22 @@ class ScriptProjectInfo(val file: File, val root: Configuration): ScriptProject 
         return root.getString("name") ?: file.name
     }
 
-    override fun run(sender: ProxyCommandSender) {
+    override fun run(sender: ProxyCommandSender): Boolean {
         sender.sendLang("project-start", name())
         // 启动所有脚本
-        main.forEach { script ->
-            val file = file(script, root = file, onlyScript = false)
-            if (file?.exists() == true && file.extension == "kts") {
-                runFileNow(file, console(), autoMount)
-            } else {
-                console().sendLang("command-script-not-found", script)
-            }
-        }
+        val scripts = compileFiles() ?: return false
+        scripts.forEach { runFile(it, sender) }
+        return true
+    }
+
+    override fun reload(sender: ProxyCommandSender): Boolean {
+        sender.sendLang("project-reload", name())
+        val scripts = compileFiles() ?: return false
+        runningScripts.forEach { releaseScript(it.container(), sender, false) }
+        runningScripts.clear()
+        Artifex.api().getScriptContainerManager().resetExchangeData(id)
+        scripts.forEach { runFile(it, sender) }
+        return true
     }
 
     override fun release(sender: ProxyCommandSender) {
@@ -90,19 +95,43 @@ class ScriptProjectInfo(val file: File, val root: Configuration): ScriptProject 
         return runningScripts.isNotEmpty()
     }
 
-    fun runFileNow(scriptFile: File, sender: ProxyCommandSender, mount: Boolean = false) {
+    fun compileFiles(): List<File>? {
+        val scripts = ArrayList<File>()
+        main.forEach { script ->
+            val file = file(script, root = file, onlyScript = false)
+            if (file?.exists() == true && file.extension == "kts") {
+                val buildFile = compileFile(file, console())
+                if (buildFile != null) {
+                    scripts += buildFile
+                } else {
+                    return null
+                }
+            } else {
+                console().sendLang("command-script-not-found", script)
+                return null
+            }
+        }
+        return scripts
+    }
+
+    fun compileFile(scriptFile: File, sender: ProxyCommandSender): File? {
         if (checkFileNotRunning(scriptFile, sender) && checkCompile(scriptFile, sender, emptyMap(), false)) {
             val buildFile = File(scriptsFile, ".build/${scriptFile.nameWithoutExtension}.jar")
             if (buildFile.exists()) {
-                val data = Artifex.api().getScriptContainerManager().getExchangeData(id)
-                // 项目文件
-                data["@project"] = this
-                // 运行脚本
-                runJarFile(buildFile, sender, mapOf("@id" to id), emptyMap(), mount, false) {
-                    container().exchangeData()["@project"] = this@ScriptProjectInfo
-                    runningScripts += this
-                }
+                return buildFile
             }
+        }
+        return null
+    }
+
+    fun runFile(buildFile: File, sender: ProxyCommandSender) {
+        val data = Artifex.api().getScriptContainerManager().getExchangeData(id)
+        // 项目文件
+        data["@project"] = this
+        // 运行脚本
+        runJarFile(buildFile, sender, mapOf("@id" to id), emptyMap(), autoMount, false) {
+            container().exchangeData()["@project"] = this@ScriptProjectInfo
+            runningScripts += this
         }
     }
 }

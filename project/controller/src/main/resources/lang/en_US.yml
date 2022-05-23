@@ -58,5 +58,6 @@ command-project-is-running: '&c[Artifex] &cScript project {0} is running.'
 command-project-is-not-running: '&c[Artifex] &cScript project {0} is not running.'
 
 project-start: '&7[Artifex] &7Starting {0}...'
+project-reload: '&7[Artifex] &7Restarting {0}...'
 project-release: '&7[Artifex] &7Releasing {0}...'
 project-loaded: '&7[Artifex] &7Loaded {0} projects.'

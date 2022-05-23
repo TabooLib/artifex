@@ -62,5 +62,6 @@ command-project-is-running: '&c[Artifex] &c工程 {0} 已在运行.'
 command-project-is-not-running: '&c[Artifex] &c工程 {0} 不在运行.'
 
 project-start: '&7[Artifex] &7正在启动 {0}...'
+project-reload: '&7[Artifex] &7正在重载 {0}...'
 project-release: '&7[Artifex] &7正在释放 {0}...'
 project-loaded: '&7[Artifex] &7已加载 {0} 个项目.'
