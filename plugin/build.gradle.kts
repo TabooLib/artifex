@@ -15,6 +15,7 @@ dependencies {
 
 tasks {
     withType<ShadowJar> {
+        archiveBaseName.set("Artifex")
         archiveClassifier.set("")
         exclude("META-INF/maven/**")
         exclude("META-INF/tf/**")
