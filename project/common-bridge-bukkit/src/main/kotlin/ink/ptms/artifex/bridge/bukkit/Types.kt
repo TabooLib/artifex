@@ -6,6 +6,7 @@ import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.module.nms.ItemTag
 
 fun world(name: String): World? {
     return Bukkit.getWorld(name)
@@ -41,4 +42,8 @@ fun ProxyCommandSender.player(): Player {
 
 fun ProxyCommandSender.sender(): CommandSender {
     return cast()
+}
+
+fun itemTagFromJson(json: String): ItemTag {
+    return ItemTag.fromJson(json)
 }

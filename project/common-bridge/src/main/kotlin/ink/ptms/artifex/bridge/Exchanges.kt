@@ -3,17 +3,14 @@ package ink.ptms.artifex.bridge
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.ScriptProject
-import ink.ptms.artifex.script.nonExists
-import taboolib.common.platform.function.getDataFolder
-import java.io.File
 import java.util.*
 
 /**
  * 获取 Artifex 项目文件
  */
 fun Script.projectInfo(): ScriptProject {
-    return exchangeData("@project")
-        ?: prepareExchangeData<ScriptProject>("@project")?.also { exchangeData("@project", it) }
+    return exchangeData("@Project")
+        ?: prepareExchangeData<ScriptProject>("@Project")?.also { exchangeData("@Project", it) }
         ?: error("Not an Artifex project")
 }
 
@@ -21,6 +18,6 @@ fun Script.projectInfo(): ScriptProject {
 fun <T> Script.prepareExchangeData(name: String): T? {
     val field = javaClass.getDeclaredField("runArgs").also { it.isAccessible = true }
     val runArgs = field.get(this) as Properties
-    val id = runArgs["@id"]?.toString() ?: return null
+    val id = runArgs["@Id"]?.toString() ?: return null
     return Artifex.api().getScriptContainerManager().getExchangeData(id)[name] as? T
 }

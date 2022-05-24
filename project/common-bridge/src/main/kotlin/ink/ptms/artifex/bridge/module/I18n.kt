@@ -1,4 +1,4 @@
-package ink.ptms.artifex.bridge.i18n
+package ink.ptms.artifex.bridge.module
 
 import ink.ptms.artifex.bridge.projectInfo
 import ink.ptms.artifex.script.Script
@@ -21,18 +21,11 @@ fun Script.i18n() {
     val files = File(info.file(), "@default/i18n").listFiles()?.filter { it.extension == "yml" } ?: emptyList()
     val i18nMap = I18nReader(files, info.name(), true).fileMap
     // 注册交换数据
-    info.exchangeData("@i18n", i18nMap)
+    info.exchangeData("@I18n", i18nMap)
     // 注册资源
-    container().resource("@i18n:${i18nMap.keys.size}") {
+    container().resource("@I18n:${i18nMap.keys.size}") {
         i18nMap.forEach { FileWatcher.INSTANCE.removeListener(it.value.file) }
     }
-}
-
-/**
- * 获取语言文件
- */
-fun Script.i18nMap(): Map<String, LanguageFile> {
-    return projectInfo().exchangeData("@i18n") ?: error("i18n has not been initialized")
 }
 
 /**
@@ -114,6 +107,13 @@ fun Script.i18nTextList(user: Any, node: String, vararg args: Any?): List<String
     } else {
         listOf("{$node}")
     }
+}
+
+/**
+ * 获取语言文件
+ */
+private fun Script.i18nMap(): Map<String, LanguageFile> {
+    return projectInfo().exchangeData("@I18n") ?: error("I18n has not been initialized")
 }
 
 private fun getLocale(sender: ProxyCommandSender): String {

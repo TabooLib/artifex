@@ -130,10 +130,10 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
     fun runFile(buildFile: File, sender: ProxyCommandSender) {
         val data = Artifex.api().getScriptContainerManager().getExchangeData(id)
         // 项目文件
-        data["@project"] = this
+        data["@Project"] = this
         // 运行脚本
-        runJarFile(buildFile, sender, mapOf("@id" to id), emptyMap(), autoMount, false) {
-            container().exchangeData()["@project"] = this@ScriptProjectInfo
+        runJarFile(buildFile, sender, mapOf("@Id" to id), emptyMap(), autoMount, false) {
+            container().exchangeData()["@Project"] = this@ScriptProjectInfo
             runningScripts += this
         }
     }

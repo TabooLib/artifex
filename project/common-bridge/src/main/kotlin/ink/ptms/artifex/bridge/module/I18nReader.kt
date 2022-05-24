@@ -1,8 +1,7 @@
-package ink.ptms.artifex.bridge.i18n
+package ink.ptms.artifex.bridge.module
 
 import ink.ptms.artifex.script.nonExists
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.warning
 import taboolib.common5.FileWatcher
