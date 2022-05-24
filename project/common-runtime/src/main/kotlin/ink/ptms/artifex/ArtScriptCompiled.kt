@@ -3,12 +3,10 @@ package ink.ptms.artifex
 import ink.ptms.artifex.kotlin.diagnostic
 import ink.ptms.artifex.kotlin.scriptClassFQName
 import ink.ptms.artifex.script.*
+import ink.ptms.artifex.script.ScriptEvaluator
 import kotlinx.coroutines.runBlocking
 import java.io.File
-import kotlin.script.experimental.api.CompiledScript
-import kotlin.script.experimental.api.ResultValue
-import kotlin.script.experimental.api.ResultWithDiagnostics
-import kotlin.script.experimental.api.ScriptEvaluationConfiguration
+import kotlin.script.experimental.api.*
 
 /**
  * Artifex

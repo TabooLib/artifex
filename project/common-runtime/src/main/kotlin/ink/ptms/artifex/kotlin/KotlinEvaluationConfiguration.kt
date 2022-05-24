@@ -17,7 +17,7 @@ import kotlin.script.experimental.jvm.loadDependencies
 class KotlinEvaluationConfiguration(val id: String, val props: ScriptRuntimeProperty, val script: ScriptCompiled) : ScriptEvaluationConfiguration(
     {
         constructorArgs(id, script)
-        scriptsInstancesSharing(false)
+        scriptsInstancesSharing(true)
         jvm {
             baseClassLoader(KotlinScript::class.java.classLoader)
             loadDependencies(false)
