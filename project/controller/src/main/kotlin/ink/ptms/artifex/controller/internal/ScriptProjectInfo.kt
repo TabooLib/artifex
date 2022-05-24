@@ -3,8 +3,11 @@ package ink.ptms.artifex.controller.internal
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.ScriptProject
+import ink.ptms.artifex.script.runPrimaryThread
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.isPrimaryThread
+import taboolib.common.platform.function.submit
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.sendLang
 import java.io.File
@@ -57,18 +60,18 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
         // 编译
         val scripts = compileFiles() ?: return false
         // 运行
-        scripts.forEach { runFile(it, sender) }
+        runPrimaryThread { scripts.forEach { runFile(it, sender) } }
         return true
     }
 
     override fun reload(sender: ProxyCommandSender): Boolean {
         sender.sendLang("project-reload", name())
         // 编译脚本
-        val scripts = compileFiles() ?: return false // 若未成功编译则不会继续执行
+        val scripts = compileFiles(checkRunning = false) ?: return false // 若未成功编译则不会继续执行
         // 释放脚本
         releaseAll(sender)
         // 运行
-        scripts.forEach { runFile(it, sender) }
+        runPrimaryThread { scripts.forEach { runFile(it, sender) } }
         return true
     }
 
@@ -94,12 +97,12 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
         return runningScripts.isNotEmpty()
     }
 
-    fun compileFiles(): List<File>? {
+    fun compileFiles(checkRunning: Boolean = true): List<File>? {
         val scripts = ArrayList<File>()
         main.forEach { script ->
-            val file = file(script, root = file, onlyScript = false)
+            val file = scriptFile(script, root = file, onlyScript = false)
             if (file?.exists() == true && file.extension == "kts") {
-                val buildFile = compileFile(file, console())
+                val buildFile = compileFile(file, console(), checkRunning)
                 if (buildFile != null) {
                     scripts += buildFile
                 } else {
@@ -113,9 +116,9 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
         return scripts
     }
 
-    fun compileFile(scriptFile: File, sender: ProxyCommandSender): File? {
+    fun compileFile(scriptFile: File, sender: ProxyCommandSender, checkRunning: Boolean = true): File? {
         // 脚本不在运行 && 检查编译
-        if (checkFileNotRunning(scriptFile, sender) && checkCompile(scriptFile, sender, emptyMap(), false)) {
+        if ((!checkRunning || checkFileNotRunning(scriptFile, sender)) && checkCompile(scriptFile, sender, emptyMap(), false)) {
             val buildFile = File(scriptsFile, ".build/${scriptFile.nameWithoutExtension}.jar")
             if (buildFile.exists()) {
                 return buildFile
@@ -138,6 +141,7 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
     fun releaseAll(sender: ProxyCommandSender) {
         runningScripts.forEach { releaseScript(it.container(), sender, false) }
         runningScripts.clear()
+        exchangeData.clear()
         Artifex.api().getScriptContainerManager().resetExchangeData(id)
     }
 }

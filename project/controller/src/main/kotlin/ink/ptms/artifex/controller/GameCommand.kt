@@ -2,6 +2,7 @@ package ink.ptms.artifex.controller
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.controller.internal.*
+import ink.ptms.artifex.script.runPrimaryThread
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
@@ -42,9 +43,9 @@ object GameCommand {
     @CommandBody
     val run = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> files() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptFiles() }
             execute<ProxyCommandSender> { sender, _, argument ->
-                val file = file(argument)
+                val file = scriptFile(argument)
                 if (file?.exists() == true) {
                     submit(async = true) { runFile(file, sender, emptyMap(), emptyMap()) }
                 } else {
@@ -56,7 +57,7 @@ object GameCommand {
                     val demand = Demand("0 $argument")
                     val args = demand.dataMap.keys.filter { it.startsWith("A") }.associate { it.substring(1) to parseType(demand.get(it)!!) }
                     val props = demand.dataMap.keys.filter { it.startsWith("P") }.associate { it.substring(1) to parseType(demand.get(it)!!) }
-                    val file = file(context.argument(-1))
+                    val file = scriptFile(context.argument(-1))
                     if (file?.exists() == true) {
                         submit(async = true) { runFile(file, sender, args, props, demand.tags.contains("M")) }
                     } else {
@@ -80,13 +81,13 @@ object GameCommand {
             }
             dynamic("method") {
                 execute<ProxyCommandSender> { sender, context, argument ->
-                    submit {
+                    runPrimaryThread {
                         invokeScript(sender, context.argument(-1), argument, emptyArray())
                     }
                 }
                 dynamic("args", optional = true) {
                     execute<ProxyCommandSender> { sender, context, argument ->
-                        submit {
+                        runPrimaryThread {
                             invokeScript(sender, context.argument(-2), context.argument(-1), argument.split(" ").map { parseType(it) }.toTypedArray())
                         }
                     }
@@ -104,9 +105,9 @@ object GameCommand {
     @CommandBody
     val compile = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> files(false) }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptFiles(false) }
             execute<ProxyCommandSender> { sender, _, argument ->
-                val file = file(argument)
+                val file = scriptFile(argument)
                 if (file?.exists() == true) {
                     submit(async = true) { compileFile(file, sender, emptyMap()) }
                 } else {
@@ -118,7 +119,7 @@ object GameCommand {
                     val demand = Demand("0 $argument")
                     val keys = demand.dataMap.keys.filter { it.startsWith("P") }
                     val props = keys.associate { it.substring(1) to parseType(demand.get(it)!!) }
-                    val file = file(context.argument(-1))
+                    val file = scriptFile(context.argument(-1))
                     if (file?.exists() == true) {
                         submit(async = true) { compileFile(file, sender, props) }
                     } else {
@@ -139,9 +140,9 @@ object GameCommand {
     @CommandBody
     val release = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> files() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptFiles() }
             execute<ProxyCommandSender> { sender, _, argument ->
-                val file = file(argument)
+                val file = scriptFile(argument)
                 if (file?.exists() == true) {
                     releaseFile(file, sender, false)
                 } else {
@@ -151,7 +152,7 @@ object GameCommand {
             dynamic("args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
-                    val file = file(context.argument(-1))
+                    val file = scriptFile(context.argument(-1))
                     if (file?.exists() == true) {
                         releaseFile(file, sender, demand.tags.contains("F"))
                     } else {
@@ -172,9 +173,9 @@ object GameCommand {
     @CommandBody
     val reload = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> files() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptFiles() }
             execute<ProxyCommandSender> { sender, _, argument ->
-                val file = file(argument)
+                val file = scriptFile(argument)
                 if (file?.exists() == true) {
                     submit(async = true) { reloadFile(file, sender, emptyMap(), emptyMap()) }
                 } else {

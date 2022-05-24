@@ -3,6 +3,9 @@ package ink.ptms.artifex.bridge
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.ScriptProject
+import ink.ptms.artifex.script.nonExists
+import taboolib.common.platform.function.getDataFolder
+import java.io.File
 import java.util.*
 
 /**

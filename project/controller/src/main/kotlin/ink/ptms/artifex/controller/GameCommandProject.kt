@@ -16,7 +16,7 @@ object GameCommandProject {
     @CommandBody
     val run = subCommand {
         dynamic("project") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> projects() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> allScriptProjects() }
             execute<ProxyCommandSender> { sender, _, argument ->
                 val file = scriptsFile.searchProject(argument)
                 if (file?.exists() == true) {
@@ -34,7 +34,7 @@ object GameCommandProject {
     @CommandBody
     val release = subCommand {
         dynamic("project") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> projects() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> allScriptProjects() }
             execute<ProxyCommandSender> { sender, _, argument ->
                 val file = scriptsFile.searchProject(argument)
                 if (file?.exists() == true) {
@@ -52,7 +52,7 @@ object GameCommandProject {
     @CommandBody
     val reload = subCommand {
         dynamic("project") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> projects() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> allScriptProjects() }
             execute<ProxyCommandSender> { sender, _, argument ->
                 val file = scriptsFile.searchProject(argument)
                 if (file?.exists() == true) {

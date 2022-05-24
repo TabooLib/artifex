@@ -4,7 +4,7 @@ import ink.ptms.artifex.Artifex
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.module.lang.sendLang
 
-fun invokeScript(sender: ProxyCommandSender, name: String, method: String, args: Array<Any>) {
+internal fun invokeScript(sender: ProxyCommandSender, name: String, method: String, args: Array<Any>) {
     val script = Artifex.api().getScriptContainerManager().get(name)!!.script()
     try {
         sender.sendLang("command-script-invoke-info", method, args.toList())

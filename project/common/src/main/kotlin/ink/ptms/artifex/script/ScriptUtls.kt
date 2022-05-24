@@ -1,5 +1,7 @@
 package ink.ptms.artifex.script
 
+import taboolib.common.platform.function.isPrimaryThread
+import taboolib.common.platform.function.submit
 import java.io.File
 
 fun File.nonExists(): Boolean {
@@ -18,5 +20,13 @@ fun String.toClassIdentifier(): String {
     } else {
         charArray[0] = charArray[0].uppercaseChar()
         charArray.concatToString()
+    }
+}
+
+fun runPrimaryThread(func: () -> Unit) {
+    if (isPrimaryThread) {
+        func()
+    } else {
+        submit { func() }
     }
 }

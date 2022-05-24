@@ -11,7 +11,7 @@ import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-fun compileFile(file: File, sender: ProxyCommandSender, props: Map<String, Any>, info: Boolean = true): ScriptCompiled? {
+internal fun compileFile(file: File, sender: ProxyCommandSender, props: Map<String, Any>, info: Boolean = true): ScriptCompiled? {
     return if (file.extension == "kts") {
         val time = System.currentTimeMillis()
         val future = CompletableFuture<Void>()
