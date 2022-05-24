@@ -1,6 +1,6 @@
 package ink.ptms.artifex.bridge
 
-class ContainerBuilder(val name: String) {
+open class ContainerBuilder(val name: String) {
 
     class Data(val name: String, val length: Int, val int: Boolean, val long: Boolean, val double: Boolean, val key: Boolean)
 
@@ -11,5 +11,29 @@ class ContainerBuilder(val name: String) {
      */
     fun data(name: String, length: Int = 64, int: Boolean = false, long: Boolean = false, double: Boolean = false, key: Boolean = false) {
         dataList += Data(name, length, int, long, double, key)
+    }
+
+    class Flatten(name: String): ContainerBuilder(name) {
+
+        fun key(name: String, length: Int = 64) {
+            data(name, length, key = true)
+        }
+
+        fun value(name: String, length: Int = 128, int: Boolean = false, long: Boolean = false, double: Boolean = false) {
+            data(name, length, int, long, double)
+        }
+
+        fun fixed(): Flatten {
+            when {
+                dataList.size == 0 -> {
+                    key("key")
+                    value("value")
+                }
+                dataList.size != 2 -> {
+                    error("Invalid container length")
+                }
+            }
+            return this
+        }
     }
 }

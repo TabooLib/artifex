@@ -1,22 +1,19 @@
 package ink.ptms.artifex.bridge
 
-import taboolib.common.reflect.Reflex.Companion.invokeMethod
 import taboolib.module.database.*
 
-class ContainerSQL(host: String, val port: Int, val user: String, val password: String, val database: String) : Container {
+class ContainerSQL(host: String, val port: Int, val user: String, val password: String, val database: String) : Container() {
 
-    val host = HostSQL(host, port.toString(), user, password, database)
-    val hostTables = HashMap<String, Table<HostSQL, SQL>>()
-    val dataSource = this.host.createDataSource(autoRelease = false)
+    override val host = HostSQL(host, port.toString(), user, password, database)
 
-    override fun addTable(name: String, player: Boolean, unique: Boolean, data: List<ContainerBuilder.Data>) {
-        hostTables[name] = Table(name, host) {
+    override fun createTable(name: String, player: Boolean, playerKey: Boolean, data: List<ContainerBuilder.Data>): Table<*, *> {
+        return Table(name, host) {
             add { id() }
             // 玩家容器
             if (player) {
                 add("username") {
                     type(ColumnTypeSQL.CHAR, 36) {
-                        options(if (unique) ColumnOptionSQL.UNIQUE_KEY else ColumnOptionSQL.KEY)
+                        options(if (playerKey) ColumnOptionSQL.UNIQUE_KEY else ColumnOptionSQL.KEY)
                     }
                 }
             }
@@ -36,17 +33,5 @@ class ContainerSQL(host: String, val port: Int, val user: String, val password: 
                 }
             }
         }
-    }
-
-    override fun init() {
-        hostTables.forEach { it.value.createTable(dataSource) }
-    }
-
-    override fun path(): String {
-        return host.connectionUrlSimple
-    }
-
-    override fun close() {
-        dataSource.invokeMethod<Void>("close")
     }
 }

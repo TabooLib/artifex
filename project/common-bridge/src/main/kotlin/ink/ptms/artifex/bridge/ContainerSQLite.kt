@@ -1,22 +1,22 @@
 package ink.ptms.artifex.bridge
 
-import taboolib.common.reflect.Reflex.Companion.invokeMethod
-import taboolib.module.database.*
+import taboolib.module.database.ColumnOptionSQLite
+import taboolib.module.database.ColumnTypeSQLite
+import taboolib.module.database.HostSQLite
+import taboolib.module.database.Table
 import java.io.File
 
-class ContainerSQLite(val file: File) : Container {
+class ContainerSQLite(val file: File) : Container() {
 
-    val host = HostSQLite(file)
-    val hostTables = HashMap<String, Table<HostSQLite, SQLite>>()
-    val dataSource = this.host.createDataSource(autoRelease = false)
+    override val host = HostSQLite(file)
 
-    override fun addTable(name: String, player: Boolean, unique: Boolean, data: List<ContainerBuilder.Data>) {
-        hostTables[name] = Table(name, host) {
+    override fun createTable(name: String, player: Boolean, playerKey: Boolean, data: List<ContainerBuilder.Data>): Table<*, *> {
+        return Table(name, host) {
             // 玩家容器
             if (player) {
                 add("username") {
                     type(ColumnTypeSQLite.TEXT, 36) {
-                        if (unique) {
+                        if (playerKey) {
                             options(ColumnOptionSQLite.PRIMARY_KEY)
                         }
                     }
@@ -33,17 +33,5 @@ class ContainerSQLite(val file: File) : Container {
                 }
             }
         }
-    }
-
-    override fun init() {
-        hostTables.forEach { it.value.createTable(dataSource) }
-    }
-
-    override fun path(): String {
-        return host.connectionUrl
-    }
-
-    override fun close() {
-        dataSource.invokeMethod<Void>("close")
     }
 }

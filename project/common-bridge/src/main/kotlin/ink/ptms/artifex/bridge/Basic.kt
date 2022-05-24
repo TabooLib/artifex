@@ -78,3 +78,15 @@ fun Script.submit(
     container().resource("task-${if (async) "async" else "sync"}:$period") { task.cancel() }
     return task
 }
+
+/**
+ * try-catch 并打印异常
+ */
+inline fun <T> sandbox(func: () -> T): T? {
+    try {
+        return func()
+    } catch (ex: Throwable) {
+        ex.printStackTrace()
+    }
+    return null
+}

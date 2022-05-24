@@ -1,6 +1,7 @@
 package ink.ptms.artifex.bridge
 
 import ink.ptms.artifex.script.Script
+import taboolib.common.io.newFile
 import taboolib.library.configuration.ConfigurationSection
 import java.io.File
 
@@ -45,6 +46,9 @@ class PersistentContainer {
             is File -> {
                 ContainerSQLite(type)
             }
+            is String -> {
+                ContainerSQLite(newFile(script.rootFile(), type))
+            }
             is ConfigurationSection -> {
                 ContainerSQL(
                     type.getString("host", "localhost")!!,
@@ -71,17 +75,24 @@ class PersistentContainer {
     }
 
     /**
-     * 注册统一数据容器
+     * 注册标准容器
      */
-    fun container(name: String, builder: ContainerBuilder.() -> Unit) {
-        container.addTable(name, player = false, unique = false, data = ContainerBuilder(name).also(builder).dataList)
+    fun container(name: String, server: Boolean = false, builder: ContainerBuilder.() -> Unit) {
+        container.addTable(name, player = !server, playerKey = true, data = ContainerBuilder(name).also(builder).dataList)
     }
 
     /**
-     * 注册玩家数据容器
+     * 注册扁平容器
      */
-    fun playerContainer(name: String, unique: Boolean = true, builder: ContainerBuilder.() -> Unit) {
-        container.addTable(name, player = true, unique = unique, data = ContainerBuilder(name).also(builder).dataList)
+    fun flatContainer(name: String, builder: ContainerBuilder.Flatten.() -> Unit = {}) {
+        container.addTable(name, player = true, playerKey = false, data = ContainerBuilder.Flatten(name).also(builder).fixed().dataList)
+    }
+
+    /**
+     * 获取控制器
+     */
+    operator fun get(name: String): ContainerOperator {
+        return container.operator(name)
     }
 }
 
