@@ -1,6 +1,5 @@
-package ink.ptms.artifex.bridge.module
+package ink.ptms.artifex.bridge
 
-import ink.ptms.artifex.bridge.projectInfo
 import ink.ptms.artifex.script.Script
 import taboolib.common.platform.function.getDataFolder
 import java.io.File

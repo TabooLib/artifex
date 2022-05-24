@@ -1,4 +1,4 @@
-package ink.ptms.artifex.bridge.module
+package ink.ptms.artifex.bridge
 
 import ink.ptms.artifex.script.nonExists
 import taboolib.common.platform.function.getDataFolder

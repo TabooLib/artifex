@@ -1,7 +1,5 @@
-package ink.ptms.artifex.bridge.module
+package ink.ptms.artifex.bridge
 
-import ink.ptms.artifex.bridge.projectInfo
-import ink.ptms.artifex.bridge.submit
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.nonExists
 import taboolib.common.io.newFile

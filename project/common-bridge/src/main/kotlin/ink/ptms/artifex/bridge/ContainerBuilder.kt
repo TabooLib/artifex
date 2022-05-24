@@ -1,4 +1,4 @@
-package ink.ptms.artifex.bridge.module
+package ink.ptms.artifex.bridge
 
 class ContainerBuilder(val name: String) {
 

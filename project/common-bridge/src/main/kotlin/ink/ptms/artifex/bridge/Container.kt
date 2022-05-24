@@ -1,4 +1,4 @@
-package ink.ptms.artifex.bridge.module
+package ink.ptms.artifex.bridge
 
 interface Container {
 
