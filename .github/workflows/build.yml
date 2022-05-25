@@ -23,11 +23,10 @@ jobs:
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
       - name: build
-        run: ./gradlew build
+        run: ./gradlew collect
       - name: capture build artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Artifacts
           path: |
             plugin/build/libs/
-            project/common-runtime/build/libs/

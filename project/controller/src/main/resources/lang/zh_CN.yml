@@ -27,9 +27,9 @@ command-script-compile-info:
 command-script-compile-successful: '&7[Artifex] &a编译成功 &7({0}s)'
 command-script-compile-failed: '&7[Artifex] &c编译失败 &7({0}s)'
 command-script-invoke-info:
-  - '&7[Artifex] &7Invoking...'
-  - '&7[Artifex] &7> :method:&f {0}'
-  - '&7[Artifex] &7> :args:&f {1}'
+  - '&7[Artifex] &7正在运行...'
+  - '&7[Artifex] &7> 方法:&f {0}'
+  - '&7[Artifex] &7> 参数:&f {1}'
 command-script-invoke-error:
   - '&c[Artifex] &c> 运行结果异常: (详细信息已发送到控制台)'
   - '&c[Artifex] &c> {0}'
