@@ -72,3 +72,8 @@ Artifex 可基于 Bukkit & BungeeCord 环境下运行：
 * **implementation-common-default**
     * 实现了 `common` 模块中的通用接口
     * 不依赖 `kotlin.script.experimental`
+
+## 感谢
+
++ 神奇田螺捐赠 `16160` 原石并提供测试环境
++ 部分代码来自 https://github.com/Redempt/RedLib（请给它一个星星️）

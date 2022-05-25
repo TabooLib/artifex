@@ -44,6 +44,11 @@ org.bukkit.projectiles.*
 org.bukkit.structure.*
 
 ink.ptms.artifex.bridge.*
+ink.ptms.artifex.bridge.bukkit.*
+ink.ptms.artifex.bridge.bukkit.plugin.*
+ink.ptms.artifex.bridge.bukkit.redlib.*
+ink.ptms.artifex.bridge.bungee.*
+ink.ptms.artifex.bridge.bungee.plugin.*
 ink.ptms.artifex.scripting.*
 
 taboolib.common.io.*
@@ -57,6 +62,7 @@ taboolib.module.configuration.util.*
 taboolib.module.configuration.*
 taboolib.module.database.*
 taboolib.module.kether.*
+taboolib.module.lang.*
 taboolib.module.nms.*
 taboolib.module.ui.*
 taboolib.library.xseries.*
