@@ -29,4 +29,5 @@ jobs:
         with:
           name: Artifacts
           path: |
-            /
+            plugin
+            project
