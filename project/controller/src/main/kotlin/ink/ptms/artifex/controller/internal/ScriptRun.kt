@@ -26,6 +26,7 @@ internal fun runFile(
     args: Map<String, Any>,
     props: Map<String, Any>,
     mount: Boolean = false,
+    compile: Boolean = false,
     info: Boolean = true,
     post: Script.() -> Unit = {}
 ) {
@@ -33,7 +34,7 @@ internal fun runFile(
         runPrimaryThread { runJarFile(file, sender, args, props, mount, info, post) }
     }
     // 默认视为 .kts 文件并检查编译
-    else if (checkFileNotRunning(file, sender) && checkCompile(file, sender, props, info)) {
+    else if (checkFileNotRunning(file, sender) && checkCompile(file, sender, props, compile = compile, info = info)) {
         val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
         if (buildFile.exists()) {
             runPrimaryThread { runJarFile(buildFile, sender, args, props, mount, info, post) }

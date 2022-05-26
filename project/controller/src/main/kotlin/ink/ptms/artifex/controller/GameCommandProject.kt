@@ -6,6 +6,7 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.submit
+import taboolib.common5.Demand
 import taboolib.module.lang.sendLang
 
 object GameCommandProject {
@@ -23,6 +24,17 @@ object GameCommandProject {
                     submit(async = true) { runProject(file, sender) }
                 } else {
                     sender.sendLang("command-project-not-found", argument)
+                }
+            }
+            dynamic(commit = "args", optional = true) {
+                execute<ProxyCommandSender> { sender, context, argument ->
+                    val demand = Demand("0 $argument")
+                    val file = scriptsFile.searchProject(context.argument(-1))
+                    if (file?.exists() == true) {
+                        submit(async = true) { runProject(file, sender, compile = demand.tags.contains("C")) }
+                    } else {
+                        sender.sendLang("command-project-not-found", argument)
+                    }
                 }
             }
         }
@@ -59,6 +71,17 @@ object GameCommandProject {
                     submit(async = true) { reloadProject(file, sender) }
                 } else {
                     sender.sendLang("command-project-not-found", argument)
+                }
+            }
+            dynamic(commit = "args", optional = true) {
+                execute<ProxyCommandSender> { sender, context, argument ->
+                    val demand = Demand("0 $argument")
+                    val file = scriptsFile.searchProject(context.argument(-1))
+                    if (file?.exists() == true) {
+                        submit(async = true) { reloadProject(file, sender, compile = demand.tags.contains("C")) }
+                    } else {
+                        sender.sendLang("command-project-not-found", argument)
+                    }
                 }
             }
         }

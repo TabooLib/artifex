@@ -36,12 +36,12 @@ interface ScriptProject : Exchanges {
     /**
      * 运行
      */
-    fun run(sender: ProxyCommandSender): Boolean
+    fun run(sender: ProxyCommandSender, compile: Boolean = false): Boolean
 
     /**
      * 重载
      */
-    fun reload(sender: ProxyCommandSender): Boolean
+    fun reload(sender: ProxyCommandSender, compile: Boolean = false): Boolean
 
     /**
      * 释放

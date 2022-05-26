@@ -6,7 +6,7 @@ import taboolib.common.platform.function.submit
 import taboolib.module.lang.sendLang
 import java.io.File
 
-internal fun reloadFile(file: File, sender: ProxyCommandSender, args: Map<String, Any>, props: Map<String, Any>) {
+internal fun reloadFile(file: File, sender: ProxyCommandSender, args: Map<String, Any>, props: Map<String, Any>, compile: Boolean = false) {
     val container = checkFileRunning(file, sender)?.second ?: return
     // 检查依赖关系
     val implementations = container.implementations()
@@ -20,7 +20,7 @@ internal fun reloadFile(file: File, sender: ProxyCommandSender, args: Map<String
         runPrimaryThread { runJarFile(file, sender, args, props, true) }
     }
     // 检查编译
-    else if (checkCompile(file, sender, props)) {
+    else if (checkCompile(file, sender, props, compile = compile)) {
         val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
         if (buildFile.exists()) {
             container.release()

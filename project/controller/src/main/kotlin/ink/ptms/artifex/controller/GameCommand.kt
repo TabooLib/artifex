@@ -59,7 +59,9 @@ object GameCommand {
                     val props = demand.dataMap.keys.filter { it.startsWith("P") }.associate { it.substring(1) to parseType(demand.get(it)!!) }
                     val file = scriptFile(context.argument(-1))
                     if (file?.exists() == true) {
-                        submit(async = true) { runFile(file, sender, args, props, demand.tags.contains("M")) }
+                        val mount = demand.tags.contains("M")
+                        val compile = demand.tags.contains("C")
+                        submit(async = true) { runFile(file, sender, args, props, mount = mount, compile = compile) }
                     } else {
                         sender.sendLang("command-script-not-found", context.argument(-1))
                     }
@@ -180,6 +182,17 @@ object GameCommand {
                     submit(async = true) { reloadFile(file, sender, emptyMap(), emptyMap()) }
                 } else {
                     sender.sendLang("command-script-not-found", argument)
+                }
+            }
+            dynamic(commit = "args", optional = true) {
+                execute<ProxyCommandSender> { sender, context, argument ->
+                    val demand = Demand("0 $argument")
+                    val file = scriptFile(context.argument(-1))
+                    if (file?.exists() == true) {
+                        submit(async = true) {  reloadFile(file, sender, emptyMap(), emptyMap(), compile = demand.tags.contains("C")) }
+                    } else {
+                        sender.sendLang("command-script-not-found", context.argument(-1))
+                    }
                 }
             }
         }

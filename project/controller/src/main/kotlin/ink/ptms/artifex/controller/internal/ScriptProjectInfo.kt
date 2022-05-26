@@ -55,19 +55,19 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
         return root.getString("name") ?: file.name
     }
 
-    override fun run(sender: ProxyCommandSender): Boolean {
+    override fun run(sender: ProxyCommandSender, compile: Boolean): Boolean {
         sender.sendLang("project-start", name())
         // 编译
-        val scripts = compileFiles() ?: return false
+        val scripts = compileFiles(compile = compile) ?: return false
         // 运行
         runPrimaryThread { scripts.forEach { runFile(it, sender) } }
         return true
     }
 
-    override fun reload(sender: ProxyCommandSender): Boolean {
+    override fun reload(sender: ProxyCommandSender, compile: Boolean): Boolean {
         sender.sendLang("project-reload", name())
         // 编译脚本
-        val scripts = compileFiles(checkRunning = false) ?: return false // 若未成功编译则不会继续执行
+        val scripts = compileFiles(checkRunning = false, compile = compile) ?: return false // 若未成功编译则不会继续执行
         // 释放脚本
         releaseAll(sender)
         // 运行
@@ -97,12 +97,12 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
         return runningScripts.isNotEmpty()
     }
 
-    fun compileFiles(checkRunning: Boolean = true): List<File>? {
+    fun compileFiles(checkRunning: Boolean = true, compile: Boolean = false): List<File>? {
         val scripts = ArrayList<File>()
         main.forEach { script ->
             val file = scriptFile(script, root = file, onlyScript = false)
             if (file?.exists() == true && file.extension == "kts") {
-                val buildFile = compileFile(file, console(), checkRunning)
+                val buildFile = compileFile(file, console(), checkRunning = checkRunning, compile = compile)
                 if (buildFile != null) {
                     scripts += buildFile
                 } else {
@@ -116,9 +116,9 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
         return scripts
     }
 
-    fun compileFile(scriptFile: File, sender: ProxyCommandSender, checkRunning: Boolean = true): File? {
+    fun compileFile(scriptFile: File, sender: ProxyCommandSender, checkRunning: Boolean = true, compile: Boolean = false): File? {
         // 脚本不在运行 && 检查编译
-        if ((!checkRunning || checkFileNotRunning(scriptFile, sender)) && checkCompile(scriptFile, sender, emptyMap(), false)) {
+        if ((!checkRunning || checkFileNotRunning(scriptFile, sender)) && checkCompile(scriptFile, sender, emptyMap(), compile = compile, info = false)) {
             val buildFile = File(scriptsFile, ".build/${scriptFile.nameWithoutExtension}.jar")
             if (buildFile.exists()) {
                 return buildFile

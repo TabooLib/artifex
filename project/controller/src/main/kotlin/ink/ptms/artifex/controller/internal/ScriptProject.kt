@@ -10,12 +10,12 @@ fun getProject(file: File): ScriptProject? {
     return Artifex.api().getScriptProjectManager().getProjects().firstOrNull { it.file().name == file.name }
 }
 
-fun runProject(file: File, sender: ProxyCommandSender): Boolean {
+fun runProject(file: File, sender: ProxyCommandSender, compile: Boolean = false): Boolean {
     if (!checkProjectRunning(file, sender)) {
         return false
     }
     val project = getProject(file)?.also { it.reloadConfig() } ?: Artifex.api().getScriptProjectManager().loadProject(file)
-    project.run(sender)
+    project.run(sender, compile = compile)
     return true
 }
 
@@ -27,13 +27,13 @@ fun releaseProject(file: File, sender: ProxyCommandSender): Boolean {
     return true
 }
 
-fun reloadProject(file: File, sender: ProxyCommandSender): Boolean {
+fun reloadProject(file: File, sender: ProxyCommandSender, compile: Boolean = false): Boolean {
     if (!checkProjectNotRunning(file, sender)) {
         return false
     }
     val project = getProject(file)!!
     project.reloadConfig()
-    project.reload(sender)
+    project.reload(sender, compile = compile)
     return true
 }
 

@@ -159,11 +159,11 @@ internal fun checkFileRunning(file: File, sender: ProxyCommandSender): Pair<Scri
     return meta to container
 }
 
-internal fun checkCompile(file: File, sender: ProxyCommandSender, props: Map<String, Any>, info: Boolean = true): Boolean {
+internal fun checkCompile(file: File, sender: ProxyCommandSender, props: Map<String, Any>, compile: Boolean = false, info: Boolean = true): Boolean {
     if (file.extension == "kts") {
         // 检查编译文件
         val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
-        if (buildFile.exists()) {
+        if (buildFile.exists() && !compile) {
             // 检查版本
             val version = try {
                 Artifex.api().getScriptMetaHandler().getScriptVersion(buildFile)
@@ -181,7 +181,9 @@ internal fun checkCompile(file: File, sender: ProxyCommandSender, props: Map<Str
                 compileFile(file, sender, props, info) ?: return false
             }
         } else {
-            sender.sendLang("command-script-compile")
+            if (!compile) {
+                sender.sendLang("command-script-compile")
+            }
             compileFile(file, sender, props, info) ?: return false
         }
         return true
