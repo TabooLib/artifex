@@ -2,19 +2,19 @@ package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.*
 import ink.ptms.artifex.script.*
+import ink.ptms.artifex.script.ScriptCompiler
 import kotlinx.coroutines.runBlocking
 import taboolib.common.io.digest
+import taboolib.common.platform.function.info
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Consumer
-import kotlin.script.experimental.api.CompiledScript
-import kotlin.script.experimental.api.ScriptCompilationConfiguration
-import kotlin.script.experimental.api.SourceCode
-import kotlin.script.experimental.api.valueOrNull
+import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.FileScriptSource
 import kotlin.script.experimental.host.StringScriptSource
+import kotlin.script.experimental.jvm.jvm
 
 /**
  * Artifex
@@ -42,10 +42,10 @@ object ArtScriptCompiler : ScriptCompiler {
             val compiledScript = result.valueOrNull()?.remap()
             if (compiledScript != null) {
                 // 移除引用脚本
-                val compiledConfiguration = compiledScript.compilationConfiguration as ScriptCompiledConfiguration
-                val compilerOutputFiles = compiledScript.compilerOutputFiles() as MutableMap
+                val artifexImportScripts = compiledScript.compilationConfiguration[ScriptCompilationConfiguration.artifexImportScripts]
+                val compilerOutputFiles = compiledScript.compilerOutputFiles() as? MutableMap ?: error("Not mutable map")
                 val otherScripts = compiledScript.otherScripts as? MutableList<CompiledScript> ?: ArrayList()
-                val imports = compiledConfiguration.importScript.map { it to it.nameWithoutExtension.toClassIdentifier() }
+                val imports = artifexImportScripts?.map { it to it.nameWithoutExtension.toClassIdentifier() } ?: emptyList()
                 // 移除引用脚本的构建文件
                 imports.forEach { compilerOutputFiles.remove("${it.second}.class") }
                 // 替换脚本对象

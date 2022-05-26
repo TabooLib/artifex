@@ -20,15 +20,6 @@ import kotlin.script.experimental.util.filterByAnnotationType
  */
 class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurationHandler {
 
-    fun searchFile(scriptPath: String?, file: String): Set<File> {
-        return if (scriptPath != null) {
-            // 先从当前目录开始找，找不到再从根目录找
-            File(scriptPath).parentFile.searchFile { isKts(file) }.ifEmpty { scriptsFile.searchFile { isKts(file) } }
-        } else {
-            scriptsFile.searchFile { isKts(file) }
-        }
-    }
-
     override operator fun invoke(context: ScriptConfigurationRefinementContext): ResultWithDiagnostics<ScriptCompilationConfiguration> {
         val anno = ScriptCollectedData.collectedAnnotations
         val annotations = context.collectedData?.get(anno)?.takeIf { it.isNotEmpty() } ?: return context.compilationConfiguration.asSuccess()
@@ -95,9 +86,13 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
 
         // 编译选项
         val compileOptions = annotations.filterByAnnotationType<CompilerOptions>().flatMap { it.annotation.options.toList() }
+
         return ScriptCompiledConfiguration(importScript, context.compilationConfiguration) {
             if (includeScripts.isNotEmpty()) {
                 importScripts.append(includeScripts)
+            }
+            if (importScript.isNotEmpty()) {
+                artifexImportScripts.append(importScript)
             }
             if (importClasses.isNotEmpty()) {
                 defaultImports.append(importClasses)
@@ -106,5 +101,14 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
                 compilerOptions.append(compileOptions)
             }
         }.asSuccess()
+    }
+
+    fun searchFile(scriptPath: String?, file: String): Set<File> {
+        return if (scriptPath != null) {
+            // 先从当前目录开始找，找不到再从根目录找
+            File(scriptPath).parentFile.searchFile { isKts(file) }.ifEmpty { scriptsFile.searchFile { isKts(file) } }
+        } else {
+            scriptsFile.searchFile { isKts(file) }
+        }
     }
 }

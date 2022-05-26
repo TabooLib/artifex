@@ -74,11 +74,9 @@ object DefaultScriptAPI : ArtifexAPI {
 
     override fun getRuntimeLibraryFile(): File {
         val file = File(getDataFolder(), "runtime/core.jar")
-        if (file.nonExists()) {
-            kotlin.runCatching {
-                releaseResourceFile("runtime/core.jar", true)
-                releaseResourceFile("runtime/bridge.jar", true)
-            }
+        kotlin.runCatching {
+            releaseResourceFile("runtime/core.jar", true)
+            releaseResourceFile("runtime/bridge.jar", true)
         }
         return file.takeIf { it.exists() } ?: error("Runtime library not found!")
     }

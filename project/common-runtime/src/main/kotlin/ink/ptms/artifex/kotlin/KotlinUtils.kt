@@ -7,9 +7,11 @@ import org.jetbrains.kotlin.scripting.compiler.plugin.impl.KJvmCompiledModuleInM
 import taboolib.common.platform.function.getDataFolder
 import java.io.File
 import kotlin.script.experimental.api.CompiledScript
+import kotlin.script.experimental.api.ScriptCompilationConfigurationKeys
 import kotlin.script.experimental.api.ScriptDiagnostic
 import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
+import kotlin.script.experimental.util.PropertiesCollection
 
 val scriptsFile = File(getDataFolder(), "scripts")
 
@@ -90,3 +92,5 @@ fun checkImportScript(file: File?, script: CompiledScript, compilerOutputFiles: 
         script
     }
 }
+
+val ScriptCompilationConfigurationKeys.artifexImportScripts by PropertiesCollection.key<List<File>>()
