@@ -28,3 +28,7 @@ fun CommandBuilder.CommandComponentDynamic.restrict(function: (argument: String)
 fun CommandBuilder.CommandComponentDynamic.restrictAsPlayer(function: (argument: String) -> Boolean) {
     return restrict<ProxyPlayer> { _, _, argument -> function(argument) }
 }
+
+fun CommandContext<*>.argument(): String {
+    return argument(0)
+}

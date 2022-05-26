@@ -32,7 +32,7 @@ fun allScriptProjects(): List<String> {
  * @param onlyScript 是否只搜索独立脚本，不包含工程中的脚本
  */
 fun scriptFile(file: String, root: File = scriptsFile, onlyScript: Boolean = true): File? {
-    return root.searchFile(onlyScript) { file == nameWithoutExtension }.firstOrNull()
+    return root.searchFile(onlyScript) { file == nameWithoutExtension || file == name }.firstOrNull()
 }
 
 /**
