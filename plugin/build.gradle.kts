@@ -28,7 +28,6 @@ tasks {
         exclude("module-info.java")
     }
     create("collect") {
-        dependsOn(build)
         doFirst {
             val version = project.version
             val file = projectDir.resolve("build/libs/plugin-$version.jar")

@@ -15,14 +15,16 @@ internal fun reloadFile(file: File, sender: ProxyCommandSender, args: Map<String
     }
     if (file.extension == "jar") {
         // 释放脚本并重新运行
-        releaseScript(container, sender)
+        container.release()
+        sender.sendLang("command-script-release", container.id())
         runPrimaryThread { runJarFile(file, sender, args, props, true) }
     }
     // 检查编译
     else if (checkCompile(file, sender, props)) {
         val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
         if (buildFile.exists()) {
-            releaseScript(container, sender)
+            container.release()
+            sender.sendLang("command-script-release", container.id())
             runPrimaryThread { runJarFile(buildFile, sender, args, props, true) }
         }
     }
