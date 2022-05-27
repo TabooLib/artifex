@@ -1,8 +1,5 @@
 package ink.ptms.artifex
 
-import taboolib.module.configuration.Configuration
-import java.util.concurrent.TimeUnit
-
 /**
  * Artifex
  * ink.ptms.artifex.Artifex
@@ -26,15 +23,5 @@ object Artifex {
      */
     fun register(api: ArtifexAPI) {
         this.api = api
-    }
-
-    fun test() {
-        val conf = Configuration.empty()
-        // 假设我获取了一些脚本
-
-    }
-
-    fun getKether(): String {
-        TODO()
     }
 }

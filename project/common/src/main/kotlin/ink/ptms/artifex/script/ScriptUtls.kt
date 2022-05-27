@@ -4,14 +4,16 @@ import taboolib.common.platform.function.isPrimaryThread
 import taboolib.common.platform.function.submit
 import java.io.File
 
+/**
+ * 文件是否不存在
+ */
 fun File.nonExists(): Boolean {
     return !exists()
 }
 
-fun Char.isValidIdentifier(): Boolean {
-    return this in 'a'..'z' || this in 'A'..'Z' || this in '0'..'9' || this == '_'
-}
-
+/**
+ * 转换为合法的类名
+ */
 fun String.toClassIdentifier(): String {
     val charArray = toCharArray()
     charArray.map { if (it.isValidIdentifier()) this else "_" }
@@ -23,10 +25,17 @@ fun String.toClassIdentifier(): String {
     }
 }
 
+/**
+ * 在主线程运行逻辑
+ */
 fun runPrimaryThread(func: () -> Unit) {
     if (isPrimaryThread) {
         func()
     } else {
         submit { func() }
     }
+}
+
+private fun Char.isValidIdentifier(): Boolean {
+    return this in 'a'..'z' || this in 'A'..'Z' || this in '0'..'9' || this == '_'
 }

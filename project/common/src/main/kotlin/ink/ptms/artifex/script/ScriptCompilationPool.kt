@@ -35,10 +35,19 @@ interface ScriptCompilationPool {
 
     fun submit(main: String, inputStream: InputStream, property: ScriptRuntimeProperty): CompletableFuture<ScriptCompiled>
 
+    /**
+     * 用于创建脚本编译池的构建器
+     */
     interface Builder {
 
+        /**
+         * 当编译产生报告时
+         */
         fun onReport(func: Consumer<ScriptResult.Diagnostic>)
 
+        /**
+         * 当编译池每一次完成所有编译任务时
+         */
         fun onCompleted(func: Runnable)
     }
 }
