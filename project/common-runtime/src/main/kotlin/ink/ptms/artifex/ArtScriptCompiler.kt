@@ -2,19 +2,18 @@ package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.*
 import ink.ptms.artifex.script.*
-import ink.ptms.artifex.script.ScriptCompiler
 import kotlinx.coroutines.runBlocking
 import taboolib.common.io.digest
-import taboolib.common.platform.function.info
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.CopyOnWriteArraySet
 import java.util.function.Consumer
-import kotlin.script.experimental.api.*
+import kotlin.script.experimental.api.CompiledScript
+import kotlin.script.experimental.api.ScriptCompilationConfiguration
+import kotlin.script.experimental.api.SourceCode
+import kotlin.script.experimental.api.valueOrNull
 import kotlin.script.experimental.host.FileScriptSource
 import kotlin.script.experimental.host.StringScriptSource
-import kotlin.script.experimental.jvm.jvm
 
 /**
  * Artifex
@@ -25,15 +24,20 @@ import kotlin.script.experimental.jvm.jvm
  */
 object ArtScriptCompiler : ScriptCompiler {
 
-    val compileQueue = CopyOnWriteArraySet<String>()
+    override fun createCompilationPool(builder: Consumer<ScriptCompilationPool.Builder>): ScriptCompilationPool {
+        return ArtScriptCompilationPool(BuilderImpl().also { builder.accept(it) })
+    }
 
     override fun createCompilationConfiguration(pops: ScriptRuntimeProperty): ScriptCompiler.Configuration {
         return KotlinCompilationConfiguration(pops)
     }
 
     override fun compile(compiler: Consumer<ScriptCompiler.Compiler>): ScriptCompiled? {
+        return compile(CompilerImpl().also { compiler.accept(it) })
+    }
+
+    fun compile(compilerImpl: CompilerImpl): ScriptCompiled? {
         return runBlocking {
-            val compilerImpl = CompilerImpl().also { compiler.accept(it) }
             val configuration = compilerImpl.configuration as ScriptCompilationConfiguration
             val result = ArtScriptEvaluator.scriptingHost.compiler(compilerImpl.source ?: error("Script content is empty"), configuration)
             // 编译日志
@@ -83,11 +87,11 @@ object ArtScriptCompiler : ScriptCompiler {
         }
 
         override fun source(file: File) {
-            this.source = FileScriptSource(file, "@file:Art\n${file.readText()}")
+            this.source = file.toSourceCode()
         }
 
         override fun source(main: String, source: String) {
-            this.source = StringScriptSource("@file:Art\n$source", main)
+            this.source = source.toSourceCode(main)
         }
 
         override fun source(main: String, byteArray: ByteArray) {
@@ -110,4 +114,26 @@ object ArtScriptCompiler : ScriptCompiler {
             this.onFailure = func
         }
     }
+
+    class BuilderImpl : ScriptCompilationPool.Builder {
+
+        var onReport: Consumer<ScriptResult.Diagnostic>? = null
+        var onCompleted: Runnable? = null
+
+        override fun onReport(func: Consumer<ScriptResult.Diagnostic>) {
+            this.onReport = func
+        }
+
+        override fun onCompleted(func: Runnable) {
+            this.onCompleted = func
+        }
+    }
+}
+
+fun File.toSourceCode(): SourceCode {
+    return FileScriptSource(this, "@file:Art\n${readText()}")
+}
+
+fun String.toSourceCode(main: String): SourceCode {
+    return StringScriptSource("@file:Art\n$this", main)
 }

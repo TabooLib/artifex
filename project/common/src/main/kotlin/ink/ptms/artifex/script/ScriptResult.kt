@@ -24,7 +24,21 @@ interface ScriptResult<out R> {
     /**
      * 运行报告详细信息
      */
-    data class Diagnostic(val code: Int, val message: String, val severity: Severity, val source: Source, val exception: Throwable?)
+    data class Diagnostic(val code: Int, val message: String, val severity: Severity, val source: Source, val exception: Throwable?) {
+
+        /**
+         * 是否可以被忽略
+         */
+        fun isIgnored(): Boolean {
+            return severity == Severity.DEBUG || message.contains("never used") || message.contains("deprecated")
+        }
+
+        override fun toString(): String {
+            val loc = source.location
+            val pos = if (loc != null) "(${loc.start.line}, ${loc.start.col}): " else ""
+            return "${severity}: ${pos}${message}"
+        }
+    }
 
     /**
      * 脚本源

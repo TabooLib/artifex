@@ -2,6 +2,8 @@ package ink.ptms.artifex.script
 
 import java.io.File
 import java.io.InputStream
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 import java.util.function.Consumer
 
 /**
@@ -11,12 +13,17 @@ import java.util.function.Consumer
 interface ScriptCompiler {
 
     /**
+     * 创建编译池
+     */
+    fun createCompilationPool(builder: Consumer<ScriptCompilationPool.Builder>): ScriptCompilationPool
+
+    /**
      * 创建编译配置
      */
     fun createCompilationConfiguration(pops: ScriptRuntimeProperty): Configuration
 
     /**
-     * 编译
+     * 编译脚本
      */
     fun compile(compiler: Consumer<Compiler>): ScriptCompiled?
 
@@ -36,8 +43,7 @@ interface ScriptCompiler {
         fun configuration(configuration: Configuration)
 
         /**
-         * 参与编译的构造参数
-         * 该方法将会覆盖之前设置的编译配置
+         * 参与编译的构造参数，该方法将会覆盖之前设置的编译配置
          */
         fun configuration(property: ScriptRuntimeProperty)
 

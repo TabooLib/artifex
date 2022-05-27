@@ -94,10 +94,8 @@ fun getScriptVersion(file: File, props: Map<String, Any>): String {
  */
 fun reportResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender) {
     // > INFO: (138, 13): This annotation is not applicable to target 'expression' and use site target '@file'
-    if (report.severity > ScriptResult.Severity.DEBUG && GameLoader.ignoreWarning.none { report.message.contains(it) }) {
-        val loc = report.source.location
-        val pos = if (loc != null) "(${loc.start.line}, ${loc.start.col}): " else ""
-        sender.sendMessage("${report.severity.color}> ${report.severity}: ${pos}${report.message}")
+    if (report.severity > ScriptResult.Severity.DEBUG && !report.isIgnored() && GameLoader.ignoreWarning.none { report.message.contains(it) }) {
+        sender.sendMessage("${report.severity.color}> $report")
     }
 }
 

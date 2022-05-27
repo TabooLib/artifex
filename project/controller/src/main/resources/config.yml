@@ -1,3 +1,2 @@
-ignore-warning:
-  - 'never used'
-  - 'deprecated'
+# 忽略编译警告信息
+ignore-warning: []
