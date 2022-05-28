@@ -1,6 +1,6 @@
 package ink.ptms.artifex
 
-import ink.ptms.artifex.kotlin.diagnostic
+import ink.ptms.artifex.kotlin.diagnosticFromKt
 import ink.ptms.artifex.kotlin.scriptsFile
 import ink.ptms.artifex.script.ScriptRuntimeProperty
 import ink.ptms.artifex.script.nonExists
@@ -54,7 +54,7 @@ class ImportScript(
     fun invokeLibrary(file: File): ResultWithDiagnostics<KClass<*>> {
         val meta = Artifex.api().getScriptMetaHandler().getScriptMeta(file)
         val result = meta.generateScriptCompiled().invoke(meta.name(), ScriptRuntimeProperty())
-        val diagnostics = result.reports().map { diagnostic(it) }
+        val diagnostics = result.reports().map { diagnosticFromKt(it) }
         return if (result.isSuccessful()) {
             ResultWithDiagnostics.Success(result.value()!!.scriptClass!!.kotlin, diagnostics)
         } else {

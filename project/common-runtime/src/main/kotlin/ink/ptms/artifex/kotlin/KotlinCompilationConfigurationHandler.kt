@@ -72,7 +72,7 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
                                 val diagnostic = ArrayList<ScriptDiagnostic>()
                                 val error = console().asLangText("compile-referenced-build-failed")
                                 diagnostic += ScriptDiagnostic(-1, error, ScriptDiagnostic.Severity.ERROR, scriptPath)
-                                compileReports.forEach { r -> diagnostic += diagnostic(r) }
+                                compileReports.forEach { r -> diagnostic += diagnosticFromKt(r) }
                                 return ResultWithDiagnostics.Failure(diagnostic)
                             } else {
                                 // 生成脚本编译文件

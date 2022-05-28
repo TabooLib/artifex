@@ -41,7 +41,7 @@ object ArtScriptCompiler : ScriptCompiler {
             val configuration = compilerImpl.configuration as ScriptCompilationConfiguration
             val result = ArtScriptEvaluator.scriptingHost.compiler(compilerImpl.source ?: error("Script content is empty"), configuration)
             // 编译日志
-            result.reports.forEach { compilerImpl.onReport?.accept(diagnostic(it)) }
+            result.reports.forEach { compilerImpl.onReport?.accept(diagnosticFromKt(it)) }
             // 编译结果
             val compiledScript = result.valueOrNull()?.remap()
             if (compiledScript != null) {

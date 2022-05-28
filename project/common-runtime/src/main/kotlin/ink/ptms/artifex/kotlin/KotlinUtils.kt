@@ -31,18 +31,18 @@ fun File.searchFile(match: File.() -> Boolean): Set<File> {
     }
 }
 
-fun position(position: SourceCode.Position): ScriptSourceCode.Position {
-    return ScriptSourceCode.Position(position.line, position.col, position.absolutePos)
+fun positionFromKt(position: SourceCode.Position): ScriptSourceCode.Position {
+    return ScriptSourceCode.Position(position.line + 1, position.col, position.absolutePos)
 }
 
-fun position(position: ScriptSourceCode.Position): SourceCode.Position {
+fun positionFromArt(position: ScriptSourceCode.Position): SourceCode.Position {
     return SourceCode.Position(position.line, position.col, position.absolutePos)
 }
 
-fun diagnostic(diagnostic: ScriptDiagnostic): ScriptResult.Diagnostic {
+fun diagnosticFromKt(diagnostic: ScriptDiagnostic): ScriptResult.Diagnostic {
     val loc = diagnostic.location
     val location = if (loc != null) {
-        ScriptSourceCode.Location(position(loc.start), if (loc.end != null) position(loc.end!!) else null)
+        ScriptSourceCode.Location(positionFromKt(loc.start), if (loc.end != null) positionFromKt(loc.end!!) else null)
     } else {
         null
     }
@@ -55,9 +55,9 @@ fun diagnostic(diagnostic: ScriptDiagnostic): ScriptResult.Diagnostic {
     )
 }
 
-fun diagnostic(diagnostic: ScriptResult.Diagnostic): ScriptDiagnostic {
-    val start = diagnostic.source.location?.start?.let { position(it) }
-    val end = diagnostic.source.location?.end?.let { position(it) }
+fun diagnosticFromKt(diagnostic: ScriptResult.Diagnostic): ScriptDiagnostic {
+    val start = diagnostic.source.location?.start?.let { positionFromArt(it) }
+    val end = diagnostic.source.location?.end?.let { positionFromArt(it) }
     return ScriptDiagnostic(
         diagnostic.code,
         diagnostic.message,

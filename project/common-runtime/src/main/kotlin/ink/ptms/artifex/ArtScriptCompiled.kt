@@ -1,6 +1,6 @@
 package ink.ptms.artifex
 
-import ink.ptms.artifex.kotlin.diagnostic
+import ink.ptms.artifex.kotlin.diagnosticFromKt
 import ink.ptms.artifex.kotlin.scriptClassFQName
 import ink.ptms.artifex.script.*
 import ink.ptms.artifex.script.ScriptEvaluator
@@ -55,9 +55,9 @@ class ArtScriptCompiled(val kotlinScript: CompiledScript, val hash: String, meta
                     }
                     else -> error("Unsupported return value ${value.javaClass.simpleName}")
                 }
-                ArtScriptResult(resultValue, result.reports.map { diagnostic(it) }, true)
+                ArtScriptResult(resultValue, result.reports.map { diagnosticFromKt(it) }, true)
             } else {
-                ArtScriptResult(null, result.reports.map { diagnostic(it) }, false)
+                ArtScriptResult(null, result.reports.map { diagnosticFromKt(it) }, false)
             }
         }
     }
