@@ -13,11 +13,11 @@ fun CommandBuilder.CommandComponent.executeAsPlayer(function: (sender: ProxyPlay
     execute<ProxyPlayer> { sender, context, _ -> function(sender, context) }
 }
 
-fun CommandBuilder.CommandComponentDynamic.suggestion(uncheck: Boolean = false, function: () -> List<String>?) {
+fun CommandBuilder.CommandComponentDynamic.suggest(uncheck: Boolean = false, function: () -> List<String>?) {
     return suggestion<ProxyCommandSender>(uncheck) { _, _ -> function() }
 }
 
-fun CommandBuilder.CommandComponentDynamic.suggestionAsPlayer(uncheck: Boolean = false, function: () -> List<String>?) {
+fun CommandBuilder.CommandComponentDynamic.suggestAsPlayer(uncheck: Boolean = false, function: () -> List<String>?) {
     return suggestion<ProxyPlayer>(uncheck) { _, _ -> function() }
 }
 
