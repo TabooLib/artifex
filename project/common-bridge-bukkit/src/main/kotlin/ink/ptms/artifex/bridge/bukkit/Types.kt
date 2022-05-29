@@ -9,15 +9,15 @@ import org.bukkit.entity.Player
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.module.nms.ItemTag
 
-fun world(name: String): World? {
+fun bukkitWorld(name: String): World? {
     return Bukkit.getWorld(name)
 }
 
-fun player(name: String): Player? {
+fun bukkitPlayer(name: String): Player? {
     return Bukkit.getPlayerExact(name)
 }
 
-fun players(): List<Player> {
+fun bukkitPlayers(): List<Player> {
     return Bukkit.getOnlinePlayers().toList()
 }
 
