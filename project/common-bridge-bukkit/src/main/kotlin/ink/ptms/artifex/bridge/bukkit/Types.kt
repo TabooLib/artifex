@@ -53,11 +53,11 @@ fun highestBlock(world: String, x: Int, z: Int): Block {
     return Bukkit.getWorld(world)!!.getHighestBlockAt(x, z)
 }
 
-fun ProxyCommandSender.player(): Player {
+fun ProxyCommandSender.bukkitPlayer(): Player {
     return cast()
 }
 
-fun ProxyCommandSender.sender(): CommandSender {
+fun ProxyCommandSender.bukkitSender(): CommandSender {
     return cast()
 }
 

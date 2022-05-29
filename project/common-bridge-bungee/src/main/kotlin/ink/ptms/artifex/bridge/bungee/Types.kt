@@ -22,10 +22,10 @@ fun servers(): Map<String, ServerInfo> {
     return BungeeCord.getInstance().servers
 }
 
-fun ProxyCommandSender.player(): ProxiedPlayer {
+fun ProxyCommandSender.bungeePlayer(): ProxiedPlayer {
     return cast()
 }
 
-fun ProxyCommandSender.sender(): CommandSender {
+fun ProxyCommandSender.bungeeSender(): CommandSender {
     return cast()
 }
