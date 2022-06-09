@@ -1,6 +1,5 @@
 package ink.ptms.artifex.controller
 
-import ink.ptms.artifex.controller.internal.ScriptProjectInfo
 import ink.ptms.artifex.controller.internal.scriptsFile
 import ink.ptms.artifex.controller.internal.searchFile
 import ink.ptms.artifex.script.ScriptProject
@@ -22,7 +21,7 @@ import java.io.File
  * @author 坏黑
  * @since 2022/5/22 00:37
  */
-object GameLoader: ScriptProjectManager {
+object GameProjectLoader : ScriptProjectManager {
 
     @Config
     lateinit var conf: Configuration
@@ -32,7 +31,7 @@ object GameLoader: ScriptProjectManager {
     lateinit var ignoreWarning: List<String>
         private set
 
-    val projects = ArrayList<ScriptProjectInfo>()
+    val projects = ArrayList<ScriptProject>()
 
     init {
         PlatformFactory.registerAPI<ScriptProjectManager>(this)
@@ -40,7 +39,9 @@ object GameLoader: ScriptProjectManager {
 
     @Awake(LifeCycle.ENABLE)
     fun load() {
-        scriptsFile.searchFile(onlyScript = false) { name == "project.yml" }.forEach { loadProject(it) }
+        scriptsFile.searchFile(onlyScript = false) { name == "project.yml" }.forEach {
+            loadProject(it).also { p -> applyProject(p) }
+        }
         console().sendLang("project-loaded", projects.size)
         projects.forEach { it.run(console()) }
     }
@@ -50,10 +51,12 @@ object GameLoader: ScriptProjectManager {
         projects.forEach { it.release(console()) }
     }
 
+    override fun applyProject(project: ScriptProject) {
+        projects += project
+    }
+
     override fun loadProject(file: File): ScriptProject {
-        val info = ScriptProjectInfo(file.parentFile, Configuration.loadFromFile(file))
-        projects += info
-        return info
+        return GameProject(file.parentFile, Configuration.loadFromFile(file))
     }
 
     override fun getProjects(): List<ScriptProject> {

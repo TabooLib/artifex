@@ -3,9 +3,7 @@ package ink.ptms.artifex.kotlin
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.Import
 import ink.ptms.artifex.Include
-import ink.ptms.artifex.script.ScriptResult
-import ink.ptms.artifex.script.nonExists
-import ink.ptms.artifex.script.toClassIdentifier
+import ink.ptms.artifex.script.*
 import org.jetbrains.kotlin.mainKts.CompilerOptions
 import taboolib.common.io.newFile
 import taboolib.common.platform.function.console
@@ -18,11 +16,12 @@ import kotlin.script.experimental.util.filterByAnnotationType
 /**
  * 编译编译配置处理器
  */
-class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurationHandler {
+class KotlinCompilationConfigurationHandler(val props: ScriptRuntimeProperty) : RefineScriptCompilationConfigurationHandler {
 
     override operator fun invoke(context: ScriptConfigurationRefinementContext): ResultWithDiagnostics<ScriptCompilationConfiguration> {
         val anno = ScriptCollectedData.collectedAnnotations
         val annotations = context.collectedData?.get(anno)?.takeIf { it.isNotEmpty() } ?: return context.compilationConfiguration.asSuccess()
+        val finder = props.defaultFileFinder ?: DefaultFinder
 
         // 脚本路径
         val scriptPath = if (context.script is FileScriptSource) (context.script as FileScriptSource).file.path else null
@@ -31,7 +30,7 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
         val includeScripts = ArrayList<FileScriptSource>()
         annotations.filterByAnnotationType<Include>().flatMap { it.annotation.name.toList() }.forEach { name ->
             // 搜索脚本文件
-            searchFile(scriptPath, name).forEach { file ->
+            finder.searchFile(scriptPath, name).forEach { file ->
                 includeScripts += FileScriptSource(file)
             }
         }
@@ -47,7 +46,7 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
             }
             // 判定为脚本
             else {
-                val files = searchFile(scriptPath, name)
+                val files = finder.searchFile(scriptPath, name)
                 if (files.isEmpty()) {
                     val diagnostic = ArrayList<ScriptDiagnostic>()
                     val error = console().asLangText("compile-referenced-not-found", name)
@@ -103,12 +102,15 @@ class KotlinCompilationConfigurationHandler : RefineScriptCompilationConfigurati
         }.asSuccess()
     }
 
-    fun searchFile(scriptPath: String?, file: String): Set<File> {
-        return if (scriptPath != null) {
-            // 先从当前目录开始找，找不到再从根目录找
-            File(scriptPath).parentFile.searchFile { isKts(file) }.ifEmpty { scriptsFile.searchFile { isKts(file) } }
-        } else {
-            scriptsFile.searchFile { isKts(file) }
+    object DefaultFinder : ScriptFileFinder {
+
+        override fun searchFile(scriptPath: String?, file: String): Set<File> {
+            return if (scriptPath != null) {
+                // 先从当前目录开始找，找不到再从根目录找
+                File(scriptPath).parentFile.searchFile { isKts(file) }.ifEmpty { scriptsFile.searchFile { isKts(file) } }
+            } else {
+                scriptsFile.searchFile { isKts(file) }
+            }
         }
     }
 }

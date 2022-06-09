@@ -28,6 +28,26 @@ interface ScriptCompiler {
     fun compile(compiler: Consumer<Compiler>): ScriptCompiled?
 
     /**
+     * 生成源文件
+     */
+    fun toScriptSource(file: File): ScriptSource
+
+    /**
+     * 生成源文件
+     */
+    fun toScriptSource(main: String, source: String): ScriptSource
+
+    /**
+     * 生成源文件
+     */
+    fun toScriptSource(main: String, byteArray: ByteArray): ScriptSource
+
+    /**
+     * 生成源文件
+     */
+    fun toScriptSource(main: String, inputStream: InputStream): ScriptSource
+
+    /**
      * 脚本编译配置
      */
     interface Configuration
@@ -46,6 +66,11 @@ interface ScriptCompiler {
          * 参与编译的构造参数，该方法将会覆盖之前设置的编译配置
          */
         fun configuration(property: ScriptRuntimeProperty)
+
+        /**
+         * 源文件
+         */
+        fun source(source: ScriptSource)
 
         /**
          * 源文件

@@ -14,6 +14,7 @@ import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.api.valueOrNull
 import kotlin.script.experimental.host.FileScriptSource
 import kotlin.script.experimental.host.StringScriptSource
+import kotlin.script.experimental.host.toScriptSource
 
 /**
  * Artifex
@@ -34,6 +35,22 @@ object ArtScriptCompiler : ScriptCompiler {
 
     override fun compile(compiler: Consumer<ScriptCompiler.Compiler>): ScriptCompiled? {
         return compile(CompilerImpl().also { compiler.accept(it) })
+    }
+
+    override fun toScriptSource(file: File): ScriptSource {
+        return SourceImpl.SourceFileImpl(file, file.toScriptSource())
+    }
+
+    override fun toScriptSource(main: String, source: String): ScriptSource {
+        return SourceImpl(source.toScriptSource(main))
+    }
+
+    override fun toScriptSource(main: String, byteArray: ByteArray): ScriptSource {
+        return toScriptSource(main, byteArray.toString(StandardCharsets.UTF_8))
+    }
+
+    override fun toScriptSource(main: String, inputStream: InputStream): ScriptSource {
+        return toScriptSource(main, inputStream.readBytes().toString(StandardCharsets.UTF_8))
     }
 
     fun compile(compilerImpl: CompilerImpl): ScriptCompiled? {
@@ -70,6 +87,14 @@ object ArtScriptCompiler : ScriptCompiler {
         }
     }
 
+    open class SourceImpl(val kotlinSourceCode: SourceCode) : ScriptSource {
+
+        override val text: String
+            get() = kotlinSourceCode.text
+
+        class SourceFileImpl(val file: File, kotlinSourceCode: SourceCode): SourceImpl(kotlinSourceCode)
+    }
+
     class CompilerImpl : ScriptCompiler.Compiler {
 
         var configuration: ScriptCompiler.Configuration = KotlinCompilationConfiguration(ScriptRuntimeProperty())
@@ -84,6 +109,10 @@ object ArtScriptCompiler : ScriptCompiler {
 
         override fun configuration(property: ScriptRuntimeProperty) {
             this.configuration = KotlinCompilationConfiguration(property)
+        }
+
+        override fun source(source: ScriptSource) {
+            this.source = (source as? SourceImpl)?.kotlinSourceCode ?: error("Not source code")
         }
 
         override fun source(file: File) {

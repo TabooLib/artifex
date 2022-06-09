@@ -18,6 +18,11 @@ interface ArtifexAPI {
     fun getPlatformHelper(): PlatformHelper
 
     /**
+     * 获取脚本帮助工具
+     */
+    fun getScriptHelper(): ScriptHelper
+
+    /**
      * 获取脚本编译器
      */
     fun getScriptCompiler(): ScriptCompiler

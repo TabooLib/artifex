@@ -33,7 +33,7 @@ class KotlinCompilationConfiguration(val props: ScriptRuntimeProperty) : ScriptC
             compilerOptions("-Xskip-runtime-version-check")
         }
         refineConfiguration {
-            onAnnotations(Art::class, Include::class, Import::class, CompilerOptions::class, handler = KotlinCompilationConfigurationHandler())
+            onAnnotations(Art::class, Include::class, Import::class, CompilerOptions::class, handler = KotlinCompilationConfigurationHandler(props))
         }
         ide {
             acceptedLocations(ScriptAcceptedLocation.Everywhere)

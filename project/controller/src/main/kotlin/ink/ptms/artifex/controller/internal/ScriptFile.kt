@@ -1,7 +1,7 @@
 package ink.ptms.artifex.controller.internal
 
 import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.controller.GameLoader
+import ink.ptms.artifex.controller.GameProjectLoader
 import ink.ptms.artifex.script.*
 import taboolib.common.io.digest
 import taboolib.common.platform.ProxyCommandSender
@@ -94,7 +94,7 @@ fun getScriptVersion(file: File, props: Map<String, Any>): String {
  */
 fun reportResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender) {
     // > INFO: (138, 13): This annotation is not applicable to target 'expression' and use site target '@file'
-    if (report.severity > ScriptResult.Severity.DEBUG && !report.isIgnored() && GameLoader.ignoreWarning.none { report.message.contains(it) }) {
+    if (report.severity > ScriptResult.Severity.DEBUG && !report.isIgnored() && GameProjectLoader.ignoreWarning.none { report.message.contains(it) }) {
         sender.sendMessage("${report.severity.color}> $report")
     }
 }

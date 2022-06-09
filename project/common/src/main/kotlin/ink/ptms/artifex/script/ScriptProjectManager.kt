@@ -12,7 +12,12 @@ import java.io.File
 interface ScriptProjectManager {
 
     /**
-     * 加载脚本工程
+     * 添加脚本工程到缓存，将在 ENABLE 生命周期下启动
+     */
+    fun applyProject(project: ScriptProject)
+
+    /**
+     * 从文件加载脚本工程
      */
     fun loadProject(file: File): ScriptProject
 

@@ -1,13 +1,17 @@
-package ink.ptms.artifex.controller.internal
+package ink.ptms.artifex.controller
 
 import ink.ptms.artifex.Artifex
+import ink.ptms.artifex.controller.internal.*
+import ink.ptms.artifex.controller.internal.checkCompile
+import ink.ptms.artifex.controller.internal.checkFileNotRunning
+import ink.ptms.artifex.controller.internal.releaseScript
+import ink.ptms.artifex.controller.internal.runJarFile
+import ink.ptms.artifex.controller.internal.scriptsFile
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.ScriptProject
 import ink.ptms.artifex.script.runPrimaryThread
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
-import taboolib.common.platform.function.isPrimaryThread
-import taboolib.common.platform.function.submit
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.sendLang
 import java.io.File
@@ -22,7 +26,7 @@ import kotlin.collections.ArrayList
  * @author 坏黑
  * @since 2022/5/23 13:28
  */
-class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject {
+class GameProject(val file: File, val root: Configuration) : ScriptProject {
 
     private val exchangeData = ConcurrentHashMap<String, Any>()
     private val runningScripts = ArrayList<Script>()
@@ -133,7 +137,7 @@ class ScriptProjectInfo(val file: File, val root: Configuration) : ScriptProject
         data["@Project"] = this
         // 运行脚本
         runJarFile(buildFile, sender, mapOf("@Id" to id), emptyMap(), autoMount, false) {
-            container().exchangeData()["@Project"] = this@ScriptProjectInfo
+            container().exchangeData()["@Project"] = this@GameProject
             runningScripts += this
         }
     }

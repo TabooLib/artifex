@@ -22,6 +22,11 @@ class ScriptRuntimeProperty {
     val defaultClasspath = ArrayList<File>()
 
     /**
+     * 默认脚本文件查找器
+     */
+    val defaultFileFinder: ScriptFileFinder? = null
+
+    /**
      * 通过 runArgs 关键字调用的变量容器
      * 改变这个容器中的变量不会使脚本重新编译
      */

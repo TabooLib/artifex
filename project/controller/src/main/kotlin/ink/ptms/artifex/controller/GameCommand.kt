@@ -189,7 +189,7 @@ object GameCommand {
                     val demand = Demand("0 $argument")
                     val file = scriptFile(context.argument(-1))
                     if (file?.exists() == true) {
-                        submit(async = true) {  reloadFile(file, sender, emptyMap(), emptyMap(), compile = demand.tags.contains("C")) }
+                        submit(async = true) { reloadFile(file, sender, emptyMap(), emptyMap(), compile = demand.tags.contains("C")) }
                     } else {
                         sender.sendLang("command-script-not-found", context.argument(-1))
                     }
@@ -248,10 +248,9 @@ object GameCommand {
         dynamic("script") {
             execute<ProxyCommandSender> { sender, _, argument ->
                 submit(async = true) {
-                    compileScript(argument, sender).thenAccept { script ->
-                        if (script != null) {
-                            runPrimaryThread { runScript(script, sender) }
-                        }
+                    val script = SimpleScriptHelper.compileByText(argument, sender)
+                    if (script != null) {
+                        runPrimaryThread { runScript(script, sender) }
                     }
                 }
             }
