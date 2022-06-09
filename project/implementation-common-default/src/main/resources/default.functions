@@ -69,6 +69,7 @@ taboolib.library.xseries.*
 taboolib.platform.compat.*
 taboolib.platform.util.*
 
+taboolib.common.platform.event.EventPriority
 taboolib.common.platform.sendTo
 taboolib.common.platform.function.console
 taboolib.common.platform.function.adaptCommandSender

@@ -1,6 +1,7 @@
 rootProject.name = "Artifex"
 
 include("plugin")
+include("project:application")
 include("project:common")
 include("project:common-bridge")
 include("project:common-bridge-bukkit")

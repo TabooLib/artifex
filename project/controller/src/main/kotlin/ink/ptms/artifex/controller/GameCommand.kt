@@ -243,6 +243,21 @@ object GameCommand {
         }
     }
 
+    @CommandBody
+    val shell = subCommand {
+        dynamic("script") {
+            execute<ProxyCommandSender> { sender, _, argument ->
+                submit(async = true) {
+                    compileScript(argument, sender).thenAccept { script ->
+                        if (script != null) {
+                            runPrimaryThread { runScript(script, sender) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fun parseType(value: String): Any {
         return try {
             value.toInt()

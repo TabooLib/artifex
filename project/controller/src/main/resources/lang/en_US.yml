@@ -56,6 +56,8 @@ command-script-status-import-name: '&7[Artifex] &8     - &f{0}'
 command-project-not-found: '&c[Artifex] &cScript project {0} does not exist.'
 command-project-is-running: '&c[Artifex] &cScript project {0} is running.'
 command-project-is-not-running: '&c[Artifex] &cScript project {0} is not running.'
+command-script-shell-compile: '&7[Artifex] &7Compiling...'
+command-script-shell-execute: '&7[Artifex] &7Executing...'
 
 project-start: '&7[Artifex] &7Starting {0}...'
 project-reload: '&7[Artifex] &7Restarting {0}...'

@@ -47,3 +47,30 @@ internal fun compileFile(file: File, sender: ProxyCommandSender, props: Map<Stri
         }
     } else null
 }
+
+internal fun compileScript(source: String, sender: ProxyCommandSender): CompletableFuture<ScriptCompiled?> {
+    val time = System.currentTimeMillis()
+    val future = CompletableFuture<ScriptCompiled?>()
+    val platformTask = submit(async = true, period = 20, delay = 20) {
+        // > 1s
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
+        if (seconds > 0) {
+            sender.sendLang("command-script-compile-wait", seconds)
+        }
+    }
+    sender.sendLang("command-script-shell-compile")
+    future.thenAccept { platformTask.cancel() }
+    Artifex.api().getScriptCompiler().compile {
+        it.source("main", source)
+        it.onReport { r -> reportResult(r, sender) }
+        it.onSuccess { r ->
+            future.complete(r)
+            sender.sendLang("command-script-compile-successful", TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time))
+        }
+        it.onFailure {
+            future.complete(null)
+            sender.sendLang("command-script-compile-failed", TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time))
+        }
+    }
+    return future
+}

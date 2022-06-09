@@ -7,4 +7,4 @@ import kotlin.script.experimental.annotations.KotlinScript
     compilationConfiguration = KotlinCompilationConfiguration::class,
     evaluationConfiguration = KotlinEvaluationConfiguration::class
 )
-class KotlinScript(val args: Array<String>)
+abstract class KotlinScript(val args: Array<String>)

@@ -1,11 +1,9 @@
+@file:Suppress("DuplicatedCode")
+
 package ink.ptms.artifex.controller.internal
 
-import ink.ptms.artifex.script.Script
-import ink.ptms.artifex.script.ScriptResult
-import ink.ptms.artifex.script.ScriptRuntimeProperty
-import ink.ptms.artifex.script.runPrimaryThread
+import ink.ptms.artifex.script.*
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.submit
 import taboolib.module.lang.sendLang
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -28,7 +26,7 @@ internal fun runFile(
     mount: Boolean = false,
     compile: Boolean = false,
     info: Boolean = true,
-    post: Script.() -> Unit = {}
+    post: Script.() -> Unit = {},
 ) {
     if (file.extension == "jar") {
         runPrimaryThread { runJarFile(file, sender, args, props, mount, info, post) }
@@ -59,7 +57,7 @@ internal fun runJarFile(
     props: Map<String, Any>,
     mount: Boolean = false,
     info: Boolean = true,
-    post: Script.() -> Unit = {}
+    post: Script.() -> Unit = {},
 ): Boolean {
     val time = System.currentTimeMillis()
     val meta = checkJarFileNotRunning(file, sender) ?: return false
@@ -92,6 +90,39 @@ internal fun runJarFile(
         } else {
             sender.sendLang("command-script-release-failed")
         }
+    }
+    val consume = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
+    return if (result.isSuccessful()) {
+        sender.sendLang("command-script-execute-successful", consume)
+        true
+    } else {
+        sender.sendLang("command-script-execute-failed", consume)
+        false
+    }
+}
+
+internal fun runScript(scriptCompiled: ScriptCompiled, sender: ProxyCommandSender): Boolean {
+    val time = System.currentTimeMillis()
+    sender.sendLang("command-script-shell-execute")
+    val result = scriptCompiled.invoke("main", ScriptRuntimeProperty())
+    // 汇报运行信息
+    result.reports().forEach { r -> reportResult(r, sender) }
+    // 汇报运行结果
+    when (val value = result.value()) {
+        is ScriptResult.Result.Error -> {
+            sender.sendLang("command-script-execute-error", value.error.toString())
+            value.error.printStackTrace()
+        }
+        is ScriptResult.Result.Value -> {
+            sender.sendLang("command-script-execute-value", value.value.toString(), value.type)
+        }
+        else -> {}
+    }
+    val script = (result.value()?.instance as? Script)
+    if (script != null) {
+        releaseScript(script.container(), sender, info = false)
+    } else {
+        sender.sendLang("command-script-release-failed")
     }
     val consume = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
     return if (result.isSuccessful()) {

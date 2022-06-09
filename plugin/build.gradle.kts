@@ -1,10 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import java.io.FileInputStream
 import java.util.zip.ZipOutputStream
 import java.io.FileOutputStream
 import java.util.jar.JarEntry
 import java.util.zip.ZipFile
-import java.util.zip.ZipInputStream
 
 plugins {
     java

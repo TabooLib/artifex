@@ -60,6 +60,8 @@ command-script-status-project-name-running: '&7[Artifex] &8- &a&n{0}&r &8({1})'
 command-project-not-found: '&c[Artifex] &c工程 {0} 不存在'
 command-project-is-running: '&c[Artifex] &c工程 {0} 已在运行.'
 command-project-is-not-running: '&c[Artifex] &c工程 {0} 不在运行.'
+command-script-shell-compile: '&7[Artifex] &7正在编译...'
+command-script-shell-execute: '&7[Artifex] &7正在运行...'
 
 project-start: '&7[Artifex] &7正在启动 {0}...'
 project-reload: '&7[Artifex] &7正在重载 {0}...'
