@@ -21,7 +21,7 @@ fun Script.config(name: String = "config.yml"): Configuration {
     val info = projectInfo()
     val file = File(getDataFolder().parentFile, "${info.name()}/$name")
     if (file.nonExists()) {
-        File(info.file(), "@default/config/$info").takeIf { it.exists() }?.copyTo(file)
+        File(info.file(), "@default/config/$name").takeIf { it.exists() }?.copyTo(file)
     }
     if (file.exists()) {
         return Configuration.loadFromFile(file).also { configMap[name] = it }
