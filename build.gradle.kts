@@ -1,3 +1,5 @@
+import groovy.lang.Closure
+
 plugins {
     id("org.gradle.java")
     id("org.gradle.maven-publish")

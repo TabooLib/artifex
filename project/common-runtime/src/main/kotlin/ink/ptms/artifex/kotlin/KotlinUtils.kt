@@ -1,5 +1,6 @@
 package ink.ptms.artifex.kotlin
 
+import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.ImportScript
 import ink.ptms.artifex.script.ScriptResult
 import ink.ptms.artifex.script.ScriptSourceCode
@@ -13,7 +14,7 @@ import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
 import kotlin.script.experimental.util.PropertiesCollection
 
-val scriptsFile = File(getDataFolder(), "scripts")
+val scriptsFile by lazy { Artifex.api().getScriptHelper().baseScriptFolder() }
 
 fun File.isKts(include: String): Boolean {
     return (name == include && extension == "kts") || name == "$include.kts"
@@ -84,7 +85,12 @@ fun CompiledScript.compilerOutputFiles(): Map<String, ByteArray> {
     }
 }
 
-fun checkImportScript(file: File?, script: CompiledScript, compilerOutputFiles: MutableMap<String, ByteArray>, imports: List<Pair<File, String>>): CompiledScript {
+fun checkImportScript(
+    file: File?,
+    script: CompiledScript,
+    compilerOutputFiles: MutableMap<String, ByteArray>,
+    imports: List<Pair<File, String>>,
+): CompiledScript {
     val otherScripts = script.otherScripts.map { checkImportScript(null, it, compilerOutputFiles, imports) }
     return if (imports.any { i -> i.second == script.scriptClassFQName() }) {
         ImportScript(file, script.scriptClassFQName(), compilerOutputFiles, otherScripts)

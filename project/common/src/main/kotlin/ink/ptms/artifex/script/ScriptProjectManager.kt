@@ -1,7 +1,6 @@
 package ink.ptms.artifex.script
 
 import java.io.File
-import java.util.zip.ZipOutputStream
 
 /**
  * Artifex
@@ -16,21 +15,6 @@ interface ScriptProjectManager {
      * 添加脚本工程到缓存，将在 ENABLE 生命周期下启动
      */
     fun applyProject(project: ScriptProject)
-
-    /**
-     * 从 project.yml 文件或任意压缩包中加载脚本工程
-     */
-    fun loadProject(file: File): ScriptProject
-
-    /**
-     * 从 ZipOutputStream 中加载脚本工程
-     */
-    fun loadProjectFromZipFile(zipOutputStream: ZipOutputStream): ScriptProject
-
-    /**
-     * 从 ScriptProjectIdentifier 中加载脚本工程
-     */
-    fun loadProjectFromProjectIdentifier(projectIdentifier: ScriptProjectIdentifier): ScriptProject
 
     /**
      * 获取特定的正在运行的脚本工程
@@ -53,7 +37,7 @@ interface ScriptProjectManager {
     fun getProjects(): List<ScriptProjectIdentifier>
 
     /**
-     * 从 project.yml 文件创建 ScriptProjectIdentifier
+     * 从文件转换到 ScriptProjectIdentifier 对象
      */
-    fun generateProjectIdentifier(file: File): ScriptProjectIdentifier
+    fun toIdentifier(file: File): ScriptProjectIdentifier
 }

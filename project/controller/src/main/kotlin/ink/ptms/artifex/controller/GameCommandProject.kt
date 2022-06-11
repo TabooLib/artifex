@@ -87,6 +87,13 @@ object GameCommandProject {
         }
     }
 
+    /**
+     * 构建脚本工程
+     */
+    val build = subCommand {
+
+    }
+
     @CommandBody
     val status = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->

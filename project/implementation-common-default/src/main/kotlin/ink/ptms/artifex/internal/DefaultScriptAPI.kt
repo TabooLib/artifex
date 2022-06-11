@@ -32,6 +32,7 @@ object DefaultScriptAPI : ArtifexAPI {
     lateinit var ignoreWarning: List<String>
         private set
 
+    private val helper = DefaultScriptHelper()
     private val environment = DefaultScriptEnvironment()
     private val classLoader by lazy { DefaultRuntimeClassLoader(getRuntimeLibraryFile()) }
     private val containerManager = DefaultScriptContainerManager()
@@ -56,7 +57,7 @@ object DefaultScriptAPI : ArtifexAPI {
     }
 
     override fun getScriptHelper(): ScriptHelper {
-        return PlatformFactory.getAPI()
+        return helper
     }
 
     override fun getScriptCompiler(): ScriptCompiler {
@@ -99,13 +100,15 @@ object DefaultScriptAPI : ArtifexAPI {
     override fun getStatus(): Map<String, String> {
         val map = HashMap<String, String>()
         kotlin.runCatching {
+            // 可能缺失
             map["PlatformHelper"] = kotlin.runCatching { getPlatformHelper().javaClass.name }.getOrElse { "null" }
-            map["ScriptHelper"] = kotlin.runCatching { getScriptHelper().javaClass.name }.getOrElse { "null" }
+            map["ScriptHelper"] = getScriptHelper().javaClass.name
             map["ScriptCompiler"] = getScriptCompiler().javaClass.name
             map["ScriptEvaluator"] = getScriptEvaluator().javaClass.name
             map["ScriptEnvironment"] = getScriptEnvironment().javaClass.name
             map["ScriptMetaHandler"] = getScriptMetaHandler().javaClass.name
             map["ScriptClassLoader"] = getScriptClassLoader().javaClass.name
+            // 可能缺失
             map["ScriptProjectManager"] = kotlin.runCatching { getScriptProjectManager().javaClass.name }.getOrElse { "null" }
             map["ScriptContainerManager"] = getScriptContainerManager().javaClass.name
         }

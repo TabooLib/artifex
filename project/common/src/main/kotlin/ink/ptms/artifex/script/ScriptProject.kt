@@ -14,11 +14,6 @@ import java.io.File
 interface ScriptProject : Exchanges {
 
     /**
-     * 获取文件
-     */
-    fun file(): File
-
-    /**
      * 工程文件
      */
     fun root(): Configuration
@@ -34,17 +29,25 @@ interface ScriptProject : Exchanges {
     fun name(): String
 
     /**
-     * 运行
+     * 运行脚本工程
+     *
+     * @param sender 日志接收者
+     * @param compile 强制编译
      */
     fun run(sender: ProxyCommandSender, compile: Boolean = false): Boolean
 
     /**
      * 重载
+     *
+     * @param sender 日志接收者
+     * @param compile 强制编译
      */
     fun reload(sender: ProxyCommandSender, compile: Boolean = false): Boolean
 
     /**
      * 释放
+     *
+     * @param sender 日志接收者
      */
     fun release(sender: ProxyCommandSender)
 

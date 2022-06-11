@@ -257,6 +257,14 @@ object GameCommand {
         }
     }
 
+    /**
+     * 构建脚本文件
+     */
+    @CommandBody
+    val build = subCommand {
+
+    }
+
     fun parseType(value: String): Any {
         return try {
             value.toInt()

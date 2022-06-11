@@ -1,15 +1,7 @@
 package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.controller.internal.*
-import ink.ptms.artifex.controller.internal.checkCompile
-import ink.ptms.artifex.controller.internal.checkFileNotRunning
-import ink.ptms.artifex.controller.internal.releaseScript
-import ink.ptms.artifex.controller.internal.runJarFile
-import ink.ptms.artifex.controller.internal.scriptsFile
-import ink.ptms.artifex.script.Script
-import ink.ptms.artifex.script.ScriptProject
-import ink.ptms.artifex.script.runPrimaryThread
+import ink.ptms.artifex.script.*
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.console
 import taboolib.module.configuration.Configuration
@@ -21,12 +13,12 @@ import kotlin.collections.ArrayList
 
 /**
  * Artifex
- * ink.ptms.artifex.controller.ScriptProject
+ * ink.ptms.artifex.internal.DefaultScriptProject
  *
  * @author 坏黑
  * @since 2022/5/23 13:28
  */
-class DefaultScriptProject(val file: File, val root: Configuration) : ScriptProject {
+open class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val constructor: ScriptProjectConstructor) : ScriptProject {
 
     private val exchangeData = ConcurrentHashMap<String, Any>()
     private val runningScripts = ArrayList<Script>()
@@ -34,21 +26,17 @@ class DefaultScriptProject(val file: File, val root: Configuration) : ScriptProj
     val id = UUID.randomUUID().toString()
 
     val main: List<String>
-        get() = root.getStringList("main")
+        get() = identifier.root().getStringList("main")
 
     val autoMount: Boolean
-        get() = root.getBoolean("auto-mount")
+        get() = identifier.root().getBoolean("auto-mount")
 
     override fun reloadConfig() {
-        root.reload()
-    }
-
-    override fun file(): File {
-        return file
+        identifier.root().reload()
     }
 
     override fun root(): Configuration {
-        return root
+        return identifier.root()
     }
 
     override fun id(): String {
@@ -56,7 +44,7 @@ class DefaultScriptProject(val file: File, val root: Configuration) : ScriptProj
     }
 
     override fun name(): String {
-        return root.getString("name") ?: file.name
+        return identifier.name()
     }
 
     override fun run(sender: ProxyCommandSender, compile: Boolean): Boolean {
