@@ -7,7 +7,7 @@ import taboolib.module.lang.sendLang
 import java.io.File
 
 fun getProject(file: File): ScriptProject? {
-    return Artifex.api().getScriptProjectManager().getProjects().firstOrNull { it.file().name == file.name }
+    return Artifex.api().getScriptProjectManager().getRunningProjects().firstOrNull { it.file().name == file.name }
 }
 
 fun runProject(file: File, sender: ProxyCommandSender, compile: Boolean = false): Boolean {

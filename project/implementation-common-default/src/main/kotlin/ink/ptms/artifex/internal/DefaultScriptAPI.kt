@@ -10,6 +10,9 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.PlatformFactory
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
+import taboolib.module.configuration.Config
+import taboolib.module.configuration.ConfigNode
+import taboolib.module.configuration.Configuration
 import java.io.File
 
 /**
@@ -20,6 +23,14 @@ import java.io.File
  * @since 2022/5/16 00:41
  */
 object DefaultScriptAPI : ArtifexAPI {
+
+    @Config
+    lateinit var conf: Configuration
+        private set
+
+    @ConfigNode("ignore-warning")
+    lateinit var ignoreWarning: List<String>
+        private set
 
     private val environment = DefaultScriptEnvironment()
     private val classLoader by lazy { DefaultRuntimeClassLoader(getRuntimeLibraryFile()) }
@@ -41,6 +52,10 @@ object DefaultScriptAPI : ArtifexAPI {
     }
 
     override fun getPlatformHelper(): PlatformHelper {
+        return PlatformFactory.getAPI()
+    }
+
+    override fun getScriptHelper(): ScriptHelper {
         return PlatformFactory.getAPI()
     }
 
@@ -84,12 +99,14 @@ object DefaultScriptAPI : ArtifexAPI {
     override fun getStatus(): Map<String, String> {
         val map = HashMap<String, String>()
         kotlin.runCatching {
-            map["PlatformHelper"] = getPlatformHelper().javaClass.name
+            map["PlatformHelper"] = kotlin.runCatching { getPlatformHelper().javaClass.name }.getOrElse { "null" }
+            map["ScriptHelper"] = kotlin.runCatching { getScriptHelper().javaClass.name }.getOrElse { "null" }
             map["ScriptCompiler"] = getScriptCompiler().javaClass.name
             map["ScriptEvaluator"] = getScriptEvaluator().javaClass.name
             map["ScriptEnvironment"] = getScriptEnvironment().javaClass.name
             map["ScriptMetaHandler"] = getScriptMetaHandler().javaClass.name
-            map["RuntimeClassLoader"] = getScriptClassLoader().javaClass.name
+            map["ScriptClassLoader"] = getScriptClassLoader().javaClass.name
+            map["ScriptProjectManager"] = kotlin.runCatching { getScriptProjectManager().javaClass.name }.getOrElse { "null" }
             map["ScriptContainerManager"] = getScriptContainerManager().javaClass.name
         }
         return map

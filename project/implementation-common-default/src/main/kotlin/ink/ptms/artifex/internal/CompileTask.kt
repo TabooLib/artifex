@@ -1,13 +1,10 @@
-package ink.ptms.artifex.controller
+package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.controller.internal.reportResult
 import ink.ptms.artifex.script.*
 import taboolib.common.platform.ProxyCommandSender
-import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.submit
 import taboolib.module.lang.sendLang
-import java.io.File
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
@@ -48,7 +45,7 @@ class CompileTask(val script: ScriptSource, val sender: ProxyCommandSender, val 
             if (report != null) {
                 it.onReport(report)
             } else {
-                it.onReport { r -> reportResult(r, sender) }
+                it.onReport { r -> Artifex.api().getScriptHelper().printScriptResult(r, sender) }
             }
             it.onSuccess { script ->
                 if (debug) {

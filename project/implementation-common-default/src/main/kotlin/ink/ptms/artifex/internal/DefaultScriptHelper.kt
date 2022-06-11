@@ -1,7 +1,6 @@
-package ink.ptms.artifex.controller
+package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.controller.internal.scriptsFile
 import ink.ptms.artifex.script.*
 import taboolib.common.io.digest
 import taboolib.common.io.newFile
@@ -18,7 +17,7 @@ import java.io.File
  * @author 坏黑
  * @since 2022/6/9 23:05
  */
-object SimpleScriptHelper : ScriptHelper {
+object DefaultScriptHelper : ScriptHelper {
 
     val baseScriptFolder by lazy { File(getDataFolder(), "scripts") }
 
@@ -43,7 +42,7 @@ object SimpleScriptHelper : ScriptHelper {
     }
 
     override fun printScriptResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender) {
-        if (!report.isIgnored() && GameProjectLoader.ignoreWarning.none { report.message.contains(it) }) {
+        if (!report.isIgnored() && DefaultScriptAPI.ignoreWarning.none { report.message.contains(it) }) {
             sender.sendMessage("${report.severity.color}> $report")
         }
     }
@@ -53,11 +52,11 @@ object SimpleScriptHelper : ScriptHelper {
      *
      * @param script 脚本源
      * @param sender 汇报接收者
-     * @param compileLogging 是否打印编译信息
+     * @param loggingCompile 是否打印编译信息
      * @param prepare 编译前回调函数
      */
-    fun prepareCompile(script: ScriptSource, sender: ProxyCommandSender, compileLogging: Boolean = true, prepare: Runnable = Runnable { }): CompileTask {
-        return CompileTask(script, sender, compileLogging).also { prepare.run() }
+    fun prepareCompile(script: ScriptSource, sender: ProxyCommandSender, loggingCompile: Boolean = true, prepare: Runnable = Runnable { }): CompileTask {
+        return CompileTask(script, sender, loggingCompile).also { prepare.run() }
     }
 
     /**
@@ -65,11 +64,11 @@ object SimpleScriptHelper : ScriptHelper {
      *
      * @param script 脚本文本
      * @param sender 汇报接收者
-     * @param beforeLogging 是否在编译前发送消息
+     * @param loggingBefore 是否在编译前发送消息
      */
-    fun compileByText(script: String, sender: ProxyCommandSender, beforeLogging: Boolean = true): ScriptCompiled? {
+    fun compileByText(script: String, sender: ProxyCommandSender, loggingBefore: Boolean = true): ScriptCompiled? {
         return prepareCompile(Artifex.api().getScriptCompiler().toScriptSource("main", script), sender) {
-            if (beforeLogging) {
+            if (loggingBefore) {
                 sender.sendLang("command-script-shell-compile")
             }
         }.apply(ScriptRuntimeProperty())
@@ -81,18 +80,18 @@ object SimpleScriptHelper : ScriptHelper {
      * @param script 脚本文件
      * @param sender 汇报接收者
      * @param providedProperties 构建参数
-     * @param beforeLogging 是否在编译前发送消息
+     * @param loggingBefore 是否在编译前发送消息
      * @param save 是否保存编译文件
      */
     fun compileByProvidedProperties(
         script: File,
         sender: ProxyCommandSender,
         providedProperties: Map<String, Any>,
-        beforeLogging: Boolean = true,
+        loggingBefore: Boolean = true,
         save: Boolean = true,
     ): ScriptCompiled? {
         val compiled = prepareCompile(Artifex.api().getScriptCompiler().toScriptSource(script), sender) {
-            if (beforeLogging) {
+            if (loggingBefore) {
                 sender.sendLang("command-script-compile-info", providedProperties)
             }
         }.apply(ScriptRuntimeProperty().also {
@@ -100,7 +99,7 @@ object SimpleScriptHelper : ScriptHelper {
         })
         // 释放编译文件
         if (save) {
-            compiled?.generateScriptJar(newFile(scriptsFile, ".build/${script.nameWithoutExtension}.jar"))
+            compiled?.generateScriptJar(newFile(baseScriptFolder, ".build/${script.nameWithoutExtension}.jar"))
         }
         return compiled
     }

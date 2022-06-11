@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":project:implementation-bukkit"))
     implementation(project(":project:implementation-bungee"))
     implementation(project(":project:implementation-common-default"))
+    implementation(project(":project:implementation-common-project"))
 }
 
 tasks {

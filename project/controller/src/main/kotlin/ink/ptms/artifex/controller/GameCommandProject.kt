@@ -90,7 +90,7 @@ object GameCommandProject {
     @CommandBody
     val status = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val projects = Artifex.api().getScriptProjectManager().getProjects()
+            val projects = Artifex.api().getScriptProjectManager().getRunningProjects()
             if (projects.isEmpty()) {
                 sender.sendLang("command-script-status-empty-project")
             } else {

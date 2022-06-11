@@ -1,4 +1,4 @@
-package ink.ptms.artifex.controller
+package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.controller.internal.*
@@ -26,7 +26,7 @@ import kotlin.collections.ArrayList
  * @author 坏黑
  * @since 2022/5/23 13:28
  */
-class GameProject(val file: File, val root: Configuration) : ScriptProject {
+class DefaultScriptProject(val file: File, val root: Configuration) : ScriptProject {
 
     private val exchangeData = ConcurrentHashMap<String, Any>()
     private val runningScripts = ArrayList<Script>()
@@ -137,7 +137,7 @@ class GameProject(val file: File, val root: Configuration) : ScriptProject {
         data["@Project"] = this
         // 运行脚本
         runJarFile(buildFile, sender, mapOf("@Id" to id), emptyMap(), autoMount, false) {
-            container().exchangeData()["@Project"] = this@GameProject
+            container().exchangeData()["@Project"] = this@DefaultScriptProject
             runningScripts += this
         }
     }

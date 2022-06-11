@@ -15,7 +15,6 @@ internal val scriptsFile = File(getDataFolder(), "scripts")
  * 获取脚本的所有实现（指引用该脚本的所有其他脚本）
  */
 fun ScriptContainer.implementations(): List<ScriptContainer> {
-    return Artifex.api().getScriptContainerManager().getAll().filter { it.script().baseScript().otherImportScripts().contains(id()) }
 }
 
 /**
@@ -80,11 +79,6 @@ fun File.searchProject(project: String): File? {
  * @param props 编译参数
  */
 fun getScriptVersion(file: File, props: Map<String, Any>): String {
-    val property = ScriptRuntimeProperty().also { property ->
-        property.providedProperties.putAll(props)
-    }
-    val digest = property.digest()
-    return "${digest}#@file:Art\n${file.readText()}".digest("sha-1")
 }
 
 /**
@@ -93,10 +87,6 @@ fun getScriptVersion(file: File, props: Map<String, Any>): String {
  * @param sender 接收人
  */
 fun reportResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender) {
-    // > INFO: (138, 13): This annotation is not applicable to target 'expression' and use site target '@file'
-    if (report.severity > ScriptResult.Severity.DEBUG && !report.isIgnored() && GameProjectLoader.ignoreWarning.none { report.message.contains(it) }) {
-        sender.sendMessage("${report.severity.color}> $report")
-    }
 }
 
 internal fun checkFileNotRunning(file: File, sender: ProxyCommandSender): Boolean {
