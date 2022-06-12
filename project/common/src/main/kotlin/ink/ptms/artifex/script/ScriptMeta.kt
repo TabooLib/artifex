@@ -23,7 +23,12 @@ interface ScriptMeta {
     fun generateJar(file: File)
 
     /**
-     * 保存到文件
+     * 保存到 ByteArray
+     */
+    fun generateJar(): ByteArray
+
+    /**
+     * 保存 Meta 文件到 Configuration
      */
     fun generateMeta(): Configuration
 

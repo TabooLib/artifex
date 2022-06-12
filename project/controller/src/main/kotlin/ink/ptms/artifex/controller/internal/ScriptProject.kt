@@ -33,7 +33,7 @@ fun reloadProject(file: File, sender: ProxyCommandSender, compile: Boolean = fal
     }
     val project = getProject(file)!!
     project.reloadConfig()
-    project.reload(sender, compile = compile)
+    project.reload(sender, forceCompile = compile)
     return true
 }
 

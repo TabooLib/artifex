@@ -14,7 +14,8 @@ import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
 import kotlin.script.experimental.util.PropertiesCollection
 
-val scriptsFile by lazy { Artifex.api().getScriptHelper().baseScriptFolder() }
+val scriptsFile: File
+    get() = Artifex.api().getScriptHelper().baseScriptFolder()
 
 fun File.isKts(include: String): Boolean {
     return (name == include && extension == "kts") || name == "$include.kts"

@@ -2,7 +2,6 @@ package ink.ptms.artifex.script
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.module.configuration.Configuration
-import java.io.File
 
 /**
  * Artifex
@@ -24,7 +23,7 @@ interface ScriptProject : Exchanges {
     fun id(): String
 
     /**
-     * 名称
+     * 工程名称
      */
     fun name(): String
 
@@ -32,24 +31,27 @@ interface ScriptProject : Exchanges {
      * 运行脚本工程
      *
      * @param sender 日志接收者
-     * @param compile 强制编译
+     * @param forceCompile 强制编译
+     * @param loggingBefore 是否在运行前发送调试日志
      */
-    fun run(sender: ProxyCommandSender, compile: Boolean = false): Boolean
+    fun run(sender: ProxyCommandSender, forceCompile: Boolean = false, loggingBefore: Boolean = true): Boolean
 
     /**
      * 重载
      *
      * @param sender 日志接收者
-     * @param compile 强制编译
+     * @param forceCompile 强制编译
+     * @param loggingBefore 是否在运行前发送调试日志
      */
-    fun reload(sender: ProxyCommandSender, compile: Boolean = false): Boolean
+    fun reload(sender: ProxyCommandSender, forceCompile: Boolean = false, loggingBefore: Boolean = true): Boolean
 
     /**
      * 释放
      *
      * @param sender 日志接收者
+     * @param loggingBefore 是否在运行前发送调试日志
      */
-    fun release(sender: ProxyCommandSender)
+    fun release(sender: ProxyCommandSender, loggingBefore: Boolean = true)
 
     /**
      * 是否有脚本正在运行（工程是否正在运行）

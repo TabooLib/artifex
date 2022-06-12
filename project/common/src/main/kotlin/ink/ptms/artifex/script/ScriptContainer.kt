@@ -18,6 +18,8 @@ interface ScriptContainer : Exchanges {
 
     /**
      * 记录脚本资源
+     * @param name 名称
+     * @param resource 释放时回调函数
      */
     fun resource(name: String, resource: Runnable)
 
@@ -27,9 +29,15 @@ interface ScriptContainer : Exchanges {
     fun resources(): List<String>
 
     /**
-     * 释放所有资源
+     * 强制释放资源
      */
-    fun release(): Boolean
+    fun releaseNow(): Boolean
+
+    /**
+     * 安全的释放资源
+     * @param releaseImplementations 是否同时释放实现（指引用该脚本的其他脚本）
+     */
+    fun releaseSafely(releaseImplementations: Boolean): ReleaseResult
 
     /**
      * 脚本是否在运行状态

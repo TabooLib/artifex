@@ -24,12 +24,18 @@ interface ScriptProjectIdentifier {
     /**
      * 加载为脚本工程对象
      */
-    fun loadToProject(): ScriptProject
+    fun load(): ScriptProject
 
     /**
      * 开发版本
      */
-    interface DevIdentifier : ScriptProjectIdentifier
+    interface DevIdentifier : ScriptProjectIdentifier {
+
+        /**
+         * 构建为分发版本
+         */
+        fun build(): ScriptProjectArtifact
+    }
 
     /**
      * 分发版本

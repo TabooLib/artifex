@@ -8,6 +8,7 @@ import taboolib.common.io.newFile
 import taboolib.common.reflect.Reflex.Companion.invokeConstructor
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.jar.JarEntry
@@ -39,14 +40,21 @@ class ArtScriptMeta(
 
     override fun generateJar(file: File) {
         file.delete()
-        val zip = ZipOutputStream(FileOutputStream(newFile(file)))
-        zip.use {
-            zip.putNextEntry(JarEntry("meta.json"))
-            zip.write(generateMeta().toString().toByteArray())
-            compilerOutputFiles.forEach { (name, v) ->
-                zip.putNextEntry(JarEntry(name))
-                zip.write(v)
+        newFile(file).writeBytes(generateJar())
+    }
+
+    override fun generateJar(): ByteArray {
+        return ByteArrayOutputStream().use { byteArrayOutputStream ->
+            val zip = ZipOutputStream(byteArrayOutputStream)
+            zip.use {
+                zip.putNextEntry(JarEntry("meta.json"))
+                zip.write(generateMeta().toString().toByteArray())
+                compilerOutputFiles.forEach { (name, v) ->
+                    zip.putNextEntry(JarEntry(name))
+                    zip.write(v)
+                }
             }
+            byteArrayOutputStream.toByteArray()
         }
     }
 

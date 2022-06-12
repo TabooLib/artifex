@@ -1,6 +1,7 @@
 package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.script.ScriptProject
+import ink.ptms.artifex.script.ScriptProjectArtifact
 import ink.ptms.artifex.script.ScriptProjectConstructor
 import ink.ptms.artifex.script.ScriptProjectIdentifier
 import taboolib.module.configuration.Configuration
@@ -26,8 +27,12 @@ open class DefaultDevIdentifier(val file: File) : ScriptProjectIdentifier.DevIde
         return root
     }
 
-    override fun loadToProject(): ScriptProject {
+    override fun load(): ScriptProject {
         return DefaultDevScriptProject(this, Constructor(this))
+    }
+
+    override fun build(): ScriptProjectArtifact {
+        TODO("Not yet implemented")
     }
 
     open class Constructor(val identifier: DefaultDevIdentifier) : ScriptProjectConstructor {

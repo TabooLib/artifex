@@ -1,5 +1,6 @@
 package ink.ptms.artifex.internal
 
+import ink.ptms.artifex.script.ScriptMeta
 import ink.ptms.artifex.script.ScriptProjectConstructor
 import ink.ptms.artifex.script.ScriptProjectIdentifier
 
@@ -12,5 +13,11 @@ import ink.ptms.artifex.script.ScriptProjectIdentifier
  */
 class DefaultDevScriptProject(identifier: ScriptProjectIdentifier, constructor: ScriptProjectConstructor) : DefaultScriptProject(identifier, constructor) {
 
+    override fun checkScripts(): Boolean {
+        TODO("Not yet implemented")
+    }
 
+    override fun collectScripts(forceCompile: Boolean): List<ScriptMeta> {
+        TODO("Not yet implemented")
+    }
 }

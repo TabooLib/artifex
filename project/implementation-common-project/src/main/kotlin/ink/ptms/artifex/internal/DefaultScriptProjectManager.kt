@@ -29,7 +29,7 @@ object DefaultScriptProjectManager : ScriptProjectManager {
 
     @Awake(LifeCycle.ENABLE)
     fun load() {
-        getProjects().forEach { applyProject(it.loadToProject()) }
+        getProjects().forEach { applyProject(it.load()) }
         console().sendLang("project-loaded", runningProjects.size)
         runningProjects.forEach { it.run(console()) }
     }

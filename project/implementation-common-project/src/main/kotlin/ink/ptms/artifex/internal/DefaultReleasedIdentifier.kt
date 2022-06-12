@@ -3,6 +3,7 @@ package ink.ptms.artifex.internal
 import ink.ptms.artifex.script.ScriptProject
 import ink.ptms.artifex.script.ScriptProjectConstructor
 import ink.ptms.artifex.script.ScriptProjectIdentifier
+import ink.ptms.artifex.script.toFileSet
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.io.File
@@ -21,19 +22,11 @@ open class DefaultReleasedIdentifier(val zip: ZipInputStream) : ScriptProjectIde
 
     constructor(file: File): this(ZipInputStream(FileInputStream(file)))
 
-    val data = HashMap<String, ByteArray>()
+    val fileSet = zip.toFileSet()
     var root: Configuration? = null
 
     init {
-        while (true) {
-            val entry = zip.nextEntry
-            if (entry != null) {
-                data[entry.name] = zip.readBytes()
-            } else {
-                break
-            }
-        }
-        root = Configuration.loadFromString(data["project.yml"]?.toString(StandardCharsets.UTF_8) ?: error("project.yml not found"), Type.YAML)
+        root = Configuration.loadFromString(fileSet["project.yml"]?.toString(StandardCharsets.UTF_8) ?: error("project.yml not found"), Type.YAML)
     }
 
     override fun name(): String {
@@ -44,14 +37,14 @@ open class DefaultReleasedIdentifier(val zip: ZipInputStream) : ScriptProjectIde
         return root!!
     }
 
-    override fun loadToProject(): ScriptProject {
+    override fun load(): ScriptProject {
         return DefaultReleasedScriptProject(this, Constructor(this))
     }
 
     open class Constructor(val identifier: DefaultReleasedIdentifier) : ScriptProjectConstructor {
 
         override fun getFile(name: String): ByteArray? {
-            return identifier.data[name]
+            return identifier.fileSet[name]
         }
     }
 }

@@ -15,14 +15,14 @@ internal fun releaseFile(file: File, sender: ProxyCommandSender, force: Boolean)
         } else {
             sender.sendLang("command-script-release-error", file.nameWithoutExtension, implementations.map { it.id() })
         }
-    } else if (container.second.release()) {
+    } else if (container.second.releaseNow()) {
         sender.sendLang("command-script-release", container.second.id())
     }
 }
 
 internal fun releaseScript(container: ScriptContainer, sender: ProxyCommandSender, info: Boolean = true) {
     container.implementations().forEach { releaseScript(it, sender, info) }
-    if (container.release() && info) {
+    if (container.releaseNow() && info) {
         sender.sendLang("command-script-release", container.id())
     }
 }

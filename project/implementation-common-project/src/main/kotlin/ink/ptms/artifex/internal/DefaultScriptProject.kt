@@ -18,7 +18,7 @@ import kotlin.collections.ArrayList
  * @author 坏黑
  * @since 2022/5/23 13:28
  */
-open class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val constructor: ScriptProjectConstructor) : ScriptProject {
+abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val constructor: ScriptProjectConstructor) : ScriptProject {
 
     private val exchangeData = ConcurrentHashMap<String, Any>()
     private val runningScripts = ArrayList<Script>()
@@ -31,8 +31,40 @@ open class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val con
     val autoMount: Boolean
         get() = identifier.root().getBoolean("auto-mount")
 
-    override fun reloadConfig() {
-        identifier.root().reload()
+    /**
+     * 检查脚本是否可以启动
+     */
+    abstract fun checkScripts(): Boolean
+
+    /**
+     * 整理脚本
+     * @param forceCompile 是否强制编译
+     */
+    abstract fun collectScripts(forceCompile: Boolean): List<ScriptMeta>
+
+    /**
+     * 释放所有资源
+     */
+    open fun releaseAll(sender: ProxyCommandSender) {
+        // 释放脚本
+        runningScripts.forEach { releaseScript(sender, it.container()) }
+        runningScripts.clear()
+        // 注销交换数据
+        exchangeData.clear()
+        Artifex.api().getScriptContainerManager().resetExchangeData(id)
+    }
+
+    /**
+     * 释放脚本
+     */
+    open fun releaseScript(sender: ProxyCommandSender, container: ScriptContainer) {
+        when (val result = container.releaseSafely(true)) {
+            // 正在被引用
+            is ReleaseResult.Referenced -> sender.sendLang("command-script-release-error", id(), result.names)
+            is ReleaseResult.Default -> {
+                result.scripts.forEach { sender.sendLang("command-script-release", it) }
+            }
+        }
     }
 
     override fun root(): Configuration {
@@ -47,29 +79,44 @@ open class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val con
         return identifier.name()
     }
 
-    override fun run(sender: ProxyCommandSender, compile: Boolean): Boolean {
-        sender.sendLang("project-start", name())
-        // 编译
-        val scripts = compileFiles(compile = compile) ?: return false
-        // 运行
-        runPrimaryThread { scripts.forEach { runFile(it, sender) } }
-        return true
+    override fun run(sender: ProxyCommandSender, forceCompile: Boolean, loggingBefore: Boolean): Boolean {
+        if (loggingBefore) {
+            sender.sendLang("project-start", name())
+        }
+        if (!checkScripts()) {
+            return false
+        }
+        val scripts = collectScripts(forceCompile)
+        if (scripts.isEmpty()) {
+            return false
+        }
+        TODO("运行脚本")
     }
 
-    override fun reload(sender: ProxyCommandSender, compile: Boolean): Boolean {
-        sender.sendLang("project-reload", name())
-        // 编译脚本
-        val scripts = compileFiles(checkRunning = false, compile = compile) ?: return false // 若未成功编译则不会继续执行
-        // 释放脚本
-        releaseAll(sender)
-        // 运行
-        runPrimaryThread { scripts.forEach { runFile(it, sender) } }
-        return true
+    override fun reload(sender: ProxyCommandSender, forceCompile: Boolean, loggingBefore: Boolean): Boolean {
+        if (loggingBefore) {
+            sender.sendLang("project-reload", name())
+        }
+        val scripts = collectScripts(forceCompile)
+        if (scripts.isEmpty()) {
+            return false // 若未成功编译则不会继续执行
+        }
+        TODO("释放脚本，运行脚本")
     }
 
-    override fun release(sender: ProxyCommandSender) {
-        sender.sendLang("project-release", name())
+    override fun release(sender: ProxyCommandSender, loggingBefore: Boolean) {
+        if (loggingBefore) {
+            sender.sendLang("project-release", name())
+        }
         releaseAll(sender)
+    }
+
+    override fun isRunning(): Boolean {
+        return runningScripts.isNotEmpty()
+    }
+
+    override fun reloadConfig() {
+        identifier.root().reload()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -83,10 +130,6 @@ open class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val con
 
     override fun exchangeData(): MutableMap<String, Any> {
         return exchangeData
-    }
-
-    override fun isRunning(): Boolean {
-        return runningScripts.isNotEmpty()
     }
 
     fun compileFiles(checkRunning: Boolean = true, compile: Boolean = false): List<File>? {
@@ -128,12 +171,5 @@ open class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val con
             container().exchangeData()["@Project"] = this@DefaultScriptProject
             runningScripts += this
         }
-    }
-
-    fun releaseAll(sender: ProxyCommandSender) {
-        runningScripts.forEach { releaseScript(it.container(), sender, false) }
-        runningScripts.clear()
-        exchangeData.clear()
-        Artifex.api().getScriptContainerManager().resetExchangeData(id)
     }
 }

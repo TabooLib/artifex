@@ -1,19 +1,16 @@
 package ink.ptms.artifex
 
 import ink.ptms.artifex.kotlin.*
-import ink.ptms.artifex.script.ScriptCompiled
-import ink.ptms.artifex.script.ScriptMeta
-import ink.ptms.artifex.script.ScriptMetaHandler
+import ink.ptms.artifex.kotlin.reader.ScriptFileReaderVer1
+import ink.ptms.artifex.script.*
 import taboolib.common.reflect.Reflex.Companion.getProperty
-import taboolib.common.reflect.Reflex.Companion.invokeConstructor
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.io.File
-import java.util.jar.JarFile
-import kotlin.script.experimental.api.CompiledScript
+import java.nio.charset.StandardCharsets
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 import kotlin.script.experimental.api.KotlinType
-import kotlin.script.experimental.api.ScriptCompilationConfiguration
-import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
 import kotlin.script.experimental.util.PropertiesCollection
 
 /**
@@ -52,20 +49,32 @@ class ArtScriptMetaHandler : ScriptMetaHandler {
     }
 
     override fun getScriptMeta(file: File): ScriptMeta {
-        val jarFile = JarFile(file)
-        val metaEntry = jarFile.getJarEntry("meta.json") ?: error("Script meta not found")
-        val meta = Configuration.loadFromString(jarFile.getInputStream(metaEntry).reader().readText(), Type.JSON)
-        // 版本向下支持
-        // 与 ArtScriptMeta#generateMeta 中的方法对应
-        return when (meta.getInt("version.compiler")) {
-            // 2022.5.19 第一版
-            1 -> ReaderImpl1.read(meta, jarFile)
-            else -> error("Unsupported version ${meta.getInt("version")}")
+        return getScriptMeta(ZipFile(file).toFileSet(readFully = true))
+    }
+
+    override fun getScriptMeta(zipInputStream: ZipInputStream): ScriptMeta {
+        return getScriptMeta(zipInputStream.toFileSet(readFully = true))
+    }
+
+    override fun getScriptMeta(fileSet: FileSet): ScriptMeta {
+        return getScriptMetaData(fileSet) { version, meta ->
+            when (version) {
+                1 -> ScriptFileReaderVer1.read(meta, fileSet)
+                else -> error("Unsupported version ${meta.getInt("version")}")
+            }
         }
     }
 
     override fun getScriptName(file: File): String {
-        return getScriptMetaData(file) { version, meta ->
+        return getScriptName(ZipFile(file).toFileSet())
+    }
+
+    override fun getScriptName(zipInputStream: ZipInputStream): String {
+        return getScriptName(zipInputStream.toFileSet())
+    }
+
+    override fun getScriptName(fileSet: FileSet): String {
+        return getScriptMetaData(fileSet) { version, meta ->
             when (version) {
                 1 -> meta.getString("name").toString()
                 else -> error("Unsupported version ${meta.getInt("version")}")
@@ -74,7 +83,15 @@ class ArtScriptMetaHandler : ScriptMetaHandler {
     }
 
     override fun getScriptVersion(file: File): String {
-        return getScriptMetaData(file) { version, meta ->
+        return getScriptVersion(ZipFile(file).toFileSet())
+    }
+
+    override fun getScriptVersion(zipInputStream: ZipInputStream): String {
+        return getScriptVersion(zipInputStream.toFileSet())
+    }
+
+    override fun getScriptVersion(fileSet: FileSet): String {
+        return getScriptMetaData(fileSet) { version, meta ->
             when (version) {
                 1 -> meta.getString("version.file").toString()
                 else -> error("Unsupported version ${meta.getInt("version")}")
@@ -82,85 +99,9 @@ class ArtScriptMetaHandler : ScriptMetaHandler {
         }
     }
 
-    fun <T> getScriptMetaData(file: File, func: (Int, Configuration) -> T): T {
-        val jarFile = JarFile(file)
-        val metaEntry = jarFile.getJarEntry("meta.json") ?: error("Script meta not found")
-        val meta = Configuration.loadFromString(jarFile.getInputStream(metaEntry).reader().readText(), Type.JSON)
-        return func(meta.getInt("version.compiler"), meta)
-    }
-
-    interface Reader {
-
-        fun read(meta: Configuration, jarFile: JarFile): ScriptMeta
-    }
-
-    object ReaderImpl1 : Reader {
-
-        override fun read(meta: Configuration, jarFile: JarFile): ScriptMeta {
-            // 名字
-            val name = meta.getString("name").toString()
-
-            // 返回值
-            val resultField = if (meta.contains("scripts.$name.result")) {
-                meta.getString("scripts.$name.result.name").toString() to meta.getString("scripts.$name.result.type").toString()
-            } else {
-                null
-            }
-
-            // 构建文件
-            val compilerOutputFiles = HashMap<String, ByteArray>()
-            jarFile.entries().toList().forEach { entry ->
-                // 读取所有 .class 和 .kotlin_module 文件
-                if (entry.name.endsWith(".class") || entry.name.endsWith(".kotlin_module")) {
-                    compilerOutputFiles[entry.name] = jarFile.getInputStream(entry).readBytes()
-                }
-            }
-
-            // 获取所有引用脚本
-            val importScripts = getScriptImports(meta)
-
-            // 依赖脚本
-            fun load(otherName: String): List<CompiledScript> {
-                return meta.getStringList("scripts.$otherName.dependencies").map {
-                    val result = if (meta.contains("scripts.$it.result")) {
-                        meta.getString("scripts.$it.result.name")!! to meta.getString("scripts.$it.result.type")!!
-                    } else {
-                        null
-                    }
-                    val compiledScript = KJvmCompiledScript::class.java.invokeConstructor(
-                        it,
-                        ScriptCompilationConfiguration.Default,
-                        it,
-                        result,
-                        load(it),
-                        ArtScriptMeta.compiledModuleClass.invokeConstructor(compilerOutputFiles)
-                    )
-                    val scriptFile = importScripts.firstOrNull { i -> i.second == it }?.first
-                    checkImportScript(scriptFile, compiledScript, compilerOutputFiles, importScripts)
-                }
-            }
-
-            val otherScripts = load(name)
-            // 构建参数
-            val providedProperties = meta.getMapList("properties").map { it["name"].toString() to it["type"].toString() }.toList()
-            return ArtScriptMeta(name,
-                resultField,
-                otherScripts,
-                compilerOutputFiles,
-                providedProperties,
-                meta.getString("version.file").toString()
-            )
-        }
-
-        fun getScriptFile(name: String): File {
-            return scriptsFile.searchFile { isKts(name) }.firstOrNull() ?: File(scriptsFile, "$name.kts")
-        }
-
-        fun getScriptImports(meta: Configuration): List<Pair<File, String>> {
-            val scripts = meta.getConfigurationSection("scripts") ?: return emptyList()
-            return scripts.getKeys(false).mapNotNull {
-                if (meta.getBoolean("scripts.$it.import")) getScriptFile(meta.getString("scripts.$it.file")!!) to it else null
-            }
-        }
+    fun <T> getScriptMetaData(fileSet: FileSet, func: (Int, Configuration) -> T): T {
+        val meta = fileSet["meta.json"]?.toString(StandardCharsets.UTF_8) ?: error("Script meta not found")
+        val metaFile = Configuration.loadFromString(meta, Type.JSON)
+        return func(metaFile.getInt("version.compiler"), metaFile)
     }
 }
