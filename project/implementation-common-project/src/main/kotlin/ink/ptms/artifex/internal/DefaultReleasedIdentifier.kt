@@ -4,6 +4,7 @@ import ink.ptms.artifex.script.ScriptProject
 import ink.ptms.artifex.script.ScriptProjectConstructor
 import ink.ptms.artifex.script.ScriptProjectIdentifier
 import ink.ptms.artifex.script.toFileSet
+import taboolib.common.platform.function.getDataFolder
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.io.File
@@ -18,11 +19,12 @@ import java.util.zip.ZipInputStream
  * @author 坏黑
  * @since 2022/5/23 13:28
  */
-open class DefaultReleasedIdentifier(val zip: ZipInputStream) : ScriptProjectIdentifier.ReleasedIdentifier {
+class DefaultReleasedIdentifier(val zip: ZipInputStream, val readFully: Boolean) : ScriptProjectIdentifier.ReleasedIdentifier {
 
-    constructor(file: File): this(ZipInputStream(FileInputStream(file)))
+    constructor(file: File): this(ZipInputStream(FileInputStream(file)), false)
 
-    val fileSet = zip.toFileSet()
+    override val fileSet = zip.toFileSet(readFully)
+
     var root: Configuration? = null
 
     init {
@@ -41,9 +43,21 @@ open class DefaultReleasedIdentifier(val zip: ZipInputStream) : ScriptProjectIde
         return DefaultReleasedScriptProject(this, Constructor(this))
     }
 
-    open class Constructor(val identifier: DefaultReleasedIdentifier) : ScriptProjectConstructor {
+    class Constructor(val identifier: DefaultReleasedIdentifier) : ScriptProjectConstructor() {
 
-        override fun getFile(name: String): ByteArray? {
+        override fun dataFolder(): File {
+            return File(getDataFolder().parentFile, identifier.name())
+        }
+
+        override fun files(): Set<String> {
+            return identifier.fileSet.files()
+        }
+
+        override fun has(name: String): Boolean {
+            return identifier.fileSet.has(name)
+        }
+
+        override fun get(name: String): ByteArray? {
             return identifier.fileSet[name]
         }
     }

@@ -66,7 +66,7 @@ class ArtScriptMetaHandler : ScriptMetaHandler {
     }
 
     override fun getScriptName(file: File): String {
-        return getScriptName(ZipFile(file).toFileSet())
+        return if (file.isZipFile()) getScriptName(ZipFile(file).toFileSet()) else error("Not a zip file")
     }
 
     override fun getScriptName(zipInputStream: ZipInputStream): String {

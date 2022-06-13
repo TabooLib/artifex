@@ -11,5 +11,8 @@ import java.io.File
  */
 interface ScriptFileSource : ScriptSource {
 
+    /**
+     * 脚本文件
+     */
     val file: File
 }

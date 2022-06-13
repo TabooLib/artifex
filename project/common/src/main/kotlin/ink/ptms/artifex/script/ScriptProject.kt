@@ -13,19 +13,24 @@ import taboolib.module.configuration.Configuration
 interface ScriptProject : Exchanges {
 
     /**
+     * 运行序号
+     */
+    fun runningId(): String
+
+    /**
      * 工程文件
      */
     fun root(): Configuration
 
     /**
-     * 运行序号
-     */
-    fun id(): String
-
-    /**
      * 工程名称
      */
     fun name(): String
+
+    /**
+     * 获取构造器
+     */
+    fun constructor(): ScriptProjectConstructor
 
     /**
      * 运行脚本工程

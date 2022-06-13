@@ -12,9 +12,9 @@ import java.io.File
 interface ScriptFileFinder {
 
     /**
-     * 查找脚本文件
+     * 获取脚本文件
      * @param scriptPath 脚本所在路径
      * @param file 查找文件的名称（test 或 test.kts）
      */
-    fun searchFile(scriptPath: String?, file: String): Set<File>
+    fun getScriptFile(scriptPath: String?, file: String): Set<File>
 }

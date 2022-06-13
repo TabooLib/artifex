@@ -8,4 +8,9 @@ package ink.ptms.artifex.script
  * @since 2022/6/12 17:00
  */
 interface ScriptProjectArtifact {
+
+    /**
+     * 插件版本
+     */
+    interface Plugin
 }

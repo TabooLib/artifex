@@ -1,6 +1,7 @@
 package ink.ptms.artifex.script
 
 import taboolib.module.configuration.Configuration
+import java.io.File
 
 /**
  * Artifex
@@ -32,13 +33,26 @@ interface ScriptProjectIdentifier {
     interface DevIdentifier : ScriptProjectIdentifier {
 
         /**
+         * 工程文件
+         */
+        val file: File
+
+        /**
          * 构建为分发版本
          */
-        fun build(): ScriptProjectArtifact
+        fun buildToArtifact(): ScriptProjectArtifact
+
+        /**
+         * 构建为插件版本
+         */
+        fun buildToArtifactPlugin(): ScriptProjectArtifact.Plugin
     }
 
     /**
      * 分发版本
      */
-    interface ReleasedIdentifier : ScriptProjectIdentifier
+    interface ReleasedIdentifier : ScriptProjectIdentifier {
+
+        val fileSet: FileSet
+    }
 }

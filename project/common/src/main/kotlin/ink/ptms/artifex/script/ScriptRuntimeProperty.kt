@@ -11,6 +11,13 @@ import java.util.*
 @Suppress("SimplifiableCallChain")
 class ScriptRuntimeProperty {
 
+    constructor()
+
+    constructor(runArgs: Map<String, Any>, providedProperties: Map<String, Any>) {
+        this.runArgs += runArgs
+        this.providedProperties += providedProperties
+    }
+
     /**
      * 默认引用
      */
@@ -24,7 +31,7 @@ class ScriptRuntimeProperty {
     /**
      * 默认脚本文件查找器
      */
-    val defaultFileFinder: ScriptFileFinder? = null
+    var defaultFileFinder: ScriptFileFinder? = null
 
     /**
      * 通过 runArgs 关键字调用的变量容器

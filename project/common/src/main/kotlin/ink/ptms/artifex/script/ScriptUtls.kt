@@ -3,6 +3,7 @@ package ink.ptms.artifex.script
 import taboolib.common.platform.function.isPrimaryThread
 import taboolib.common.platform.function.submit
 import java.io.File
+import java.util.concurrent.CompletableFuture
 
 /**
  * 文件是否不存在
@@ -28,12 +29,14 @@ fun String.toClassIdentifier(): String {
 /**
  * 在主线程运行逻辑
  */
-fun runPrimaryThread(func: () -> Unit) {
+fun <T> runPrimaryThread(func: () -> T): T {
+    val future = CompletableFuture<T>()
     if (isPrimaryThread) {
-        func()
+        future.complete(func())
     } else {
-        submit { func() }
+        submit { future.complete(func()) }
     }
+    return future.get()
 }
 
 private fun Char.isValidIdentifier(): Boolean {

@@ -10,7 +10,9 @@ import taboolib.common.platform.PlatformFactory
 import taboolib.common.platform.function.console
 import taboolib.module.lang.sendLang
 import java.io.File
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 
 /**
  * Artifex
@@ -21,7 +23,7 @@ import java.util.zip.ZipFile
  */
 object DefaultScriptProjectManager : ScriptProjectManager {
 
-    val runningProjects = ArrayList<ScriptProject>()
+    val runningProjects = CopyOnWriteArrayList<ScriptProject>()
 
     init {
         PlatformFactory.registerAPI<ScriptProjectManager>(this)
@@ -31,7 +33,7 @@ object DefaultScriptProjectManager : ScriptProjectManager {
     fun load() {
         getProjects().forEach { applyProject(it.load()) }
         console().sendLang("project-loaded", runningProjects.size)
-        runningProjects.forEach { it.run(console()) }
+        runningProjects.forEach { it.run(console(), loggingBefore = false) }
     }
 
     @Awake(LifeCycle.DISABLE)
@@ -41,6 +43,10 @@ object DefaultScriptProjectManager : ScriptProjectManager {
 
     override fun applyProject(project: ScriptProject) {
         runningProjects += project
+    }
+
+    override fun releaseProject(name: String) {
+        runningProjects.removeIf { it.name() == name }
     }
 
     override fun getRunningProject(name: String): ScriptProject? {
@@ -67,6 +73,10 @@ object DefaultScriptProjectManager : ScriptProjectManager {
             isProjectZipFile(file) -> readProjectIdentifierFromZipFile(file)
             else -> error("Unformatted file")
         }
+    }
+
+    override fun toIdentifier(zipInputStream: ZipInputStream, readFully: Boolean): ScriptProjectIdentifier {
+        return DefaultReleasedIdentifier(zipInputStream, readFully)
     }
 
     fun getProjects(file: File): List<ScriptProjectIdentifier> {

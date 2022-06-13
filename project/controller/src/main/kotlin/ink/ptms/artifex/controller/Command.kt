@@ -1,28 +1,44 @@
 package ink.ptms.artifex.controller
 
 import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.controller.internal.*
-import ink.ptms.artifex.script.runPrimaryThread
+import ink.ptms.artifex.script.ScriptContainerManager
+import ink.ptms.artifex.script.ScriptHelper
+import ink.ptms.artifex.script.ScriptMetaHandler
+import ink.ptms.artifex.script.ScriptRuntimeProperty
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.mainCommand
 import taboolib.common.platform.command.subCommand
-import taboolib.common.platform.function.submit
 import taboolib.common5.Demand
 import taboolib.expansion.createHelper
 import taboolib.module.lang.sendLang
 
 /**
  * Artifex
- * ink.ptms.artifex.controller.GameCommand
+ * ink.ptms.artifex.controller.Command
  *
  * @author 坏黑
  * @since 2022/5/19 11:46
  */
 @Suppress("DuplicatedCode")
 @CommandHeader(name = "artifex", aliases = ["art"], permission = "artifex.command")
-object GameCommand {
+object Command {
+
+    private val helper: ScriptHelper
+        get() = Artifex.api().getScriptHelper()
+
+    private val metaHandler: ScriptMetaHandler
+        get() = Artifex.api().getScriptMetaHandler()
+
+    private val containerManager: ScriptContainerManager
+        get() = Artifex.api().getScriptContainerManager()
+
+    private val scripts: List<String>
+        get() = helper.getScriptFiles(jar = false).map { it.name }
+
+    private val scriptsAndJars: List<String>
+        get() = helper.getScriptFiles(jar = true).map { it.name }
 
     @CommandBody
     val main = mainCommand {
@@ -30,7 +46,7 @@ object GameCommand {
     }
 
     @CommandBody
-    val project = GameCommandProject
+    val project = CommandProject
 
     /**
      * 运行脚本，通过命令运行的脚本在参数上仅支持基本类型推断
@@ -43,11 +59,15 @@ object GameCommand {
     @CommandBody
     val run = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptFiles() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptsAndJars }
             execute<ProxyCommandSender> { sender, _, argument ->
-                val file = scriptFile(argument)
+                val file = helper.getScriptFile(argument)
                 if (file?.exists() == true) {
-                    submit(async = true) { runFile(file, sender, emptyMap(), emptyMap()) }
+                    async {
+                        helper.getSimpleEvaluator().prepareEvaluation(file, sender) {
+                            sender.sendLang("command-script-execute", "{}", "{}")
+                        }?.apply(ScriptRuntimeProperty())
+                    }
                 } else {
                     sender.sendLang("command-script-not-found", argument)
                 }
@@ -55,13 +75,17 @@ object GameCommand {
             dynamic(commit = "args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
-                    val args = demand.dataMap.keys.filter { it.startsWith("A") }.associate { it.substring(1) to parseType(demand.get(it)!!) }
-                    val props = demand.dataMap.keys.filter { it.startsWith("P") }.associate { it.substring(1) to parseType(demand.get(it)!!) }
-                    val file = scriptFile(context.argument(-1))
+                    val args = demand.dataMap.keys.filter { it.startsWith("A") }.associate { it.substring(1) to type(demand.get(it)!!) }
+                    val props = demand.dataMap.keys.filter { it.startsWith("P") }.associate { it.substring(1) to type(demand.get(it)!!) }
+                    val mount = demand.tags.contains("M")
+                    val compile = demand.tags.contains("C")
+                    val file = helper.getScriptFile(context.argument(-1))
                     if (file?.exists() == true) {
-                        val mount = demand.tags.contains("M")
-                        val compile = demand.tags.contains("C")
-                        submit(async = true) { runFile(file, sender, args, props, mount = mount, compile = compile) }
+                        async {
+                            helper.getSimpleEvaluator().prepareEvaluation(file, sender, providedProperties = props, forceCompile = compile) {
+                                sender.sendLang("command-script-execute", args, props)
+                            }?.mount(mount)?.apply(ScriptRuntimeProperty(args, props))
+                        }
                     } else {
                         sender.sendLang("command-script-not-found", context.argument(-1))
                     }
@@ -78,20 +102,14 @@ object GameCommand {
     @CommandBody
     val invoke = subCommand {
         dynamic("name") {
-            suggestion<ProxyCommandSender> { _, _ ->
-                Artifex.api().getScriptContainerManager().getAll().map { it.id() }
-            }
+            suggestion<ProxyCommandSender> { _, _ -> containerManager.getAll().map { it.id() } }
             dynamic("method") {
                 execute<ProxyCommandSender> { sender, context, argument ->
-                    runPrimaryThread {
-                        invokeScript(sender, context.argument(-1), argument, emptyArray())
-                    }
+                    helper.invokeScript(sender, context.argument(-1), argument, emptyArray())
                 }
                 dynamic("args", optional = true) {
                     execute<ProxyCommandSender> { sender, context, argument ->
-                        runPrimaryThread {
-                            invokeScript(sender, context.argument(-2), context.argument(-1), argument.split(" ").map { parseType(it) }.toTypedArray())
-                        }
+                        helper.invokeScript(sender, context.argument(-2), context.argument(-1), argument.split(" ").map { type(it) }.toTypedArray())
                     }
                 }
             }
@@ -107,11 +125,11 @@ object GameCommand {
     @CommandBody
     val compile = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptFiles(false) }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scripts }
             execute<ProxyCommandSender> { sender, _, argument ->
-                val file = scriptFile(argument)
+                val file = helper.getScriptFile(argument)
                 if (file?.exists() == true) {
-                    submit(async = true) { compileFile(file, sender, emptyMap()) }
+                    async { helper.getSimpleCompiler().compileByProvidedProperties(file, sender, providedProperties = emptyMap()) }
                 } else {
                     sender.sendLang("command-script-not-found", argument)
                 }
@@ -120,10 +138,10 @@ object GameCommand {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
                     val keys = demand.dataMap.keys.filter { it.startsWith("P") }
-                    val props = keys.associate { it.substring(1) to parseType(demand.get(it)!!) }
-                    val file = scriptFile(context.argument(-1))
+                    val props = keys.associate { it.substring(1) to type(demand.get(it)!!) }
+                    val file = helper.getScriptFile(context.argument(-1))
                     if (file?.exists() == true) {
-                        submit(async = true) { compileFile(file, sender, props) }
+                        async { helper.getSimpleCompiler().compileByProvidedProperties(file, sender, providedProperties = props) }
                     } else {
                         sender.sendLang("command-script-not-found", context.argument(-1))
                     }
@@ -142,11 +160,11 @@ object GameCommand {
     @CommandBody
     val release = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptFiles() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptsAndJars }
             execute<ProxyCommandSender> { sender, _, argument ->
-                val file = scriptFile(argument)
+                val file = helper.getScriptFile(argument)
                 if (file?.exists() == true) {
-                    releaseFile(file, sender, false)
+                    helper.releaseScript(file, sender, releaseImplementations = false)
                 } else {
                     sender.sendLang("command-script-not-found", argument)
                 }
@@ -154,9 +172,9 @@ object GameCommand {
             dynamic("args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
-                    val file = scriptFile(context.argument(-1))
+                    val file = helper.getScriptFile(context.argument(-1))
                     if (file?.exists() == true) {
-                        releaseFile(file, sender, demand.tags.contains("F"))
+                        helper.releaseScript(file, sender, releaseImplementations = demand.tags.contains("F"))
                     } else {
                         sender.sendLang("command-script-not-found", context.argument(-1))
                     }
@@ -175,11 +193,11 @@ object GameCommand {
     @CommandBody
     val reload = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptFiles() }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptsAndJars }
             execute<ProxyCommandSender> { sender, _, argument ->
-                val file = scriptFile(argument)
+                val file = helper.getScriptFile(argument)
                 if (file?.exists() == true) {
-                    submit(async = true) { reloadFile(file, sender, emptyMap(), emptyMap()) }
+                    async { helper.getSimpleEvaluator().reload(file, sender, emptyMap(), emptyMap()) }
                 } else {
                     sender.sendLang("command-script-not-found", argument)
                 }
@@ -187,9 +205,12 @@ object GameCommand {
             dynamic(commit = "args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
-                    val file = scriptFile(context.argument(-1))
+                    val args = demand.dataMap.keys.filter { it.startsWith("A") }.associate { it.substring(1) to type(demand.get(it)!!) }
+                    val props = demand.dataMap.keys.filter { it.startsWith("P") }.associate { it.substring(1) to type(demand.get(it)!!) }
+                    val compile = demand.tags.contains("C")
+                    val file = helper.getScriptFile(context.argument(-1))
                     if (file?.exists() == true) {
-                        submit(async = true) { reloadFile(file, sender, emptyMap(), emptyMap(), compile = demand.tags.contains("C")) }
+                        async { helper.getSimpleEvaluator().reload(file, sender, runArgs = args, providedProperties = props, forceCompile = compile) }
                     } else {
                         sender.sendLang("command-script-not-found", context.argument(-1))
                     }
@@ -213,7 +234,7 @@ object GameCommand {
     @CommandBody
     val status = subCommand {
         execute<ProxyCommandSender> { sender, _, _ ->
-            val containers = Artifex.api().getScriptContainerManager().getAll()
+            val containers = containerManager.getAll()
             if (containers.isEmpty()) {
                 sender.sendLang("command-script-status-empty")
             } else {
@@ -247,25 +268,19 @@ object GameCommand {
     val shell = subCommand {
         dynamic("script") {
             execute<ProxyCommandSender> { sender, _, argument ->
-                submit(async = true) {
-                    val script = SimpleScriptHelper.compileByText(argument, sender)
+                async {
+                    val script = helper.getSimpleCompiler().compileByText(argument, sender)
                     if (script != null) {
-                        runPrimaryThread { runScript(script, sender) }
+                        helper.getSimpleEvaluator().prepareEvaluation(script.generateScriptMeta(), sender) {
+                            sender.sendLang("command-script-shell-execute")
+                        }.loggingReleased(false).apply(ScriptRuntimeProperty())
                     }
                 }
             }
         }
     }
 
-    /**
-     * 构建脚本文件
-     */
-    @CommandBody
-    val build = subCommand {
-
-    }
-
-    fun parseType(value: String): Any {
+    fun type(value: String): Any {
         return try {
             value.toInt()
         } catch (_: Throwable) {

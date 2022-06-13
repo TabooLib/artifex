@@ -5,20 +5,27 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.function.adaptCommandSender
 import taboolib.common.platform.function.console
+import taboolib.common.platform.function.info
 import taboolib.common5.FileWatcher
 import taboolib.module.lang.Language
 import taboolib.module.lang.LanguageFile
 import taboolib.module.lang.TypeList
 import taboolib.module.lang.TypeText
-import java.io.File
 
 /**
  * 初始化语言文件
  */
-fun Script.i18n() {
-    val info = projectInfo()
-    val files = File(info.file(), "@default/i18n").listFiles()?.filter { it.extension == "yml" } ?: emptyList()
-    val i18nMap = I18nReader(files, info.name(), true).fileMap
+fun Script.i18n(fileWatcher: Boolean = true) {
+    val info = project()
+    val files = info.constructor().files().mapNotNull {
+        info("i18n file $it")
+        if (it.startsWith("@default/i18n") && it.endsWith(".yml")) {
+            it.substringAfterLast('/').substringBeforeLast('.') to info.constructor()[it]!!
+        } else {
+            null
+        }
+    }.toMap()
+    val i18nMap = I18nReader(files, info, info.name(), migrate = true, fileWatcher = fileWatcher).fileMap
     // 注册交换数据
     info.exchangeData("@I18n", i18nMap)
     // 注册资源
@@ -112,7 +119,7 @@ fun Script.i18nTextList(user: Any, node: String, vararg args: Any?): List<String
  * 获取语言文件
  */
 private fun Script.i18nMap(): Map<String, LanguageFile> {
-    return projectInfo().exchangeData("@I18n") ?: error("I18n has not been initialized")
+    return project().exchangeData("@I18n") ?: error("I18n has not been initialized")
 }
 
 private fun getLocale(sender: ProxyCommandSender): String {

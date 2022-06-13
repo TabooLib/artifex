@@ -30,7 +30,7 @@ class KotlinCompilationConfigurationHandler(val props: ScriptRuntimeProperty) : 
         val includeScripts = ArrayList<FileScriptSource>()
         annotations.filterByAnnotationType<Include>().flatMap { it.annotation.name.toList() }.forEach { name ->
             // 搜索脚本文件
-            finder.searchFile(scriptPath, name).forEach { file ->
+            finder.getScriptFile(scriptPath, name).forEach { file ->
                 includeScripts += FileScriptSource(file)
             }
         }
@@ -46,7 +46,7 @@ class KotlinCompilationConfigurationHandler(val props: ScriptRuntimeProperty) : 
             }
             // 判定为脚本
             else {
-                val files = finder.searchFile(scriptPath, name)
+                val files = finder.getScriptFile(scriptPath, name)
                 if (files.isEmpty()) {
                     val diagnostic = ArrayList<ScriptDiagnostic>()
                     val error = console().asLangText("compile-referenced-not-found", name)
@@ -104,7 +104,7 @@ class KotlinCompilationConfigurationHandler(val props: ScriptRuntimeProperty) : 
 
     object DefaultFinder : ScriptFileFinder {
 
-        override fun searchFile(scriptPath: String?, file: String): Set<File> {
+        override fun getScriptFile(scriptPath: String?, file: String): Set<File> {
             return if (scriptPath != null) {
                 // 先从当前目录开始找，找不到再从根目录找
                 File(scriptPath).parentFile.searchFile { isKts(file) }.ifEmpty { scriptsFile.searchFile { isKts(file) } }

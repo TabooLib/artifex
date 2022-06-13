@@ -3,7 +3,6 @@ package ink.ptms.artifex.bridge
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.nonExists
 import taboolib.common.io.newFile
-import taboolib.common.platform.function.getDataFolder
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.io.File
@@ -18,10 +17,10 @@ fun Script.config(name: String = "config.yml"): Configuration {
     if (configMap.containsKey(name)) {
         return configMap[name]!!
     }
-    val info = projectInfo()
-    val file = File(getDataFolder().parentFile, "${info.name()}/$name")
+    val info = project()
+    val file = File(info.constructor().dataFolder(), name)
     if (file.nonExists()) {
-        File(info.file(), "@default/config/$name").takeIf { it.exists() }?.copyTo(file)
+        info.constructor()["@default/config/$name"]?.let { newFile(file).writeBytes(it) }
     }
     if (file.exists()) {
         return Configuration.loadFromFile(file).also { configMap[name] = it }
@@ -39,8 +38,8 @@ fun Script.localCache(name: String, saveTime: Long = 1200): Configuration {
     if (localMap.containsKey(name)) {
         return localMap[name]!!
     }
-    val info = projectInfo()
-    val file = newFile(getDataFolder().parentFile, "${info.name()}/$name", create = true)
+    val info = project()
+    val file = newFile(info.constructor().dataFolder(), name)
     val data = Configuration.loadFromFile(file)
     localMap[name] = data
     val task = submit(period = saveTime, async = true) { data.saveToFile(file) }
@@ -49,11 +48,11 @@ fun Script.localCache(name: String, saveTime: Long = 1200): Configuration {
 }
 
 private fun Script.configMap(): MutableMap<String, Configuration> {
-    val info = projectInfo()
+    val info = project()
     return info.exchangeData("@Config") ?: ConcurrentHashMap<String, Configuration>().also { info.exchangeData("@Config", it) }
 }
 
 private fun Script.localCacheMap(): MutableMap<String, Configuration> {
-    val info = projectInfo()
+    val info = project()
     return info.exchangeData("@LocalCache") ?: ConcurrentHashMap<String, Configuration>().also { info.exchangeData("@LocalCache", it) }
 }

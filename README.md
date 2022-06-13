@@ -47,10 +47,10 @@ https://github.com/taboolib/artifex/wiki
     * 游戏内控制器
     * 不实现任何逻辑，仅提供基于 Minecraft 游戏内的脚本控制方法（例如：命令、配置）
 
-* **implementation-bukkit**
+* **implementation-artifex**
     * 实现了 `common` 模块中的平台适配相关接口
     * 提供了 `Bukkit` 专用特性
-    * 依赖 `org.bukkit`
+    * 依赖 `org.artifex`
 
 * **implementation-bungee**
     * 实现了 `common` 模块中的平台适配相关接口

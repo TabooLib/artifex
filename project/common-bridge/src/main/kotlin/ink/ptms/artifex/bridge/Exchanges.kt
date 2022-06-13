@@ -8,7 +8,7 @@ import java.util.*
 /**
  * 获取 Artifex 项目文件
  */
-fun Script.projectInfo(): ScriptProject {
+fun Script.project(): ScriptProject {
     return exchangeData("@Project")
         ?: prepareExchangeData<ScriptProject>("@Project")?.also { exchangeData("@Project", it) }
         ?: error("Not an Artifex project")

@@ -1,5 +1,7 @@
 package ink.ptms.artifex.script
 
+import java.io.File
+
 /**
  * Artifex
  * ink.ptms.artifex.script.ScriptProjectConstructor
@@ -7,10 +9,7 @@ package ink.ptms.artifex.script
  * @author 坏黑
  * @since 2022/6/9 22:53
  */
-interface ScriptProjectConstructor {
+abstract class ScriptProjectConstructor : FileSet() {
 
-    /**
-     * 获取文件
-     */
-    fun getFile(name: String): ByteArray?
+    abstract fun dataFolder(): File
 }

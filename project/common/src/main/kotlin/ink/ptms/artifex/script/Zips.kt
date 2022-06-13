@@ -1,8 +1,13 @@
 package ink.ptms.artifex.script
 
+import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
+
+fun File.isZipFile(): Boolean {
+    return kotlin.runCatching { ZipFile(this) }.isSuccess
+}
 
 fun ZipFile.toFileSet(readFully: Boolean = false): FileSet {
     return ZipFileMemory(this, readFully)
@@ -20,9 +25,24 @@ abstract class FileSet {
     abstract fun files(): Set<String>
 
     /**
+     * 是否存在某个文件
+     */
+    abstract fun has(name: String): Boolean
+
+    /**
      * 获取文件内容
      */
     abstract operator fun get(name: String): ByteArray?
+
+    /**
+     * 搜索文件
+     */
+    fun search(name: String, extension: String): String? {
+        return files().firstOrNull {
+            val fn = it.substringAfterLast('/')
+            fn == name || (fn.substringBeforeLast('.') == name && fn.substringAfterLast('.') == extension)
+        }
+    }
 }
 
 class ZipFileMemory(val jar: ZipFile, readFully: Boolean = false) : FileSet() {
@@ -41,6 +61,10 @@ class ZipFileMemory(val jar: ZipFile, readFully: Boolean = false) : FileSet() {
 
     override fun files(): Set<String> {
         return keys.keys
+    }
+
+    override fun has(name: String): Boolean {
+        return keys.containsKey(name)
     }
 
     override fun get(name: String): ByteArray? {
@@ -65,6 +89,10 @@ class ZipInputStreamMemory(val zipInputStream: ZipInputStream, readFully: Boolea
 
     override fun files(): Set<String> {
         return keys.keys
+    }
+
+    override fun has(name: String): Boolean {
+        return keys.containsKey(name)
     }
 
     override operator fun get(name: String): ByteArray? {

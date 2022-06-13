@@ -1,4 +1,4 @@
-package ink.ptms.artifex.controller
+package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.*
@@ -11,33 +11,20 @@ import java.util.function.Consumer
 
 /**
  * Artifex
- * ink.ptms.artifex.controller.CompileTask
+ * ink.ptms.artifex.controller.TaskCompiler
  *
  * @author 坏黑
  * @since 2022/6/9 23:05
  */
-class CompileTask(val script: ScriptSource, val sender: ProxyCommandSender, val debug: Boolean) {
+class TaskCompiler(private val script: ScriptSource, private val sender: ProxyCommandSender, private val loggingCompile: Boolean): ScriptTaskCompiler {
 
-    val time = System.currentTimeMillis()
-    val future = CompletableFuture<ScriptCompiled?>()
+    private val time = System.currentTimeMillis()
+    private val future = CompletableFuture<ScriptCompiled?>()
 
-    fun init() {
-        if (script is ScriptFileSource && script.file.extension != "kts") {
-            return
+    override fun apply(property: ScriptRuntimeProperty, report: Consumer<ScriptResult.Diagnostic>?): ScriptCompiled? {
+        if (!init()) {
+            return null
         }
-        if (debug) {
-            val task = submit(async = true, period = 20, delay = 20) {
-                // > 1s
-                val seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
-                if (seconds > 0) {
-                    sender.sendLang("command-script-compile-wait", seconds)
-                }
-            }
-            future.thenAccept { task.cancel() }
-        }
-    }
-
-    fun apply(property: ScriptRuntimeProperty, report: Consumer<ScriptResult.Diagnostic>? = null): ScriptCompiled? {
         return Artifex.api().getScriptCompiler().compile {
             it.source(script)
             it.configuration(property)
@@ -48,17 +35,34 @@ class CompileTask(val script: ScriptSource, val sender: ProxyCommandSender, val 
                 it.onReport { r -> Artifex.api().getScriptHelper().printScriptResult(r, sender) }
             }
             it.onSuccess { script ->
-                if (debug) {
+                if (loggingCompile) {
                     sender.sendLang("command-script-compile-successful", TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time))
                 }
                 future.complete(script)
             }
             it.onFailure {
-                if (debug) {
+                if (loggingCompile) {
                     sender.sendLang("command-script-compile-failed", TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time))
                 }
                 future.complete(null)
             }
         }
+    }
+
+    private fun init(): Boolean {
+        if (script is ScriptFileSource && script.file.extension != "kts") {
+            return false
+        }
+        if (loggingCompile) {
+            val task = submit(async = true, period = 20, delay = 20) {
+                // > 1s
+                val seconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
+                if (seconds > 0) {
+                    sender.sendLang("command-script-compile-wait", seconds)
+                }
+            }
+            future.thenAccept { task.cancel() }
+        }
+        return true
     }
 }

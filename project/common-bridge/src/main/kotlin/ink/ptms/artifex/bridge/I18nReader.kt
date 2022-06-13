@@ -1,6 +1,8 @@
 package ink.ptms.artifex.bridge
 
+import ink.ptms.artifex.script.ScriptProject
 import ink.ptms.artifex.script.nonExists
+import taboolib.common.io.newFile
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.submit
 import taboolib.common.platform.function.warning
@@ -10,6 +12,7 @@ import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.SecuredFile
 import taboolib.module.lang.*
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 
 /**
@@ -19,22 +22,24 @@ import java.text.SimpleDateFormat
  * @author sky
  * @since 2021/6/21 11:48 下午
  */
-class I18nReader(files: List<File>, val name: String, val migrate: Boolean = true) {
+class I18nReader(files: Map<String, ByteArray>, val info: ScriptProject, val name: String, val migrate: Boolean = true, val fileWatcher: Boolean = true) {
 
     val fileMap = HashMap<String, LanguageFile>()
     val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm")
 
     init {
         files.forEach {
-            val node = it.nameWithoutExtension
+            val node = it.key
             val nodes = HashMap<String, Type>()
-            val configuration = Configuration.loadFromFile(it)
+            val configuration = Configuration.loadFromString(it.value.toString(StandardCharsets.UTF_8))
             // 加载内存中的原件
             loadNodes(configuration, nodes, node)
             // 释放文件
-            val file = releaseFile(it)
+            val file = releaseFile(it.key, it.value)
             // 移除文件监听
-            FileWatcher.INSTANCE.removeListener(file)
+            if (fileWatcher) {
+                FileWatcher.INSTANCE.removeListener(file)
+            }
             val exists = HashMap<String, Type>()
             // 加载文件
             loadNodes(Configuration.loadFromFile(file), exists, node)
@@ -47,10 +52,12 @@ class I18nReader(files: List<File>, val name: String, val migrate: Boolean = tru
             nodes += exists
             fileMap[node] = LanguageFile(file, nodes).also {
                 // 文件变动监听
-                FileWatcher.INSTANCE.addSimpleListener(file) {
-                    it.nodes.clear()
-                    loadNodes(configuration, it.nodes, node)
-                    loadNodes(Configuration.loadFromFile(file), it.nodes, node)
+                if (fileWatcher) {
+                    FileWatcher.INSTANCE.addSimpleListener(file) {
+                        it.nodes.clear()
+                        loadNodes(configuration, it.nodes, node)
+                        loadNodes(Configuration.loadFromFile(file), it.nodes, node)
+                    }
                 }
             }
         }
@@ -118,10 +125,10 @@ class I18nReader(files: List<File>, val name: String, val migrate: Boolean = tru
         }
     }
 
-    private fun releaseFile(file: File): File {
-        val lang = File(getDataFolder().parentFile, "$name/lang/${file.name}")
+    private fun releaseFile(name: String, data: ByteArray): File {
+        val lang = File(info.constructor().dataFolder(), "lang/$name.yml")
         if (lang.nonExists()) {
-            file.copyTo(lang)
+            newFile(lang).writeBytes(data)
         }
         return lang
     }
