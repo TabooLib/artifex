@@ -1,9 +1,11 @@
 package artifex;
 
 import ink.ptms.artifex.controller.Proxy;
+import ink.ptms.artifex.script.Script;
 import ink.ptms.artifex.script.ScriptProject;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ import java.util.List;
  */
 public class ArtifexPlugin extends Plugin {
 
-    private static final List<ScriptProject> runningList = new ArrayList<>();
+    private static ScriptProject runningProject;
 
     @Override
     public void onEnable() {
@@ -35,17 +37,29 @@ public class ArtifexPlugin extends Plugin {
         if (resource != null) {
             ScriptProject project = Proxy.INSTANCE.readToScriptProject(resource).load();
             if (Proxy.INSTANCE.runProject(project)) {
-                runningList.add(project);
+                runningProject = project;
             }
         }
     }
 
     private void shutdown() {
-        runningList.forEach(Proxy.INSTANCE::releaseProject);
+        if (runningProject != null) {
+            Proxy.INSTANCE.releaseProject(runningProject);
+        }
+    }
+
+    @Nullable
+    public static Object invoke(@NotNull String name, @NotNull String method, @NotNull Object... args) {
+        for (Script script : runningProject.runningScripts()) {
+            if (script.baseId().equals(name)) {
+                return script.invoke(method, args);
+            }
+        }
+        return null;
     }
 
     @NotNull
-    public static List<ScriptProject> getRunningList() {
-        return runningList;
+    public static ScriptProject getRunningProject() {
+        return runningProject;
     }
 }

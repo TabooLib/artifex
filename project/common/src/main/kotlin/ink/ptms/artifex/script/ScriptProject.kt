@@ -18,6 +18,11 @@ interface ScriptProject : Exchanges {
     fun runningId(): String
 
     /**
+     * 运行脚本
+     */
+    fun runningScripts(): List<Script>
+
+    /**
      * 是否被禁用
      */
     fun disabled(): Boolean

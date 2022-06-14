@@ -48,6 +48,10 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
         return runningId
     }
 
+    override fun runningScripts(): List<Script> {
+        return runningScripts
+    }
+
     override fun disabled(): Boolean {
         return identifier.root().getBoolean("disable")
     }
