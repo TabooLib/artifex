@@ -13,8 +13,8 @@ fun ZipFile.toFileSet(readFully: Boolean = false): FileSet {
     return ZipFileMemory(this, readFully)
 }
 
-fun ZipInputStream.toFileSet(readFully: Boolean = false): FileSet {
-    return ZipInputStreamMemory(this, readFully)
+fun ZipInputStream.toFileSet(): FileSet {
+    return ZipInputStreamMemory(this)
 }
 
 abstract class FileSet {
@@ -76,14 +76,14 @@ class ZipFileMemory(val jar: ZipFile, readFully: Boolean = false) : FileSet() {
     }
 }
 
-class ZipInputStreamMemory(val zipInputStream: ZipInputStream, readFully: Boolean = false) : FileSet() {
+class ZipInputStreamMemory(val zipInputStream: ZipInputStream) : FileSet() {
 
-    val keys = HashMap<String, ByteArray?>()
+    val keys = HashMap<String, ByteArray>()
 
     init {
         while (true) {
             val entry = zipInputStream.nextEntry ?: break
-            keys[entry.name] = if (readFully) zipInputStream.readBytes() else null
+            keys[entry.name] = zipInputStream.readBytes()
         }
     }
 
@@ -96,16 +96,6 @@ class ZipInputStreamMemory(val zipInputStream: ZipInputStream, readFully: Boolea
     }
 
     override operator fun get(name: String): ByteArray? {
-        val value = keys[name]
-        if (value != null) {
-            return value
-        }
-        while (true) {
-            val entry = zipInputStream.nextEntry ?: break
-            if (entry.name == name) {
-                return zipInputStream.readBytes().also { keys[name] = it }
-            }
-        }
-        return null
+        return keys[name]
     }
 }

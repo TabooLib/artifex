@@ -5,6 +5,7 @@ import ink.ptms.artifex.script.ScriptProjectConstructor
 import ink.ptms.artifex.script.ScriptProjectIdentifier
 import ink.ptms.artifex.script.toFileSet
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.info
 import taboolib.module.configuration.Configuration
 import taboolib.module.configuration.Type
 import java.io.File
@@ -19,11 +20,11 @@ import java.util.zip.ZipInputStream
  * @author 坏黑
  * @since 2022/5/23 13:28
  */
-class DefaultReleasedIdentifier(val zip: ZipInputStream, val readFully: Boolean) : ScriptProjectIdentifier.ReleasedIdentifier {
+class DefaultReleasedIdentifier(val zip: ZipInputStream) : ScriptProjectIdentifier.ReleasedIdentifier {
 
-    constructor(file: File): this(ZipInputStream(FileInputStream(file)), false)
+    constructor(file: File): this(ZipInputStream(FileInputStream(file)))
 
-    override val fileSet = zip.toFileSet(readFully)
+    override val fileSet = zip.toFileSet()
 
     var root: Configuration? = null
 

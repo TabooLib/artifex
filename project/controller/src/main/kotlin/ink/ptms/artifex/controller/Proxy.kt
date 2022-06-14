@@ -1,13 +1,12 @@
 package ink.ptms.artifex.controller
 
 import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.script.*
+import ink.ptms.artifex.script.ScriptProject
+import ink.ptms.artifex.script.ScriptProjectIdentifier
+import ink.ptms.artifex.script.ScriptSimpleEvaluator
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.submit
-import java.io.File
 import java.io.InputStream
-import java.nio.charset.StandardCharsets
-import java.util.concurrent.CompletableFuture
 import java.util.zip.ZipInputStream
 
 /**
@@ -22,29 +21,16 @@ object Proxy {
     val evaluator: ScriptSimpleEvaluator
         get() = Artifex.api().getScriptHelper().getSimpleEvaluator()
 
-    fun readAll(inputStream: InputStream): String {
-        return inputStream.readBytes().toString(StandardCharsets.UTF_8)
+    fun readToScriptProject(inputStream: InputStream): ScriptProjectIdentifier {
+        return Artifex.api().getScriptProjectManager().toIdentifier(ZipInputStream(inputStream))
     }
 
-    fun readToScriptMeta(inputStream: InputStream): ScriptMeta {
-        return Artifex.api().getScriptMetaHandler().getScriptMeta(ZipInputStream(inputStream))
+    fun runProject(scriptProject: ScriptProject): Boolean {
+        return scriptProject.run(console(), logging = false)
     }
 
-    fun evalScript(scriptMeta: ScriptMeta, property: ScriptRuntimeProperty): CompletableFuture<Script> {
-        val future = CompletableFuture<Script>()
-        evaluator.prepareEvaluation(scriptMeta, console(), false).mount(true).afterEval { future.complete(it) }.apply(property)
-        return future
-    }
-
-    fun createScriptFileFinder(resourceLoader: ResourceLoader): ScriptFileFinder {
-        TODO()
-    }
-
-    interface ResourceLoader {
-
-        fun getFile(): File
-
-        fun getResource(name: String): InputStream?
+    fun releaseProject(scriptProject: ScriptProject) {
+        scriptProject.release(console())
     }
 }
 

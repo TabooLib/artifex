@@ -51,7 +51,6 @@ interface ScriptProjectManager {
      * 从 ZipInputStream 转换到 ScriptProjectIdentifier 对象
      *
      * @param zipInputStream Zip 文件输入流
-     * @param readFully 是否一次性读取全部内容
      */
-    fun toIdentifier(zipInputStream: ZipInputStream, readFully: Boolean): ScriptProjectIdentifier
+    fun toIdentifier(zipInputStream: ZipInputStream): ScriptProjectIdentifier
 }

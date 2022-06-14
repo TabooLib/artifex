@@ -1,7 +1,9 @@
 package ink.ptms.artifex.script
 
+import taboolib.common.platform.ProxyCommandSender
 import taboolib.module.configuration.Configuration
 import java.io.File
+import java.util.function.Consumer
 
 /**
  * Artifex
@@ -39,13 +41,20 @@ interface ScriptProjectIdentifier {
 
         /**
          * 构建为分发版本
+         *
+         * @param sender 汇报接收者
+         * @param source 是否包含 kts 源代码
          */
-        fun buildToArtifact(): ScriptProjectArtifact
+        fun buildToArtifact(sender: ProxyCommandSender, source: Boolean = false): ScriptProjectArtifact
 
         /**
          * 构建为插件版本
+         *
+         * @param sender 汇报接收者
+         * @param source 是否包含 kts 源代码
+         * @param builder 构建器
          */
-        fun buildToArtifactPlugin(): ScriptProjectArtifact.Plugin
+        fun buildToArtifactPlugin(sender: ProxyCommandSender, source: Boolean = false, builder: Consumer<ArtifactPluginBuilder>): ScriptProjectArtifact.Plugin
     }
 
     /**

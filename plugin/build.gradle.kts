@@ -46,6 +46,12 @@ tasks {
                     new.putNextEntry(JarEntry("runtime/core.jar"))
                     new.write(rootProject.file("project/common-runtime/build/libs/common-runtime-$version.jar").readBytes())
                     new.closeEntry()
+                    new.putNextEntry(JarEntry("proxy/bukkit.jar"))
+                    new.write(rootProject.file("project/proxy-bukkit/build/libs/proxy-bukkit-$version.jar").readBytes())
+                    new.closeEntry()
+                    new.putNextEntry(JarEntry("proxy/bungee.jar"))
+                    new.write(rootProject.file("project/proxy-bungee/build/libs/proxy-bungee-$version.jar").readBytes())
+                    new.closeEntry()
                 }
             }
         }

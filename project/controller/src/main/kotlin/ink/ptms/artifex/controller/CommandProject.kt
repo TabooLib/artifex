@@ -1,12 +1,17 @@
 package ink.ptms.artifex.controller
 
 import ink.ptms.artifex.Artifex
+import ink.ptms.artifex.script.ArtifactDescription
+import ink.ptms.artifex.script.ScriptProjectIdentifier
 import ink.ptms.artifex.script.ScriptProjectManager
+import taboolib.common.io.newFile
+import taboolib.common.platform.Platform
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.subCommand
 import taboolib.common5.Demand
 import taboolib.module.lang.sendLang
+import java.util.concurrent.TimeUnit
 
 /**
  * Artifex
@@ -45,7 +50,7 @@ object CommandProject {
                     if (project != null) {
                         async { project.load().run(sender, forceCompile = demand.tags.contains("C")) }
                     } else {
-                        sender.sendLang("command-project-not-found", argument)
+                        sender.sendLang("command-project-not-found", context.argument(-1))
                     }
                 }
             }
@@ -64,7 +69,7 @@ object CommandProject {
                 if (project != null) {
                     project.release(sender)
                 } else {
-                    sender.sendLang("command-project-not-found", argument)
+                    sender.sendLang("command-project-is-not-running", argument)
                 }
             }
         }
@@ -82,7 +87,7 @@ object CommandProject {
                 if (project != null) {
                     async { project.reload(sender) }
                 } else {
-                    sender.sendLang("command-project-not-found", argument)
+                    sender.sendLang("command-project-is-not-running", argument)
                 }
             }
             dynamic(commit = "args", optional = true) {
@@ -92,17 +97,11 @@ object CommandProject {
                     if (project != null) {
                         async { project.reload(sender, forceCompile = demand.tags.contains("C")) }
                     } else {
-                        sender.sendLang("command-project-not-found", argument)
+                        sender.sendLang("command-project-is-not-running", context.argument(-1))
                     }
                 }
             }
         }
-    }
-
-    /**
-     * 构建脚本工程
-     */
-    val build = subCommand {
     }
 
     @CommandBody
@@ -120,6 +119,111 @@ object CommandProject {
                         sender.sendLang("command-script-status-project-name", project.name(), project.name())
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * 构建脚本工程，可以选择构建为压缩包形式或插件形式
+     *
+     * + art project build zip <工程名> --S
+     * + art project build plugin <工程名> -n <名称> -m <主类> -a <作者> -v <版本>
+     */
+    @CommandBody
+    val build = subCommand {
+        literal("zip") {
+            dynamic("project") {
+                suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> projects }
+                execute<ProxyCommandSender> { sender, _, argument ->
+                    val project = projectManager.getProject(argument)
+                    if (project is ScriptProjectIdentifier.DevIdentifier) {
+                        buildToZip(project, sender, Demand(""))
+                    } else {
+                        sender.sendLang("command-project-not-found-or-not-dev", argument)
+                    }
+                }
+                dynamic(commit = "args", optional = true) {
+                    execute<ProxyCommandSender> { sender, context, argument ->
+                        val demand = Demand("0 $argument")
+                        val project = projectManager.getProject(context.argument(-1))
+                        if (project is ScriptProjectIdentifier.DevIdentifier) {
+                            buildToZip(project, sender, demand)
+                        } else {
+                            sender.sendLang("command-project-not-found-or-not-dev", context.argument(-1))
+                        }
+                    }
+                }
+            }
+        }
+        literal("plugin") {
+            dynamic("project") {
+                suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> projects }
+                dynamic(commit = "args") {
+                    execute<ProxyCommandSender> { sender, context, argument ->
+                        val demand = Demand("0 $argument")
+                        val project = projectManager.getProject(context.argument(-1))
+                        if (project is ScriptProjectIdentifier.DevIdentifier) {
+                            buildToPlugin(project, sender, demand)
+                        } else {
+                            sender.sendLang("command-project-not-found-or-not-dev", context.argument(-1))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun buildToZip(project: ScriptProjectIdentifier.DevIdentifier, sender: ProxyCommandSender, demand: Demand) {
+        async {
+            val time = System.currentTimeMillis()
+            val artifact = project.buildToArtifact(sender, source = demand.tags.contains("S"))
+            val consume = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
+            if (artifact.isSuccessful()) {
+                newFile(project.file.parentFile, "${project.name()}.zip").writeBytes(artifact.toByteArray())
+                sender.sendLang("command-project-build-successful", consume)
+            } else {
+                sender.sendLang("command-project-build-failed", consume)
+            }
+        }
+    }
+
+    fun buildToPlugin(project: ScriptProjectIdentifier.DevIdentifier, sender: ProxyCommandSender, demand: Demand) {
+        async {
+            val time = System.currentTimeMillis()
+            val name = demand.get(listOf("name", "n"))
+            if (name == null) {
+                sender.sendLang("command-project-build-missing-parameters", "-n (-name)")
+                return@async
+            }
+            val main = demand.get(listOf("main", "m"))
+            if (main == null) {
+                sender.sendLang("command-project-build-missing-parameters", "-m (-main)")
+                return@async
+            }
+            if (main.indexOf('.') == -1 && main.indexOf('/') == -1) {
+                sender.sendLang("command-project-build-no-separator")
+                return@async
+            }
+            val author = demand.get(listOf("author", "a"))
+            if (author == null) {
+                sender.sendLang("command-project-build-missing-parameters", "-a (-author)")
+                return@async
+            }
+            val version = demand.get(listOf("version", "v"))
+            if (version == null) {
+                sender.sendLang("command-project-build-missing-parameters", "-v (-version)")
+                return@async
+            }
+            val artifact = project.buildToArtifactPlugin(sender, source = demand.tags.contains("S")) {
+                it.platform(Platform.BUKKIT, ArtifactDescription(name, main, author, version))
+                it.platform(Platform.BUNGEE, ArtifactDescription(name, main, author, version))
+            }
+            val consume = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
+            if (artifact.isSuccessful()) {
+                newFile(project.file.parentFile, "${project.name()}.jar").writeBytes(artifact.toByteArray())
+                sender.sendLang("command-project-build-successful", consume)
+            } else {
+                sender.sendLang("command-project-build-failed", consume)
             }
         }
     }

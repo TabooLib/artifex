@@ -39,7 +39,7 @@ class DefaultReleasedScriptProject(identifier: ScriptProjectIdentifier, construc
         return true
     }
 
-    override fun collectScripts(forceCompile: Boolean, sender: ProxyCommandSender): List<ScriptMeta> {
+    override fun collectScripts(sender: ProxyCommandSender, forceCompile: Boolean): List<ScriptMeta> {
         identifier as ScriptProjectIdentifier.ReleasedIdentifier
         return main.mapNotNull {
             val jarFile = identifier.fileSet.search(it, "jar")

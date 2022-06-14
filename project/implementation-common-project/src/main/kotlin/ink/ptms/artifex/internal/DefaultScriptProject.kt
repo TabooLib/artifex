@@ -38,13 +38,18 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
 
     /**
      * 整理脚本
-     * @param forceCompile 是否强制编译
+     *
      * @param sender 汇报接收者
+     * @param forceCompile 是否强制编译
      */
-    abstract fun collectScripts(forceCompile: Boolean, sender: ProxyCommandSender): List<ScriptMeta>
+    abstract fun collectScripts(sender: ProxyCommandSender, forceCompile: Boolean = false): List<ScriptMeta>
 
     override fun runningId(): String {
         return runningId
+    }
+
+    override fun disabled(): Boolean {
+        return identifier.root().getBoolean("disable")
     }
 
     override fun root(): Configuration {
@@ -59,12 +64,12 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
         return constructor
     }
 
-    override fun run(sender: ProxyCommandSender, forceCompile: Boolean, loggingBefore: Boolean): Boolean {
+    override fun run(sender: ProxyCommandSender, forceCompile: Boolean, logging: Boolean): Boolean {
         if (checkScripts(sender)) {
-            if (loggingBefore) {
+            if (logging) {
                 sender.sendLang("project-start", name())
             }
-            val scripts = collectScripts(forceCompile, sender)
+            val scripts = collectScripts(sender, forceCompile)
             if (scripts.isEmpty()) {
                 return false
             }
@@ -72,33 +77,39 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
                 Artifex.api().getScriptProjectManager().applyProject(this)
             }
             scripts.forEach { runScript(it, sender) }
-            sender.sendLang("command-project-started", name())
+            if (logging) {
+                sender.sendLang("command-project-started", name())
+            }
             return true
         }
         return false
     }
 
-    override fun reload(sender: ProxyCommandSender, forceCompile: Boolean, loggingBefore: Boolean): Boolean {
-        if (loggingBefore) {
+    override fun reload(sender: ProxyCommandSender, forceCompile: Boolean, logging: Boolean): Boolean {
+        if (logging) {
             sender.sendLang("project-reload", name())
         }
-        val scripts = collectScripts(forceCompile, sender)
+        val scripts = collectScripts(sender, forceCompile)
         if (scripts.isEmpty()) {
             return false // 若未成功编译则不会继续执行
         }
         releaseAll(sender, false)
         scripts.forEach { runScript(it, sender) }
-        sender.sendLang("command-project-reloaded", name())
+        if (logging) {
+            sender.sendLang("command-project-reloaded", name())
+        }
         return true
     }
 
-    override fun release(sender: ProxyCommandSender, loggingBefore: Boolean) {
-        if (loggingBefore) {
+    override fun release(sender: ProxyCommandSender, logging: Boolean) {
+        if (logging) {
             sender.sendLang("project-release", name())
         }
-        releaseAll(sender, true)
+        releaseAll(sender, logging)
         Artifex.api().getScriptProjectManager().releaseProject(name())
-        sender.sendLang("command-project-released", name())
+        if (logging) {
+            sender.sendLang("command-project-released", name())
+        }
     }
 
     override fun isRunning(): Boolean {

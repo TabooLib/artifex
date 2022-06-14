@@ -40,7 +40,7 @@ class DefaultDevScriptProject(identifier: ScriptProjectIdentifier, constructor: 
         return true
     }
 
-    override fun collectScripts(forceCompile: Boolean, sender: ProxyCommandSender): List<ScriptMeta> {
+    override fun collectScripts(sender: ProxyCommandSender, forceCompile: Boolean): List<ScriptMeta> {
         identifier as ScriptProjectIdentifier.DevIdentifier
         return main.mapNotNull {
             val scriptFile = helper.getScriptFile(identifier.file.parentFile, it) ?: return emptyList()

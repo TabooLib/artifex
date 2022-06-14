@@ -18,6 +18,11 @@ interface ScriptProject : Exchanges {
     fun runningId(): String
 
     /**
+     * 是否被禁用
+     */
+    fun disabled(): Boolean
+
+    /**
      * 工程文件
      */
     fun root(): Configuration
@@ -37,26 +42,26 @@ interface ScriptProject : Exchanges {
      *
      * @param sender 日志接收者
      * @param forceCompile 强制编译
-     * @param loggingBefore 是否在运行前发送调试日志
+     * @param logging 是否发送日志
      */
-    fun run(sender: ProxyCommandSender, forceCompile: Boolean = false, loggingBefore: Boolean = true): Boolean
+    fun run(sender: ProxyCommandSender, forceCompile: Boolean = false, logging: Boolean = true): Boolean
 
     /**
      * 重载
      *
      * @param sender 日志接收者
      * @param forceCompile 强制编译
-     * @param loggingBefore 是否在运行前发送调试日志
+     * @param logging 是否发送日志
      */
-    fun reload(sender: ProxyCommandSender, forceCompile: Boolean = false, loggingBefore: Boolean = true): Boolean
+    fun reload(sender: ProxyCommandSender, forceCompile: Boolean = false, logging: Boolean = true): Boolean
 
     /**
      * 释放
      *
      * @param sender 日志接收者
-     * @param loggingBefore 是否在运行前发送调试日志
+     * @param logging 是否发送日志
      */
-    fun release(sender: ProxyCommandSender, loggingBefore: Boolean = true)
+    fun release(sender: ProxyCommandSender, logging: Boolean = true)
 
     /**
      * 是否有脚本正在运行（工程是否正在运行）

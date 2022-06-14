@@ -53,7 +53,7 @@ class ArtScriptMetaHandler : ScriptMetaHandler {
     }
 
     override fun getScriptMeta(zipInputStream: ZipInputStream): ScriptMeta {
-        return getScriptMeta(zipInputStream.toFileSet(readFully = true))
+        return getScriptMeta(zipInputStream.toFileSet())
     }
 
     override fun getScriptMeta(fileSet: FileSet): ScriptMeta {

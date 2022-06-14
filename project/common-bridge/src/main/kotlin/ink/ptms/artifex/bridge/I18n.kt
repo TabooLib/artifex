@@ -18,7 +18,6 @@ import taboolib.module.lang.TypeText
 fun Script.i18n(fileWatcher: Boolean = true) {
     val info = project()
     val files = info.constructor().files().mapNotNull {
-        info("i18n file $it")
         if (it.startsWith("@default/i18n") && it.endsWith(".yml")) {
             it.substringAfterLast('/').substringBeforeLast('.') to info.constructor()[it]!!
         } else {

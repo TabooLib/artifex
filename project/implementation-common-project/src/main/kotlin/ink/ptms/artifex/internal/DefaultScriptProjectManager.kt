@@ -31,9 +31,14 @@ object DefaultScriptProjectManager : ScriptProjectManager {
 
     @Awake(LifeCycle.ENABLE)
     fun load() {
-        getProjects().forEach { applyProject(it.load()) }
+        getProjects().forEach {
+            val project = it.load()
+            if (!project.disabled()) {
+                applyProject(project)
+            }
+        }
         console().sendLang("project-loaded", runningProjects.size)
-        runningProjects.forEach { it.run(console(), loggingBefore = false) }
+        runningProjects.forEach { it.run(console(), logging = false) }
     }
 
     @Awake(LifeCycle.DISABLE)
@@ -75,8 +80,8 @@ object DefaultScriptProjectManager : ScriptProjectManager {
         }
     }
 
-    override fun toIdentifier(zipInputStream: ZipInputStream, readFully: Boolean): ScriptProjectIdentifier {
-        return DefaultReleasedIdentifier(zipInputStream, readFully)
+    override fun toIdentifier(zipInputStream: ZipInputStream): ScriptProjectIdentifier {
+        return DefaultReleasedIdentifier(zipInputStream)
     }
 
     fun getProjects(file: File): List<ScriptProjectIdentifier> {
