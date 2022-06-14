@@ -16,3 +16,10 @@ fun Script.dataFolder(): File {
 fun Script.resource(name: String): ByteArray? {
     return project().constructor()[name]
 }
+
+/**
+ * 获取所有脚本资源
+ */
+fun Script.resources(): Set<String> {
+    return project().constructor().files()
+}
