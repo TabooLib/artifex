@@ -6,6 +6,27 @@ import java.io.File
 import java.util.concurrent.CompletableFuture
 
 /**
+ * 获取真实的脚本名字
+ */
+fun ScriptContainer.scriptName(): String {
+    return script().javaClass.simpleName
+}
+
+/**
+ * 是否为附加脚本（脚本真实名称与容器名称不一致）
+ */
+fun ScriptContainer.isIncludeScript(): Boolean {
+    return scriptName() != id()
+}
+
+/**
+ * 是否为脚本工程中的脚本
+ */
+fun ScriptContainer.isProjectScript(): Boolean {
+    return script().exchangeData<Any?>("@Project") != null
+}
+
+/**
  * 文件是否不存在
  */
 fun File.nonExists(): Boolean {

@@ -1,10 +1,7 @@
 package ink.ptms.artifex.controller
 
 import ink.ptms.artifex.Artifex
-import ink.ptms.artifex.script.ScriptContainerManager
-import ink.ptms.artifex.script.ScriptHelper
-import ink.ptms.artifex.script.ScriptMetaHandler
-import ink.ptms.artifex.script.ScriptRuntimeProperty
+import ink.ptms.artifex.script.*
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
@@ -33,6 +30,9 @@ object Command {
 
     private val containerManager: ScriptContainerManager
         get() = Artifex.api().getScriptContainerManager()
+
+    private val runningScripts: List<String>
+        get() = Artifex.api().getScriptContainerManager().getAll().filter { !it.isIncludeScript() && !it.isProjectScript() }.map { it.scriptName() }
 
     private val scripts: List<String>
         get() = helper.getScriptFiles(jar = false).map { it.name }
@@ -102,7 +102,7 @@ object Command {
     @CommandBody
     val invoke = subCommand {
         dynamic("name") {
-            suggestion<ProxyCommandSender> { _, _ -> containerManager.getAll().map { it.id() } }
+            suggestion<ProxyCommandSender> { _, _ -> runningScripts }
             dynamic("method") {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     helper.invokeScript(sender, context.argument(-1), argument, emptyArray())
@@ -160,7 +160,7 @@ object Command {
     @CommandBody
     val release = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptsAndJars }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> runningScripts }
             execute<ProxyCommandSender> { sender, _, argument ->
                 val file = helper.getScriptFile(argument)
                 if (file?.exists() == true) {
@@ -193,7 +193,7 @@ object Command {
     @CommandBody
     val reload = subCommand {
         dynamic("file") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> scriptsAndJars }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> runningScripts }
             execute<ProxyCommandSender> { sender, _, argument ->
                 val file = helper.getScriptFile(argument)
                 if (file?.exists() == true) {
@@ -240,7 +240,7 @@ object Command {
             } else {
                 sender.sendLang("command-script-status")
                 containers.forEach { container ->
-                    sender.sendLang("command-script-status-name", container.id())
+                    sender.sendLang("command-script-status-name", "${container.id()}:${container.script().javaClass.simpleName}")
                     if (container.resources().isNotEmpty()) {
                         sender.sendLang("command-script-status-resource")
                         container.resources().sorted().forEach {

@@ -2,6 +2,7 @@ package ink.ptms.artifex.bridge
 
 import ink.ptms.artifex.script.Script
 import taboolib.common.io.newFile
+import taboolib.common.platform.function.info
 import taboolib.library.configuration.ConfigurationSection
 import java.io.File
 
@@ -47,7 +48,7 @@ class PersistentContainer {
                 ContainerSQLite(type)
             }
             is String -> {
-                ContainerSQLite(newFile(script.rootFile(), type))
+                ContainerSQLite(newFile(script.dataFolder(), type))
             }
             is ConfigurationSection -> {
                 ContainerSQL(

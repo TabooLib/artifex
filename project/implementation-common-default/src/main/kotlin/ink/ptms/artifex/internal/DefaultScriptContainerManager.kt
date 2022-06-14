@@ -3,6 +3,8 @@ package ink.ptms.artifex.internal
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.ScriptContainer
 import ink.ptms.artifex.script.ScriptContainerManager
+import ink.ptms.artifex.script.scriptName
+import taboolib.common.platform.function.info
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -19,12 +21,12 @@ class DefaultScriptContainerManager : ScriptContainerManager {
     }
 
     override fun register(script: ScriptContainer): ScriptContainer {
-        activeScriptContainers[script.id()] = script
+        activeScriptContainers[script.scriptName()] = script
         return script
     }
 
     override fun unregister(script: ScriptContainer) {
-        activeScriptContainers.remove(script.id())
+        activeScriptContainers.remove(script.scriptName())
     }
 
     override fun get(id: String): ScriptContainer? {

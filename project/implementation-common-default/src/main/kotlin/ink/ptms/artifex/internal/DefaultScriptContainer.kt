@@ -4,6 +4,7 @@ import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.ReleaseResult
 import ink.ptms.artifex.script.Script
 import ink.ptms.artifex.script.ScriptContainer
+import taboolib.common.platform.function.info
 import java.io.Closeable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -27,7 +28,7 @@ class DefaultScriptContainer(val script: Script): ScriptContainer {
     }
 
     override fun resource(name: String, resource: Runnable) {
-        resources += name to Closeable { resource.run() }
+        resources.add(name to Closeable { resource.run() })
     }
 
     override fun resources(): List<String> {
@@ -54,6 +55,8 @@ class DefaultScriptContainer(val script: Script): ScriptContainer {
             // 注销交换数据
             Artifex.api().getScriptContainerManager().resetExchangeData(id())
             exchangeData.clear()
+            // 释放附加脚本
+            script.baseScript().otherIncludeScripts().toSet().forEach { Artifex.api().getScriptContainerManager().get(it)?.releaseNow() }
             return true
         }
         return false

@@ -28,6 +28,9 @@ object CommandProject {
     val projects: List<String>
         get() = projectManager.getProjects().map { it.name() }
 
+    val runningProjects: List<String>
+        get() = projectManager.getRunningProjects().map { it.name() }
+
     /**
      * 运行脚本工程
      */
@@ -63,7 +66,7 @@ object CommandProject {
     @CommandBody
     val release = subCommand {
         dynamic("project") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> projects }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> runningProjects }
             execute<ProxyCommandSender> { sender, _, argument ->
                 val project = projectManager.getRunningProject(argument)
                 if (project != null) {
@@ -81,7 +84,7 @@ object CommandProject {
     @CommandBody
     val reload = subCommand {
         dynamic("project") {
-            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> projects }
+            suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> runningProjects }
             execute<ProxyCommandSender> { sender, _, argument ->
                 val project = projectManager.getRunningProject(argument)
                 if (project != null) {
