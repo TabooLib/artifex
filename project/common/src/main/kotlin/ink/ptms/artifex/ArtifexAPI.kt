@@ -60,7 +60,7 @@ interface ArtifexAPI {
     /**
      * 获取运行库文件
      */
-    fun getRuntimeLibraryFile(): File
+    fun getRuntimeLibraryFile(): List<File>
 
     /**
      * 获取接口信息

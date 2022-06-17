@@ -2,12 +2,14 @@ package ink.ptms.artifex.internal
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.RuntimeClassLoader
+import taboolib.common.platform.function.info
 import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.net.URLClassLoader
 import java.security.CodeSource
 import java.util.concurrent.ConcurrentHashMap
+import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.Manifest
 
@@ -15,12 +17,10 @@ import java.util.jar.Manifest
  * @author 坏黑
  * @since 2022/5/16 00:56
  */
-class DefaultRuntimeClassLoader(val file: File) : URLClassLoader(arrayOf(file.toURI().toURL()), Artifex::class.java.classLoader), RuntimeClassLoader {
+class DefaultRuntimeClassLoader(val files: List<File>) :
+    URLClassLoader(files.map { it.toURI().toURL() }.toTypedArray(), Artifex::class.java.classLoader), RuntimeClassLoader {
 
-    val jar = JarFile(file)
-    val url: URL = file.toURI().toURL()
-    val manifest: Manifest? = jar.manifest
-
+    val jars = files.map { JarFile(it).let { jar -> ClassFile(jar, it.toURI().toURL(), jar.manifest) } }
     val runningClasses = ConcurrentHashMap<String, Class<*>>()
 
     init {
@@ -37,11 +37,12 @@ class DefaultRuntimeClassLoader(val file: File) : URLClassLoader(arrayOf(file.to
             return result
         }
         val path = name.replace('.', '/').substringBeforeLast('.')
-        val entry = jar.getJarEntry(path)
+        val entry = getJarClass(path)
         if (entry != null) {
+            val jar = entry.first.jarFile
             var classBytes: ByteArray
             try {
-                jar.getInputStream(entry).use { classBytes = it.readBytes() }
+                jar.getInputStream(entry.second).use { classBytes = it.readBytes() }
             } catch (ex: IOException) {
                 throw ClassNotFoundException(name, ex)
             }
@@ -50,8 +51,8 @@ class DefaultRuntimeClassLoader(val file: File) : URLClassLoader(arrayOf(file.to
                 val pkgName = name.substring(0, dot)
                 if (getPackage(pkgName) == null) {
                     try {
-                        if (manifest != null) {
-                            definePackage(pkgName, manifest, url)
+                        if (entry.first.manifest != null) {
+                            definePackage(pkgName, entry.first.manifest, entry.first.url)
                         } else {
                             definePackage(pkgName, null, null, null, null, null, null, null)
                         }
@@ -60,7 +61,7 @@ class DefaultRuntimeClassLoader(val file: File) : URLClassLoader(arrayOf(file.to
                     }
                 }
             }
-            result = defineClass(name, classBytes, 0, classBytes.size, CodeSource(url, entry.codeSigners))
+            result = defineClass(name, classBytes, 0, classBytes.size, CodeSource(entry.first.url, entry.second.codeSigners))
         }
         if (result == null) {
             result = super.findClass(name)
@@ -70,6 +71,16 @@ class DefaultRuntimeClassLoader(val file: File) : URLClassLoader(arrayOf(file.to
     }
 
     override fun close() {
-        jar.use { super.close() }
+        jars.forEach { it.jarFile.use { super.close() } }
+    }
+
+    fun getJarClass(path: String): Pair<ClassFile, JarEntry>? {
+        jars.forEach {
+            val entry = it.jarFile.getJarEntry(path)
+            if (entry != null) {
+                return it to entry
+            }
+        }
+        return null
     }
 }

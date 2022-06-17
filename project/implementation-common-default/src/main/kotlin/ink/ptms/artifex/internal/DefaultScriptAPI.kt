@@ -32,18 +32,23 @@ object DefaultScriptAPI : ArtifexAPI {
     lateinit var ignoreWarning: List<String>
         private set
 
+    private var isDependenciesLoaded = false
+
     private val helper = DefaultScriptHelper()
     private val environment = DefaultScriptEnvironment()
-    private val classLoader by lazy { DefaultRuntimeClassLoader(getRuntimeLibraryFile()) }
+    private val classLoader = DefaultRuntimeClassLoader(getRuntimeLibraryFile())
     private val containerManager = DefaultScriptContainerManager()
 
     private val compiler = loadRuntimeClass<ScriptCompiler>("ArtScriptCompiler")
     private val evaluator = loadRuntimeClass<ScriptEvaluator>("ArtScriptEvaluator")
     private val metaHandler = loadRuntimeClass<ScriptMetaHandler>("ArtScriptMetaHandler")
 
+    init {
+        Artifex.register(DefaultScriptAPI)
+    }
+
     @Awake(LifeCycle.LOAD)
     fun init() {
-        Artifex.register(DefaultScriptAPI)
         Artifex.api().getScriptEnvironment().setupGlobalImports()
     }
 
@@ -88,13 +93,24 @@ object DefaultScriptAPI : ArtifexAPI {
         return containerManager
     }
 
-    override fun getRuntimeLibraryFile(): File {
+    override fun getRuntimeLibraryFile(): List<File> {
+        if (!isDependenciesLoaded) {
+            isDependenciesLoaded = true
+            KotlinEnvironments.loadDependencies()
+        }
         val file = File(getDataFolder(), "runtime/core.jar")
         kotlin.runCatching {
             releaseResourceFile("runtime/core.jar", true)
             releaseResourceFile("runtime/bridge.jar", true)
         }
-        return file.takeIf { it.exists() } ?: error("Runtime library not found!")
+        if (file.nonExists()) {
+            error("Runtime library not found")
+        }
+        val files = ArrayList<File>()
+        files += KotlinEnvironments.getKotlinFiles()
+        files += KotlinEnvironments.getFiles()
+        files += file
+        return files
     }
 
     override fun getStatus(): Map<String, String> {
@@ -117,6 +133,7 @@ object DefaultScriptAPI : ArtifexAPI {
 
     @Suppress("UNCHECKED_CAST")
     fun <T> loadRuntimeClass(name: String): T {
-        return classLoader.findClass("ink.ptms.artifex.$name").getInstance(true)!!.get() as T
+        val instance = classLoader.findClass("ink.ptms.artifex.$name").getInstance(true) ?: error("Class not found: $name")
+        return instance.get() as T
     }
 }

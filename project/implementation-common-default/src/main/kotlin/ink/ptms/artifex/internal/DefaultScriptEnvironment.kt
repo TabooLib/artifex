@@ -31,7 +31,8 @@ class DefaultScriptEnvironment : ScriptEnvironment {
     override fun getClasspath(input: List<Class<*>>): List<File> {
         val dependencies = ArrayList<File?>()
         // 运行库
-        dependencies += File(getDataFolder(), "runtime").listFiles()!!.filter { it.extension == "jar" }
+        dependencies += KotlinEnvironments.getKotlinFiles()
+        dependencies += KotlinEnvironments.getFiles(File(getDataFolder(), "runtime"))
         // 插件列表
         dependencies += Artifex.api().getPlatformHelper().plugins().map { file(it.javaClass) }
         // 预设
