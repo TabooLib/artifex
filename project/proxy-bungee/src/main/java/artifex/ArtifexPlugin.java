@@ -7,6 +7,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +34,15 @@ public class ArtifexPlugin extends Plugin {
     }
 
     private void startup() {
-        InputStream resource = getResourceAsStream("META-INF/src.zip");
-        if (resource != null) {
-            ScriptProject project = Proxy.INSTANCE.readToScriptProject(resource).load();
-            if (Proxy.INSTANCE.runProject(project)) {
-                runningProject = project;
+        try (InputStream resource = getResourceAsStream("META-INF/src.zip")) {
+            if (resource != null) {
+                ScriptProject project = Proxy.INSTANCE.readToScriptProject(resource).load();
+                if (Proxy.INSTANCE.runProject(project)) {
+                    runningProject = project;
+                }
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

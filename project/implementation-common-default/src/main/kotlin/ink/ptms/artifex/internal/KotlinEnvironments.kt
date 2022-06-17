@@ -60,7 +60,7 @@ object KotlinEnvironments {
         downloader.loadDependency(downloader.repositories, Dependency(args[0], args[1], args[2], DependencyScope.RUNTIME))
     }
 
-    fun getFiles(file: File = File(getDataFolder(), "runtime/libraries")): List<File> {
+    fun getFiles(file: File): List<File> {
         return when {
             file.isDirectory -> file.listFiles()?.flatMap { getFiles(it) } ?: emptyList()
             file.extension == "jar" -> listOf(file)

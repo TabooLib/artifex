@@ -8,6 +8,7 @@ import taboolib.common.LifeCycle
 import taboolib.common.io.getInstance
 import taboolib.common.platform.Awake
 import taboolib.common.platform.PlatformFactory
+import taboolib.common.platform.SkipTo
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.module.configuration.Config
@@ -22,6 +23,7 @@ import java.io.File
  * @author 坏黑
  * @since 2022/5/16 00:41
  */
+@SkipTo(LifeCycle.INIT)
 object DefaultScriptAPI : ArtifexAPI {
 
     @Config
@@ -106,11 +108,7 @@ object DefaultScriptAPI : ArtifexAPI {
         if (file.nonExists()) {
             error("Runtime library not found")
         }
-        val files = ArrayList<File>()
-        files += KotlinEnvironments.getKotlinFiles()
-        files += KotlinEnvironments.getFiles()
-        files += file
-        return files
+        return environment.classpathWithoutPlugins(listOf(DefaultScriptAPI::class.java))
     }
 
     override fun getStatus(): Map<String, String> {

@@ -54,36 +54,34 @@ object ArtScriptCompiler : ScriptCompiler {
     }
 
     fun compile(compilerImpl: CompilerImpl): ScriptCompiled? {
-        return runBlocking {
-            val configuration = compilerImpl.configuration as ScriptCompilationConfiguration
-            val result = ArtScriptEvaluator.scriptingHost.compiler(compilerImpl.source ?: error("Script content is empty"), configuration)
-            // 编译日志
-            result.reports.forEach { compilerImpl.onReport?.accept(diagnosticFromKt(it)) }
-            // 编译结果
-            val compiledScript = result.valueOrNull()?.remap()
-            if (compiledScript != null) {
-                // 移除引用脚本
-                val artifexImportScripts = compiledScript.compilationConfiguration[ScriptCompilationConfiguration.artifexImportScripts]
-                val compilerOutputFiles = compiledScript.compilerOutputFiles() as? MutableMap ?: error("Not mutable map")
-                val otherScripts = compiledScript.otherScripts as? MutableList<CompiledScript> ?: ArrayList()
-                val imports = artifexImportScripts?.map { it to it.nameWithoutExtension.toClassIdentifier() } ?: emptyList()
-                // 移除引用脚本的构建文件
-                imports.forEach { compilerOutputFiles.remove("${it.second}.class") }
-                // 替换脚本对象
-                val others = otherScripts.map {
-                    val find = imports.firstOrNull { i -> i.second == it.scriptClassFQName() } ?: return@map it
-                    checkImportScript(find.first, it, compilerOutputFiles, imports)
-                }
-                otherScripts.clear()
-                otherScripts.addAll(others)
-                // 参数签名
-                val digest = (configuration as? KotlinCompilationConfiguration)?.props?.digest() ?: ScriptRuntimeProperty.defaultDigest
-                val hash = "${digest}#${compilerImpl.source!!.text}".digest("sha-1")
-                ArtScriptCompiled(compiledScript, hash).also { compilerImpl.onSuccess?.accept(it) }
-            } else {
-                compilerImpl.onFailure?.run()
-                null
+        val configuration = compilerImpl.configuration as ScriptCompilationConfiguration
+        val result = runBlocking { ArtScriptEvaluator.scriptingHost.compiler(compilerImpl.source ?: error("Script content is empty"), configuration) }
+        // 编译日志
+        result.reports.forEach { compilerImpl.onReport?.accept(diagnosticFromKt(it)) }
+        // 编译结果
+        val compiledScript = result.valueOrNull()?.remap()
+        return if (compiledScript != null) {
+            // 移除引用脚本
+            val artifexImportScripts = compiledScript.compilationConfiguration[ScriptCompilationConfiguration.artifexImportScripts]
+            val compilerOutputFiles = compiledScript.compilerOutputFiles() as? MutableMap ?: error("Not mutable map")
+            val otherScripts = compiledScript.otherScripts as? MutableList<CompiledScript> ?: ArrayList()
+            val imports = artifexImportScripts?.map { it to it.nameWithoutExtension.toClassIdentifier() } ?: emptyList()
+            // 移除引用脚本的构建文件
+            imports.forEach { compilerOutputFiles.remove("${it.second}.class") }
+            // 替换脚本对象
+            val others = otherScripts.map {
+                val find = imports.firstOrNull { i -> i.second == it.scriptClassFQName() } ?: return@map it
+                checkImportScript(find.first, it, compilerOutputFiles, imports)
             }
+            otherScripts.clear()
+            otherScripts.addAll(others)
+            // 参数签名
+            val digest = (configuration as? KotlinCompilationConfiguration)?.props?.digest() ?: ScriptRuntimeProperty.defaultDigest
+            val hash = "${digest}#${compilerImpl.source!!.text}".digest("sha-1")
+            ArtScriptCompiled(compiledScript, hash).also { compilerImpl.onSuccess?.accept(it) }
+        } else {
+            compilerImpl.onFailure?.run()
+            null
         }
     }
 
@@ -92,7 +90,7 @@ object ArtScriptCompiler : ScriptCompiler {
         override val text: String
             get() = kotlinSourceCode.text
 
-        class SourceFileImpl(val file: File, kotlinSourceCode: SourceCode): SourceImpl(kotlinSourceCode)
+        class SourceFileImpl(val file: File, kotlinSourceCode: SourceCode) : SourceImpl(kotlinSourceCode)
     }
 
     class CompilerImpl : ScriptCompiler.Compiler {

@@ -1,27 +1,25 @@
 package ink.ptms.artifex.internal
 
-import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.RuntimeClassLoader
-import taboolib.common.platform.function.info
 import java.io.File
 import java.io.IOException
-import java.net.URL
 import java.net.URLClassLoader
 import java.security.CodeSource
 import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
-import java.util.jar.Manifest
 
 /**
  * @author 坏黑
  * @since 2022/5/16 00:56
  */
 class DefaultRuntimeClassLoader(val files: List<File>) :
-    URLClassLoader(files.map { it.toURI().toURL() }.toTypedArray(), Artifex::class.java.classLoader), RuntimeClassLoader {
+    URLClassLoader(files.map { it.toURI().toURL() }.toTypedArray(), DefaultRuntimeClassLoader::class.java.classLoader), RuntimeClassLoader {
 
     val jars = files.map { JarFile(it).let { jar -> ClassFile(jar, it.toURI().toURL(), jar.manifest) } }
     val runningClasses = ConcurrentHashMap<String, Class<*>>()
+
+    val kotlinClassLoader = KotlinClassLoader()
 
     init {
         ClassLoader.registerAsParallelCapable()
@@ -35,6 +33,13 @@ class DefaultRuntimeClassLoader(val files: List<File>) :
         var result = runningClasses[name]
         if (result != null) {
             return result
+        }
+        // 获取父加载器中可能存在的 Kotlin 环境
+        try {
+            result = super.findClass(name)
+            runningClasses[name] = result
+            return result
+        } catch (_: ClassNotFoundException) {
         }
         val path = name.replace('.', '/').substringBeforeLast('.')
         val entry = getJarClass(path)

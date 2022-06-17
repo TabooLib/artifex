@@ -22,8 +22,6 @@ import java.util.zip.ZipInputStream
  */
 class DefaultReleasedIdentifier(val zip: ZipInputStream) : ScriptProjectIdentifier.ReleasedIdentifier {
 
-    constructor(file: File): this(ZipInputStream(FileInputStream(file)))
-
     override val fileSet = zip.toFileSet()
 
     var root: Configuration? = null

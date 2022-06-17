@@ -34,7 +34,7 @@ class DefaultScriptEnvironment : ScriptEnvironment {
         dependencies += KotlinEnvironments.getKotlinFiles()
         dependencies += KotlinEnvironments.getFiles(File(getDataFolder(), "runtime"))
         // 插件列表
-        dependencies += Artifex.api().getPlatformHelper().plugins().map { file(it.javaClass) }
+        dependencies += DefaultScriptAPI.getPlatformHelper().plugins().map { file(it.javaClass) }
         // 预设
         dependencies += input.map { file(it) }
         return dependencies.filterNotNull()
@@ -91,5 +91,15 @@ class DefaultScriptEnvironment : ScriptEnvironment {
 
     fun file(clazz: Class<*>): File? {
         return clazz.protectionDomain.codeSource?.location?.file?.let { File(URLDecoder.decode(it, "UTF-8")) }
+    }
+
+    fun classpathWithoutPlugins(input: List<Class<*>>): List<File> {
+        val dependencies = ArrayList<File?>()
+        // 运行库
+        dependencies += KotlinEnvironments.getKotlinFiles()
+        dependencies += KotlinEnvironments.getFiles(File(getDataFolder(), "runtime"))
+        // 预设
+        dependencies += input.map { file(it) }
+        return dependencies.filterNotNull()
     }
 }

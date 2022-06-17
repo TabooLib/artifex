@@ -182,7 +182,8 @@ object CommandProject {
             val artifact = project.buildToArtifact(sender, source = demand.tags.contains("S"))
             val consume = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
             if (artifact.isSuccessful()) {
-                newFile(project.file.parentFile, "${project.name()}.zip").writeBytes(artifact.toByteArray())
+                val baseFolder = Artifex.api().getScriptHelper().baseScriptFolder()
+                newFile(baseFolder, ".artifact/project-${project.name().lowercase()}.zip").writeBytes(artifact.toByteArray())
                 sender.sendLang("command-project-build-successful", consume)
             } else {
                 sender.sendLang("command-project-build-failed", consume)
@@ -223,7 +224,8 @@ object CommandProject {
             }
             val consume = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
             if (artifact.isSuccessful()) {
-                newFile(project.file.parentFile, "${project.name()}.jar").writeBytes(artifact.toByteArray())
+                val baseFolder = Artifex.api().getScriptHelper().baseScriptFolder()
+                newFile(baseFolder, ".artifact/${project.name()}.jar").writeBytes(artifact.toByteArray())
                 sender.sendLang("command-project-build-successful", consume)
             } else {
                 sender.sendLang("command-project-build-failed", consume)

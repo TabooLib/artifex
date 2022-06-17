@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -31,12 +32,15 @@ public class ArtifexPlugin extends JavaPlugin {
     }
 
     private void startup() {
-        InputStream resource = getResource("META-INF/src.zip");
-        if (resource != null) {
-            ScriptProject project = Proxy.INSTANCE.readToScriptProject(resource).load();
-            if (Proxy.INSTANCE.runProject(project)) {
-                runningProject = project;
+        try (InputStream resource = getResource("META-INF/src.zip")) {
+            if (resource != null) {
+                ScriptProject project = Proxy.INSTANCE.readToScriptProject(resource).load();
+                if (Proxy.INSTANCE.runProject(project)) {
+                    runningProject = project;
+                }
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

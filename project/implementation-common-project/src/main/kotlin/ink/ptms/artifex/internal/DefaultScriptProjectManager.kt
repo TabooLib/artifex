@@ -10,6 +10,7 @@ import taboolib.common.platform.PlatformFactory
 import taboolib.common.platform.function.console
 import taboolib.module.lang.sendLang
 import java.io.File
+import java.io.FileInputStream
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
@@ -109,6 +110,6 @@ object DefaultScriptProjectManager : ScriptProjectManager {
     }
 
     fun readProjectIdentifierFromZipFile(file: File): ScriptProjectIdentifier {
-        return DefaultReleasedIdentifier(file)
+        return ZipInputStream(FileInputStream(file)).use { DefaultReleasedIdentifier(it) }
     }
 }
