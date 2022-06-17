@@ -25,6 +25,8 @@ tasks {
         exclude("META-INF/maven/**")
         exclude("META-INF/tf/**")
         exclude("module-info.java")
+        relocate("taboolib.platform.type.BukkitProxyEvent", "ink.ptms.artifex.taboolib.platform.type.BukkitProxyEvent")
+        relocate("taboolib.platform.type.BungeeProxyEvent", "ink.ptms.artifex.taboolib.platform.type.BungeeProxyEvent")
     }
     create("collect") {
         doFirst {

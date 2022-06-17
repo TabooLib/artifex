@@ -30,7 +30,8 @@ class KotlinCompilationConfigurationHandler(val props: ScriptRuntimeProperty) : 
         val includeScripts = ArrayList<FileScriptSource>()
         annotations.filterByAnnotationType<Include>().flatMap { it.annotation.name.toList() }.forEach { name ->
             // 搜索脚本文件
-            finder.getScriptFile(scriptPath, name).forEach { file ->
+            val file = finder.getScriptFile(scriptPath, name).firstOrNull()
+            if (file != null) {
                 includeScripts += FileScriptSource(file)
             }
         }
@@ -46,37 +47,35 @@ class KotlinCompilationConfigurationHandler(val props: ScriptRuntimeProperty) : 
             }
             // 判定为脚本
             else {
-                val files = finder.getScriptFile(scriptPath, name)
-                if (files.isEmpty()) {
+                val file = finder.getScriptFile(scriptPath, name).firstOrNull()
+                if (file == null) {
                     val diagnostic = ArrayList<ScriptDiagnostic>()
                     val error = console().asLangText("compile-referenced-not-found", name)
                     diagnostic += ScriptDiagnostic(-1, error, ScriptDiagnostic.Severity.ERROR, scriptPath)
                     return ResultWithDiagnostics.Failure(diagnostic)
                 }
-                files.forEach { file ->
-                    includeScripts += FileScriptSource(file)
-                    importScript += file
-                    // 检查运行环境
-                    if (Artifex.api().getScriptContainerManager().get(file.nameWithoutExtension.toClassIdentifier()) == null) {
-                        // 检查构建文件
-                        val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
-                        if (buildFile.nonExists()) {
-                            val compileReports = ArrayList<ScriptResult.Diagnostic>()
-                            val compiled = Artifex.api().getScriptCompiler().compile { c ->
-                                c.source(file)
-                                c.onReport { r -> compileReports += r }
-                            }
-                            // 编译失败
-                            if (compiled == null) {
-                                val diagnostic = ArrayList<ScriptDiagnostic>()
-                                val error = console().asLangText("compile-referenced-build-failed")
-                                diagnostic += ScriptDiagnostic(-1, error, ScriptDiagnostic.Severity.ERROR, scriptPath)
-                                compileReports.forEach { r -> diagnostic += diagnosticFromKt(r) }
-                                return ResultWithDiagnostics.Failure(diagnostic)
-                            } else {
-                                // 生成脚本编译文件
-                                compiled.generateScriptJar(newFile(buildFile))
-                            }
+                includeScripts += FileScriptSource(file)
+                importScript += file
+                // 检查运行环境
+                if (Artifex.api().getScriptContainerManager().get(file.nameWithoutExtension.toClassIdentifier()) == null) {
+                    // 检查构建文件
+                    val buildFile = File(scriptsFile, ".build/${file.nameWithoutExtension}.jar")
+                    if (buildFile.nonExists()) {
+                        val compileReports = ArrayList<ScriptResult.Diagnostic>()
+                        val compiled = Artifex.api().getScriptCompiler().compile { c ->
+                            c.source(file)
+                            c.onReport { r -> compileReports += r }
+                        }
+                        // 编译失败
+                        if (compiled == null) {
+                            val diagnostic = ArrayList<ScriptDiagnostic>()
+                            val error = console().asLangText("compile-referenced-build-failed")
+                            diagnostic += ScriptDiagnostic(-1, error, ScriptDiagnostic.Severity.ERROR, scriptPath)
+                            compileReports.forEach { r -> diagnostic += diagnosticFromKt(r) }
+                            return ResultWithDiagnostics.Failure(diagnostic)
+                        } else {
+                            // 生成脚本编译文件
+                            compiled.generateScriptJar(newFile(buildFile))
                         }
                     }
                 }

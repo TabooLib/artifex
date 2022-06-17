@@ -36,7 +36,12 @@ interface ScriptResult<out R> {
         override fun toString(): String {
             val loc = source.location
             val pos = if (loc != null) "(${loc.start.line}, ${loc.start.col}): " else ""
-            return "${severity}: ${pos}${message}"
+            return if (source.path != null) {
+                val path = source.path.substringAfterLast('/')
+                "${severity}: ${pos}${message} ($path)"
+            } else {
+                "${severity}: ${pos}${message}"
+            }
         }
     }
 
