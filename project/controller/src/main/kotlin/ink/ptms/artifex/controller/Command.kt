@@ -3,6 +3,7 @@ package ink.ptms.artifex.controller
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.*
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.ProxyPlayer
 import taboolib.common.platform.command.CommandBody
 import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.mainCommand
@@ -273,7 +274,9 @@ object Command {
                     if (script != null) {
                         helper.getSimpleEvaluator().prepareEvaluation(script.generateScriptMeta(), sender) {
                             sender.sendLang("command-script-shell-execute")
-                        }.loggingReleased(false).apply(ScriptRuntimeProperty())
+                        }.loggingReleased(false).apply(ScriptRuntimeProperty().also {
+                            it.providedProperties["sender"] = sender
+                        })
                     }
                 }
             }

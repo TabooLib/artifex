@@ -74,9 +74,24 @@ fun Script.submit(
     commit: String? = null,
     executor: PlatformExecutor.PlatformTask.() -> Unit,
 ): PlatformExecutor.PlatformTask {
-    val task = taboolib.common.platform.function.submit(now, async, delay, period, commit, executor)
-    container().resource("task-${if (async) "async" else "sync"}:$period") { task.cancel() }
-    return task
+    // 非循环调度器不注册资源
+    if (period == 0L) {
+        return taboolib.common.platform.function.submit(now, async, delay, period, commit, executor)
+    }
+    // 循环调度器必须在服务器完全启动后创建，否则将无法在 1.12 版本有效释放
+    else {
+        var task: PlatformExecutor.PlatformTask? = null
+        taboolib.common.platform.function.submit {
+            task = taboolib.common.platform.function.submit(now, async, delay, period, commit, executor)
+            container().resource("task-${if (async) "async" else "sync"}:$period") { task?.cancel() }
+        }
+        return object : PlatformExecutor.PlatformTask {
+
+            override fun cancel() {
+                task?.cancel()
+            }
+        }
+    }
 }
 
 /**
