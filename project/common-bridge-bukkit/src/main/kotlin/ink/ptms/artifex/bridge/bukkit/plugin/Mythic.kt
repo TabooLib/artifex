@@ -1,14 +1,15 @@
 package ink.ptms.artifex.bridge.bukkit.plugin
 
 import io.lumine.mythic.api.MythicProvider
+import io.lumine.mythic.core.config.MythicLineConfigImpl
 import io.lumine.mythic.core.mobs.MobExecutor
 import io.lumine.mythic.core.skills.SkillMetadataImpl
 import io.lumine.xikage.mythicmobs.MythicMobs
 import io.lumine.xikage.mythicmobs.adapters.AbstractEntity
 import io.lumine.xikage.mythicmobs.adapters.bukkit.BukkitAdapter
 import io.lumine.xikage.mythicmobs.adapters.bukkit.BukkitPlayer
+import io.lumine.xikage.mythicmobs.io.MythicLineConfig
 import io.lumine.xikage.mythicmobs.mobs.ActiveMob
-import io.lumine.xikage.mythicmobs.mobs.GenericCaster
 import io.lumine.xikage.mythicmobs.skills.SkillMechanic
 import io.lumine.xikage.mythicmobs.skills.SkillMetadata
 import io.lumine.xikage.mythicmobs.skills.SkillTrigger
@@ -39,9 +40,9 @@ object Mythic {
 
     fun getSkillMechanic(name: String): Skill? {
         return if (isLegacy) {
-            Skill4(MythicMobs.inst().skillManager.getSkillMechanic(name) ?: return null)
+            Skill4(MythicMobs.inst().skillManager.getSkillMechanic(MythicLineConfig.unparseBlock(name)) ?: return null)
         } else {
-            Skill5(MythicProvider.get().skillManager.getMechanic(name) ?: return null)
+            Skill5(MythicProvider.get().skillManager.getMechanic(MythicLineConfigImpl.unparseBlock(name)) ?: return null)
         }
     }
 
@@ -74,7 +75,7 @@ object Mythic {
 
     interface Skill {
 
-        fun execute(trigger: Trigger, entity: Entity, target: Entity, eTargets: Set<Entity>, lTargets: Set<Location>, power: Float): Boolean
+        fun execute(trigger: Trigger, entity: Entity, target: Entity, et: Set<Entity>, lt: Set<Location>, power: Float, args: Map<String, Any>): Boolean
 
         interface Trigger {
 
@@ -151,16 +152,16 @@ object Mythic {
 
         val source = obj as SkillMechanic
 
-        override fun execute(trigger: Skill.Trigger, entity: Entity, target: Entity, eTargets: Set<Entity>, lTargets: Set<Location>, power: Float): Boolean {
+        override fun execute(trigger: Skill.Trigger, entity: Entity, target: Entity, et: Set<Entity>, lt: Set<Location>, power: Float, args: Map<String, Any>): Boolean {
             val caster: AbstractEntity = if (entity is Player) BukkitPlayer(entity) else BukkitAdapter.adapt(entity)
             MythicMobs.inst().skillManager.runSecondPass()
             return source.executeSkills(SkillMetadata(
                 (trigger as SkillTrigger4).source,
-                GenericCaster(caster),
+                MythicCaster4(caster, args),
                 BukkitAdapter.adapt(target),
                 BukkitAdapter.adapt(entity.location),
-                eTargets.map { BukkitAdapter.adapt(it) }.toHashSet(),
-                lTargets.map { BukkitAdapter.adapt(it) }.toHashSet(),
+                et.map { BukkitAdapter.adapt(it) }.toHashSet(),
+                lt.map { BukkitAdapter.adapt(it) }.toHashSet(),
                 power
             ))
         }
@@ -170,7 +171,7 @@ object Mythic {
 
         val source = obj as io.lumine.mythic.core.skills.SkillMechanic
 
-        override fun execute(trigger: Skill.Trigger, entity: Entity, target: Entity, eTargets: Set<Entity>, lTargets: Set<Location>, power: Float): Boolean {
+        override fun execute(trigger: Skill.Trigger, entity: Entity, target: Entity, et: Set<Entity>, lt: Set<Location>, power: Float, args: Map<String, Any>): Boolean {
             val caster: io.lumine.mythic.api.adapters.AbstractEntity = if (entity is Player) {
                 io.lumine.mythic.bukkit.adapters.BukkitPlayer(entity)
             } else {
@@ -178,11 +179,11 @@ object Mythic {
             }
             return source.execute(SkillMetadataImpl::class.java.invokeConstructor(
                 (trigger as SkillTrigger5).source,
-                io.lumine.mythic.api.mobs.GenericCaster(caster),
+                MythicCaster5(caster, args),
                 io.lumine.mythic.bukkit.BukkitAdapter.adapt(target),
                 io.lumine.mythic.bukkit.BukkitAdapter.adapt(entity.location),
-                eTargets.map { io.lumine.mythic.bukkit.BukkitAdapter.adapt(it) }.toHashSet(),
-                lTargets.map { io.lumine.mythic.bukkit.BukkitAdapter.adapt(it) }.toHashSet(),
+                et.map { io.lumine.mythic.bukkit.BukkitAdapter.adapt(it) }.toHashSet(),
+                lt.map { io.lumine.mythic.bukkit.BukkitAdapter.adapt(it) }.toHashSet(),
                 power
             ))
         }
