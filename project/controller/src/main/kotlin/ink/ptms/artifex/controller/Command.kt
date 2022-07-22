@@ -270,7 +270,7 @@ object Command {
         dynamic("script") {
             execute<ProxyCommandSender> { sender, _, argument ->
                 async {
-                    val script = helper.getSimpleCompiler().compileByText(argument, sender)
+                    val script = helper.getSimpleCompiler().compileByText(argument, sender, mapOf("sender" to sender))
                     if (script != null) {
                         helper.getSimpleEvaluator().prepareEvaluation(script.generateScriptMeta(), sender) {
                             sender.sendLang("command-script-shell-execute")

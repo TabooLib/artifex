@@ -41,12 +41,12 @@ class DefaultScriptSimpleCompiler : ScriptSimpleCompiler {
      * @param sender 汇报接收者
      * @param loggingBefore 是否在编译前发送消息
      */
-    override fun compileByText(script: String, sender: ProxyCommandSender, loggingBefore: Boolean): ScriptCompiled? {
+    override fun compileByText(script: String, sender: ProxyCommandSender, providedProperties: Map<String, Any>, loggingBefore: Boolean): ScriptCompiled? {
         return prepareCompile(Artifex.api().getScriptCompiler().toScriptSource("main", script), sender) {
             if (loggingBefore) {
                 sender.sendLang("command-script-shell-compile")
             }
-        }.apply(ScriptRuntimeProperty())
+        }.apply(ScriptRuntimeProperty(emptyMap(), providedProperties))
     }
 
     /**

@@ -27,9 +27,10 @@ interface ScriptSimpleCompiler {
      *
      * @param script 脚本文本
      * @param sender 汇报接收者
+     * @param providedProperties 构建参数
      * @param loggingBefore 是否在编译前发送消息
      */
-    fun compileByText(script: String, sender: ProxyCommandSender, loggingBefore: Boolean = true): ScriptCompiled?
+    fun compileByText(script: String, sender: ProxyCommandSender, providedProperties: Map<String, Any> = emptyMap(),  loggingBefore: Boolean = true): ScriptCompiled?
 
     /**
      * 通过 providedProperties 编译脚本，向控制台发送 {command-script-compile-info} 信息，并释放编译文件
