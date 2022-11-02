@@ -21,32 +21,32 @@ import java.util.stream.Collectors;
  * @author Redempt
  */
 public class BlockDataManager {
-	
+
 	/**
 	 * Creates a BlockDataManager backed by chunk PersistentDataContainers
+	 * @param plugin The Plugin that owns the data
 	 * @param autoLoad Whether to automatically load data for newly-loaded chunks asynchronously
 	 * @param events Whether to listen for events to automatically move and remove DataBlocks in response to their owning blocks being moved and removed
 	 * @return The created BlockDataManager
 	 */
-	public static BlockDataManager createPDC(boolean autoLoad, boolean events) {
-		Plugin plugin = JavaPlugin.getProvidingPlugin(BlockDataManager.class);
+	public static BlockDataManager createPDC(Plugin plugin, boolean autoLoad, boolean events) {
 		BlockDataBackend backend = BlockDataBackend.pdc(plugin);
 		return new BlockDataManager(plugin, backend, autoLoad, events);
 	}
-	
+
 	/**
 	 * Creates a BlockDataManager backed by SQLite
+	 * @param plugin The Plugin that owns the data
 	 * @param path The path to the SQLite database
 	 * @param autoLoad Whether to automatically load data for newly-loaded chunks
 	 * @param events Whether to listen for events to automatically move and remove DataBlocks in response to their owning blocks being moved and removed
 	 * @return The created BlockDataManager
 	 */
-	public static BlockDataManager createSQLite(Path path, boolean autoLoad, boolean events) {
-		Plugin plugin = JavaPlugin.getProvidingPlugin(BlockDataManager.class);
+	public static BlockDataManager createSQLite(Plugin plugin, Path path, boolean autoLoad, boolean events) {
 		BlockDataBackend backend = BlockDataBackend.sqlite(path);
 		return new BlockDataManager(plugin, backend, autoLoad, events);
 	}
-	
+
 	/**
 	 * Creates a BlockDataManager backed by SQLite if the server is running a version lower than 1.14, and chunk PersistentDataContainers otherwise
 	 * @param path The path to the SQLite database
@@ -59,14 +59,14 @@ public class BlockDataManager {
 		BlockDataBackend backend = MinecraftVersion.INSTANCE.getMajorLegacy() >= 11400 ? BlockDataBackend.pdc(plugin) : BlockDataBackend.sqlite(path);
 		return new BlockDataManager(plugin, backend, autoLoad, events);
 	}
-	
+
 	private final BlockDataBackend backend;
 	private final Plugin plugin;
 	private BlockDataListener listener;
 	private final Map<ChunkPosition, Map<BlockPosition, DataBlock>> dataBlocks = new ConcurrentHashMap<>();
 	private final Map<ChunkPosition, CompletableFuture<Void>> loading = new ConcurrentHashMap<>();
 	private final Set<ChunkPosition> modified = Collections.synchronizedSet(new HashSet<>());
-	
+
 	/**
 	 * Asynchronously retrieves a DataBlock
 	 * @param block The Block the data is attached to
@@ -90,7 +90,7 @@ public class BlockDataManager {
 			return db;
 		});
 	}
-	
+
 	private BlockDataManager(Plugin plugin, BlockDataBackend backend, boolean autoLoad, boolean events) {
 		this.plugin = plugin;
 		this.backend = backend;
@@ -99,10 +99,10 @@ public class BlockDataManager {
 			new EventListener<>(plugin, ChunkLoadEvent.class, e -> load(new ChunkPosition(e.getChunk())));
 		}
 		if (events) {
-			new BlockDataListener(this, plugin);
+			listener = new BlockDataListener(this, plugin);
 		}
 	}
-	
+
 	/**
 	 * Attempts to migrate SQLite from an older version of the database from the previous BlockDataManager library
 	 * @return Whether a migration was completed successfully
@@ -110,14 +110,14 @@ public class BlockDataManager {
 	public boolean migrate() {
 		return backend.attemptMigration(this);
 	}
-	
+
 	/**
 	 * @return The plugin that owns this BlockDataManager
 	 */
 	public Plugin getPlugin() {
 		return plugin;
 	}
-	
+
 	/**
 	 * Saves all data loaded in this BlockDataManager
 	 */
@@ -127,7 +127,7 @@ public class BlockDataManager {
 		this.modified.clear();
 		unwrap(backend.saveAll());
 	}
-	
+
 	/**
 	 * Saves all data loaded in this BlockDataManager and closes connections where needed
 	 */
@@ -135,11 +135,11 @@ public class BlockDataManager {
 		save();
 		unwrap(backend.close());
 	}
-	
+
 	protected void setModified(ChunkPosition pos) {
 		modified.add(pos);
 	}
-	
+
 	/**
 	 * Gets a DataBlock, creating one if it doesn't exist
 	 * @param block The Block data will be attached to
@@ -148,7 +148,7 @@ public class BlockDataManager {
 	public DataBlock getDataBlock(Block block) {
 		return getDataBlock(block, true);
 	}
-	
+
 	private CompletableFuture<Void> save(ChunkPosition pos, boolean force) {
 		if (!force && !modified.contains(pos)) {
 			return CompletableFuture.completedFuture(null);
@@ -168,27 +168,27 @@ public class BlockDataManager {
 		});
 		return backend.save(pos, BlockDataContainerKt.serializeToByteArray(map, true));
 	}
-	
+
 	private CompletableFuture<Void> unload(ChunkPosition pos) {
 		CompletableFuture<Void> load = loading.remove(pos);
-		if (load != null) {
+		if (load != null && !load.isDone()) {
 			load.cancel(true);
 			dataBlocks.remove(pos);
 			return CompletableFuture.completedFuture(null);
 		}
 		return save(pos, false).thenRun(() -> dataBlocks.remove(pos));
 	}
-	
+
 	/**
 	 * Removes a DataBlock and its data from this BlockDataManager
 	 * @param db The DataBlock to remove
 	 */
 	public void remove(DataBlock db) {
-		ChunkPosition chunkPosition = db.getChunkPosition();
-		setModified(chunkPosition);
-		Optional.ofNullable(dataBlocks.get(chunkPosition)).ifPresent(m -> m.remove(db.getBlockPosition()));
+		ChunkPosition cpos = db.getChunkPosition();
+		setModified(cpos);
+		Optional.ofNullable(dataBlocks.get(cpos)).ifPresent(m -> m.remove(db.getBlockPosition()));
 	}
-	
+
 	/**
 	 * Moves a DataBlock to a new location asynchronously
 	 * @param db The DataBlock whose data should be moved
@@ -197,14 +197,14 @@ public class BlockDataManager {
 	 */
 	public CompletableFuture<DataBlock> moveAsync(DataBlock db, Block location) {
 		remove(db);
-		ChunkPosition chunkPosition = new ChunkPosition(location);
-		modified.add(chunkPosition);
+		ChunkPosition cpos = new ChunkPosition(location);
+		modified.add(cpos);
 		return getDataBlockAsync(location, true).thenApply(b -> {
 			b.data = db.data;
 			return b;
 		});
 	}
-	
+
 	/**
 	 * Moves a DataBlock to a new location
 	 * @param db The DataBlock whose data should be moved
@@ -214,7 +214,7 @@ public class BlockDataManager {
 	public DataBlock move(DataBlock db, Block block) {
 		return unwrap(moveAsync(db, block));
 	}
-	
+
 	/**
 	 * Loads the data for a chunk asynchronously
 	 * @param world The world the data is in
@@ -225,7 +225,7 @@ public class BlockDataManager {
 	public CompletableFuture<Void> loadAsync(World world, int cx, int cz) {
 		return load(new ChunkPosition(cx, cz, world.getName()));
 	}
-	
+
 	/**
 	 * Loads the data for a chunk synchronously
 	 * @param world The world the data is in
@@ -235,7 +235,7 @@ public class BlockDataManager {
 	public void load(World world, int cx, int cz) {
 		unwrap(loadAsync(world, cx, cz));
 	}
-	
+
 	/**
 	 * Unloads the data for a chunk asynchronously
 	 * @param world The world the data is in
@@ -246,7 +246,7 @@ public class BlockDataManager {
 	public CompletableFuture<Void> unloadAsync(World world, int cx, int cz) {
 		return unload(new ChunkPosition(cx, cz, world.getName()));
 	}
-	
+
 	/**
 	 * Unloads the data for a chunk synchronously
 	 * @param world The world the data is in
@@ -256,7 +256,7 @@ public class BlockDataManager {
 	public void unload(World world, int cx, int cz) {
 		unwrap(unloadAsync(world, cx, cz));
 	}
-	
+
 	/**
 	 * Gets the DataBlocks for a given chunk, if it is loaded already
 	 * @param world The world the data is in
@@ -268,7 +268,7 @@ public class BlockDataManager {
 		ChunkPosition pos = new ChunkPosition(cx, cz, world.getName());
 		return Optional.ofNullable(dataBlocks.get(pos)).map(Map::values).orElseGet(ArrayList::new);
 	}
-	
+
 	/**
 	 * Checks whether the DataBlocks for a given chunk are loaded
 	 * @param world The world the data is in
@@ -314,7 +314,7 @@ public class BlockDataManager {
 		DataBlock db = new DataBlock(map, bPos, pos.getWorldName(), this);
 		dataBlocks.get(pos).put(bPos, db);
 	}
-	
+
 	/**
 	 * Gets a DataBlock for the given Block
 	 * @param block The Block data will be attached to
@@ -324,32 +324,34 @@ public class BlockDataManager {
 	public DataBlock getDataBlock(Block block, boolean create) {
 		return unwrap(getDataBlockAsync(block, create));
 	}
-	
+
 	/**
 	 * Loads all DataBlocks stored by this BlockDataManager. Not supported for PDC.
 	 * @return A CompletableFuture for the loading task.
 	 */
 	@SuppressWarnings("unchecked")
 	public CompletableFuture<Void> loadAll() {
+		save();
 		loading.values().forEach(f -> f.cancel(true));
 		loading.clear();
 		dataBlocks.clear();
 		return backend.loadAll().thenApply(chunkMap -> {
 			chunkMap.forEach((cPos, data) -> {
 				Map<String, Object> chunkData = BlockDataContainerKt.deserializeToMap(data, true);
+				dataBlocks.computeIfAbsent(cPos, k -> new HashMap<>());
 				chunkData.keySet().forEach(bPos -> load(bPos, (Map<String, Object>) chunkData.get(bPos), cPos));
 			});
 			return null;
 		});
 	}
-	
+
 	/**
 	 * @return All DataBlocks currently loaded in this BlockDataManager
 	 */
 	public Set<DataBlock> getAllLoaded() {
 		return dataBlocks.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toSet());
 	}
-	
+
 	private <T> T unwrap(CompletableFuture<T> future) {
 		try {
 			return future.get();
@@ -358,5 +360,8 @@ public class BlockDataManager {
 			return null;
 		}
 	}
-	
+
+	public BlockDataListener getListener() {
+		return listener;
+	}
 }
