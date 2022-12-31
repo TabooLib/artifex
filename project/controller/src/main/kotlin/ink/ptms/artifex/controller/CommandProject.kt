@@ -46,7 +46,7 @@ object CommandProject {
                     sender.sendLang("command-project-not-found", argument)
                 }
             }
-            dynamic(commit = "args", optional = true) {
+            dynamic(comment = "args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
                     val project = projectManager.getProject(context.argument(-1))
@@ -93,7 +93,7 @@ object CommandProject {
                     sender.sendLang("command-project-is-not-running", argument)
                 }
             }
-            dynamic(commit = "args", optional = true) {
+            dynamic(comment = "args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
                     val project = projectManager.getRunningProject(context.argument(-1))
@@ -145,7 +145,7 @@ object CommandProject {
                         sender.sendLang("command-project-not-found-or-not-dev", argument)
                     }
                 }
-                dynamic(commit = "args", optional = true) {
+                dynamic(comment = "args", optional = true) {
                     execute<ProxyCommandSender> { sender, context, argument ->
                         val demand = Demand("0 $argument")
                         val project = projectManager.getProject(context.argument(-1))
@@ -161,7 +161,7 @@ object CommandProject {
         literal("plugin") {
             dynamic("project") {
                 suggestion<ProxyCommandSender>(uncheck = true) { _, _ -> projects }
-                dynamic(commit = "args") {
+                dynamic(comment = "args") {
                     execute<ProxyCommandSender> { sender, context, argument ->
                         val demand = Demand("0 $argument")
                         val project = projectManager.getProject(context.argument(-1))

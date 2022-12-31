@@ -31,6 +31,7 @@ class KotlinCompilationConfiguration(val props: ScriptRuntimeProperty) : ScriptC
             // Consider removing these libraries from the classpath
             // Library has Kotlin runtime bundled into it
             compilerOptions("-Xskip-runtime-version-check")
+            compilerOptions("-Xjvm-default", "all")
         }
         refineConfiguration {
             onAnnotations(Art::class, Include::class, Import::class, CompilerOptions::class, handler = KotlinCompilationConfigurationHandler(props))
