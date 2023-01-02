@@ -3,8 +3,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 val taboolib_version: String by project
 
 plugins {
-    id("io.izzel.taboolib") version "1.40"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("io.izzel.taboolib")
+    id("com.github.johnrengelman.shadow")
 }
 
 taboolib {

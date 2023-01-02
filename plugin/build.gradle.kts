@@ -6,7 +6,7 @@ import java.util.zip.ZipFile
 
 plugins {
     java
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.johnrengelman.shadow")
 }
 
 dependencies {
@@ -32,7 +32,7 @@ tasks {
         doFirst {
             val version = project.version
             val file = projectDir.resolve("build/libs/plugin-$version.jar")
-            val newFile = projectDir.resolve("build/libs/plugin-$version-all.jar")
+            val newFile = projectDir.resolve("build/libs/${rootProject.name}-$version.jar")
             ZipFile(file).use { old ->
                 ZipOutputStream(FileOutputStream(newFile)).use { new ->
                     for (entry in old.entries()) {

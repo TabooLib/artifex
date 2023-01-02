@@ -73,7 +73,7 @@ object Command {
                     sender.sendLang("command-script-not-found", argument)
                 }
             }
-            dynamic(commit = "args", optional = true) {
+            dynamic(comment = "args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
                     val args = demand.dataMap.keys.filter { it.startsWith("A") }.associate { it.substring(1) to type(demand.get(it)!!) }
@@ -135,7 +135,7 @@ object Command {
                     sender.sendLang("command-script-not-found", argument)
                 }
             }
-            dynamic(commit = "args", optional = true) {
+            dynamic(comment = "args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
                     val keys = demand.dataMap.keys.filter { it.startsWith("P") }
@@ -203,7 +203,7 @@ object Command {
                     sender.sendLang("command-script-not-found", argument)
                 }
             }
-            dynamic(commit = "args", optional = true) {
+            dynamic(comment = "args", optional = true) {
                 execute<ProxyCommandSender> { sender, context, argument ->
                     val demand = Demand("0 $argument")
                     val args = demand.dataMap.keys.filter { it.startsWith("A") }.associate { it.substring(1) to type(demand.get(it)!!) }

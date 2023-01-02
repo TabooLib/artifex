@@ -4,6 +4,9 @@ plugins {
     id("org.gradle.java")
     id("org.gradle.maven-publish")
     id("org.jetbrains.kotlin.jvm") version "1.5.10" apply false
+
+    id("io.izzel.taboolib") version "1.51" apply false
+    id("com.github.johnrengelman.shadow") version "7.1.2" apply false
 }
 
 subprojects {
