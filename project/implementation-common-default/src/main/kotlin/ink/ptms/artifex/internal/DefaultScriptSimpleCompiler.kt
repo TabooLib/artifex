@@ -74,8 +74,7 @@ class DefaultScriptSimpleCompiler : ScriptSimpleCompiler {
         })
         // 释放编译文件
         if (save) {
-            val baseScriptFolder = Artifex.api().getScriptHelper().baseScriptFolder()
-            compiled?.generateScriptJar(newFile(baseScriptFolder, ".build/${script.nameWithoutExtension}.jar"))
+            compiled?.generateScriptJar(newFile(helper.buildFolder(), "${script.nameWithoutExtension}.jar"))
         }
         return compiled
     }
@@ -102,7 +101,7 @@ class DefaultScriptSimpleCompiler : ScriptSimpleCompiler {
             error("Not a kts file")
         }
         // 检查编译文件
-        val buildFile = File(helper.baseScriptFolder(), ".build/${file.nameWithoutExtension}.jar")
+        val buildFile = File(helper.buildFolder(),"${file.nameWithoutExtension}.jar")
         if (buildFile.exists() && !forceCompile) {
             // 检查版本
             val version = try {
