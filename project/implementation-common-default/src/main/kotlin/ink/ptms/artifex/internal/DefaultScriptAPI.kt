@@ -38,10 +38,6 @@ object DefaultScriptAPI : ArtifexAPI {
     var scriptFolder: String? = null
         private set
 
-    @ConfigNode("buildFolder")
-    var buildFolder: String? = null
-        private set
-
     private var isDependenciesLoaded = false
 
     private val helper = DefaultScriptHelper()
