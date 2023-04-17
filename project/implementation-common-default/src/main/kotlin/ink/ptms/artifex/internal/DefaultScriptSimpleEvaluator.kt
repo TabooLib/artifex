@@ -123,7 +123,7 @@ class DefaultScriptSimpleEvaluator : ScriptSimpleEvaluator {
                 save = save
             )
         ) {
-            val buildFile = File(helper.baseScriptFolder(), ".build/${file.nameWithoutExtension}.jar")
+            val buildFile = File(helper.buildFolder(), "${file.nameWithoutExtension}.jar")
             if (buildFile.exists()) {
                 return prepareEvaluationByJarFile(buildFile, sender, loggingRunning = loggingRunning, prepare = prepare)
             }
@@ -151,7 +151,7 @@ class DefaultScriptSimpleEvaluator : ScriptSimpleEvaluator {
         }
         // 检查编译
         else if (helper.getSimpleCompiler().compileCheck(file, sender, providedProperties = providedProperties, forceCompile = forceCompile)) {
-            val buildFile = File(helper.baseScriptFolder(), ".build/${file.nameWithoutExtension}.jar")
+            val buildFile = File(helper.buildFolder(), "${file.nameWithoutExtension}.jar")
             if (buildFile.exists()) {
                 container.releaseNow()
                 prepareEvaluation(file, sender, providedProperties = providedProperties, forceCompile = forceCompile) {

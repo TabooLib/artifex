@@ -19,8 +19,13 @@ class DefaultScriptHelper : ScriptHelper {
 
     val simpleCompiler = DefaultScriptSimpleCompiler()
     val simpleEvaluator = DefaultScriptSimpleEvaluator()
-    val baseScriptFolder = File(getDataFolder(), "scripts")
-
+    val baseScriptFolder by lazy {
+        if (DefaultScriptAPI.scriptFolder.isNullOrBlank())
+            File(getDataFolder(), "scripts")
+        else
+            File(DefaultScriptAPI.scriptFolder!!)
+    }
+    val buildFolder = File(getDataFolder(),".build/")
     override fun getSimpleCompiler(): ScriptSimpleCompiler {
         return simpleCompiler
     }
@@ -33,8 +38,13 @@ class DefaultScriptHelper : ScriptHelper {
         return baseScriptFolder
     }
 
+    override fun buildFolder(): File {
+        return buildFolder
+    }
+
     override fun getScriptImplementations(container: ScriptContainer): List<ScriptContainer> {
-        return Artifex.api().getScriptContainerManager().getAll().filter { it.script().baseScript().otherImportScripts().contains(container.id()) }
+        return Artifex.api().getScriptContainerManager().getAll()
+            .filter { it.script().baseScript().otherImportScripts().contains(container.id()) }
     }
 
     override fun getScriptVersion(script: ScriptSource, providedProperties: Map<String, Any>): String {
@@ -93,6 +103,7 @@ class DefaultScriptHelper : ScriptHelper {
                 }
                 return null
             }
+
             root.extension == "kts" && (root.nameWithoutExtension == name || root.name == name) -> return root
             else -> return null
         }
@@ -182,7 +193,11 @@ class DefaultScriptHelper : ScriptHelper {
         releaseScript(container, sender, releaseImplementations)
     }
 
-    override fun releaseScript(container: ScriptContainer, sender: ProxyCommandSender, releaseImplementations: Boolean) {
+    override fun releaseScript(
+        container: ScriptContainer,
+        sender: ProxyCommandSender,
+        releaseImplementations: Boolean,
+    ) {
         when (val result = container.releaseSafely(releaseImplementations)) {
             // 正在被引用
             is ReleaseResult.Referenced -> sender.sendLang("command-script-release-error", container.id(), result.names)

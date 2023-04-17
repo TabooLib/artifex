@@ -50,7 +50,7 @@ class DefaultDevScriptProject(identifier: ScriptProjectIdentifier, constructor: 
                     providedProperties = emptyMap(),
                     forceCompile = forceCompile
                 )) {
-                val buildFile = File(helper.baseScriptFolder(), ".build/${scriptFile.nameWithoutExtension}.jar")
+                val buildFile = File(helper.buildFolder(), "${scriptFile.nameWithoutExtension}.jar")
                 if (buildFile.exists()) {
                     metaHandler.getScriptMeta(buildFile)
                 } else {

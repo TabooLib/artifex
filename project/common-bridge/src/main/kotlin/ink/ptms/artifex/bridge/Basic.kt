@@ -3,8 +3,8 @@ package ink.ptms.artifex.bridge
 import ink.ptms.artifex.script.Script
 import taboolib.common.TabooLibCommon
 import taboolib.common.platform.Platform
-import taboolib.common.platform.command.CommandBuilder
 import taboolib.common.platform.command.PermissionDefault
+import taboolib.common.platform.command.component.CommandBase
 import taboolib.common.platform.event.EventPriority
 import taboolib.common.platform.function.registerBukkitListener
 import taboolib.common.platform.function.registerBungeeListener
@@ -44,7 +44,7 @@ fun Script.command(
     permissionMessage: String = "",
     permissionDefault: PermissionDefault = PermissionDefault.OP,
     permissionChildren: Map<String, PermissionDefault> = emptyMap(),
-    commandBuilder: CommandBuilder.CommandBase.() -> Unit,
+    commandBuilder: CommandBase.() -> Unit,
 ) {
     taboolib.common.platform.command.command(
         name,

@@ -34,6 +34,10 @@ object DefaultScriptAPI : ArtifexAPI {
     lateinit var ignoreWarning: List<String>
         private set
 
+    @ConfigNode("scriptFolder")
+    var scriptFolder: String? = null
+        private set
+
     private var isDependenciesLoaded = false
 
     private val helper = DefaultScriptHelper()

@@ -28,6 +28,11 @@ interface ScriptHelper {
     fun baseScriptFolder(): File
 
     /**
+     * 脚本编译目录
+     */
+    fun buildFolder(): File
+
+    /**
      * 获取脚本的所有实现（指引用该脚本的所有其他脚本）
      */
     fun getScriptImplementations(container: ScriptContainer): List<ScriptContainer>
