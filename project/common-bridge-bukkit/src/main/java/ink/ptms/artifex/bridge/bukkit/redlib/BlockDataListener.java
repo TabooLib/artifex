@@ -203,7 +203,7 @@ class BlockDataListener implements Listener {
                 destroyCause = DataBlockDestroyEvent.DestroyCause.ENDER_DRAGON;
             } else if (e.getEntity() instanceof Enderman || e.getEntity() instanceof FallingBlock) {
                 // TODO 末影人与方块坠落将进行数据转移
-                e.setCancelled(true);
+//                e.setCancelled(true);
                 return;
             } else {
                 destroyCause = DataBlockDestroyEvent.DestroyCause.ENTITY;

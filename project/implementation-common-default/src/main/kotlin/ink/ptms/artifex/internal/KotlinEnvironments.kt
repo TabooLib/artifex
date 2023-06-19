@@ -46,7 +46,7 @@ object KotlinEnvironments {
         }
         val pomFile = File(baseDir, String.format("%s/%s/%s/%s-%s.pom", args[0].replace('.', '/'), args[1], args[2], args[1], args[2]))
         val pomShaFile = File(pomFile.path + ".sha1")
-        if (pomFile.exists() && pomShaFile.exists() && DependencyDownloader.readFile(pomShaFile).startsWith(DependencyDownloader.readFileHash(pomFile))) {
+        if (pomFile.exists() && pomShaFile.exists() && IO.readFile(pomShaFile).startsWith(IO.getHash(pomFile))) {
             downloader.loadDependencyFromInputStream(pomFile.toPath().toUri().toURL().openStream())
         } else {
             val pom = String.format("%s/%s/%s/%s/%s-%s.pom", repository, args[0].replace('.', '/'), args[1], args[2], args[1], args[2])
