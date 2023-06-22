@@ -8,6 +8,7 @@ import taboolib.common.io.taboolibId
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import java.io.File
+import java.net.URLClassLoader
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.ConcurrentHashMap
@@ -57,7 +58,9 @@ class DefaultScriptEnvironment : ScriptEnvironment {
     override fun loadImportsFromString(str: List<String>, classLoader: List<ClassLoader>): List<String> {
         val scanner = FastClasspathScanner(*str.filter { it.isNotBlank() }.toTypedArray())
         classLoader.forEach { scanner.addClassLoader(it) }
-        val classes = scanner.alwaysScanClasspathElementRoot(false).scan().namesOfAllClasses
+        val classes = scanner.alwaysScanClasspathElementRoot(false).scan().namesOfAllClasses.filter {
+            !it.startsWith("kotlin.")
+        }
         return classes.map { it.substringBeforeLast(".") }.filter { it.isNotEmpty() }.toSet().map { "$it.*" }
     }
 
@@ -77,6 +80,20 @@ class DefaultScriptEnvironment : ScriptEnvironment {
         }
         // 插入用户片段
         val extra = if (args.size > 1) args[1].split(",").toTypedArray() else emptyArray()
+
+        /*val pluginClassLoader = plugin.javaClass.classLoader as URLClassLoader
+
+        // 排除其它插件的 kotlin 影响
+        val excludedClassLoader = object : URLClassLoader(pluginClassLoader.urLs, plugin.javaClass.classLoader) {
+            override fun loadClass(name: String, resolve: Boolean): Class<*> {
+                // 排除 Kotlin 相关的类
+                if (name.startsWith("kotlin.")) {
+                    throw ClassNotFoundException(name)
+                }
+                return super.loadClass(name, resolve)
+            }
+        }*/
+
         val imports = loadImportsFromString(listOf("!!", main, *extra, "-$main.$taboolibId"), listOf(plugin.javaClass.classLoader))
         if (imports.isNotEmpty()) {
             pluginImports[name] = imports

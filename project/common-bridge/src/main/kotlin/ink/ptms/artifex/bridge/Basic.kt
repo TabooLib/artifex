@@ -44,6 +44,7 @@ fun Script.command(
     permissionMessage: String = "",
     permissionDefault: PermissionDefault = PermissionDefault.OP,
     permissionChildren: Map<String, PermissionDefault> = emptyMap(),
+    newParser: Boolean,
     commandBuilder: CommandBase.() -> Unit,
 ) {
     taboolib.common.platform.command.command(
@@ -55,6 +56,7 @@ fun Script.command(
         permissionMessage,
         permissionDefault,
         permissionChildren,
+        newParser,
         commandBuilder
     )
     container().resource("command:$name") {
