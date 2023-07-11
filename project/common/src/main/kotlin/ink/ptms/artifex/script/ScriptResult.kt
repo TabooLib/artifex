@@ -1,6 +1,8 @@
 package ink.ptms.artifex.script
 
 /**
+ * 脚本运行结果
+ *
  * @author 坏黑
  * @since 2022/5/15 23:47
  */
@@ -35,7 +37,7 @@ interface ScriptResult<out R> {
 
         override fun toString(): String {
             val loc = source.location
-            val pos = if (loc != null) "(${loc.start.line}, ${loc.start.col}): " else ""
+            val pos = if (loc != null) "(Line: ${loc.start.line}, Column: ${loc.start.col}): " else ""
             return if (source.path != null) {
                 val path = source.path.substringAfterLast('/')
                 "${severity}: ${pos}${message} ($path)"

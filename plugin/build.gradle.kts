@@ -11,22 +11,36 @@ plugins {
 
 dependencies {
     implementation(project(":project:common"))
-    implementation(project(":project:common-bridge"))
-    implementation(project(":project:controller"))
-    implementation(project(":project:implementation-bukkit"))
-    implementation(project(":project:implementation-bungee"))
-    implementation(project(":project:implementation-common-default"))
-    implementation(project(":project:implementation-common-project"))
+    implementation(project(":project:common-script-api"))
+    implementation(project(":project:common-script-api-bukkit"))
+    implementation(project(":project:common-script-api-bungee"))
+    // 运行平台
+    implementation(project(":project:platform-bukkit"))
+    implementation(project(":project:platform-bungee"))
+    implementation(project(":project:platform-universal-command"))
+    // 逻辑实现
+    implementation(project(":project:common-impl-default"))
+    implementation(project(":project:common-impl-project"))
+    // 第三方库
+    implementation("ink.ptms:um:1.0.0-beta-29")
 }
 
 tasks {
     withType<ShadowJar> {
         archiveClassifier.set("")
+        // 移除不必要的文件
         exclude("META-INF/maven/**")
         exclude("META-INF/tf/**")
         exclude("module-info.java")
-        relocate("taboolib.platform.type.BukkitProxyEvent", "ink.ptms.artifex.taboolib.platform.type.BukkitProxyEvent")
-        relocate("taboolib.platform.type.BungeeProxyEvent", "ink.ptms.artifex.taboolib.platform.type.BungeeProxyEvent")
+        // 重定向 kotlin
+        relocate("kotlin.", "kotlin1820.") {
+            exclude("kotlin.Metadata")
+        }
+        // 重定向 TabooLib
+        relocate("taboolib", "ink.ptms.artifex.taboolib")
+        // 第三方库
+        relocate("ink.ptms.um", "ink.ptms.artifex.library.um")
+        relocate("io.github.lukehutch", "ink.ptms.artifex.library")
     }
     create("collect") {
         doFirst {
@@ -42,23 +56,30 @@ tasks {
                         }
                         new.closeEntry()
                     }
-                    new.putNextEntry(JarEntry("runtime/bridge.jar"))
-                    new.write(rootProject.file("project/common-bridge/build/libs/common-bridge-$version-origin.jar").readBytes())
-                    new.closeEntry()
-                    new.putNextEntry(JarEntry("runtime/core.jar"))
-                    new.write(rootProject.file("project/common-runtime/build/libs/common-runtime-$version.jar").readBytes())
-                    new.closeEntry()
-                    new.putNextEntry(JarEntry("proxy/bukkit.jar"))
-                    new.write(rootProject.file("project/proxy-bukkit/build/libs/proxy-bukkit-$version.jar").readBytes())
-                    new.closeEntry()
-                    new.putNextEntry(JarEntry("proxy/bungee.jar"))
-                    new.write(rootProject.file("project/proxy-bungee/build/libs/proxy-bungee-$version.jar").readBytes())
-                    new.closeEntry()
+
+                    // 因为 TabooLib 运行在 relocated 后的 Kotlin 环境中 (kotlin1820)
+                    // 因此需要给脚本提供未经重定向的 jar 文件来进行编译
+
+                    // 运行环境及标准库
+                    applyToZip(new, version, "runtime/core", "common-core")
+                    applyToZip(new, version, "runtime/script-api", "common-script-api")
+                    applyToZip(new, version, "runtime/script-api-bukkit", "common-script-api-bukkit")
+                    applyToZip(new, version, "runtime/script-api-bungee", "common-script-api-bungee")
+                    // jar 代理
+                    applyToZip(new, version, "proxy/bukkit", "jar-proxy-bukkit")
+                    applyToZip(new, version, "proxy/bungee", "jar-proxy-bungee")
                 }
             }
+            file.delete()
         }
     }
     build {
         dependsOn(shadowJar)
     }
+}
+
+fun applyToZip(new: ZipOutputStream, version: Any, name: String, module: String) {
+    new.putNextEntry(JarEntry("$name.jar"))
+    new.write(rootProject.file("project/$module/build/libs/$module-$version.jar").readBytes())
+    new.closeEntry()
 }

@@ -6,6 +6,8 @@ import java.io.File
  * Artifex
  * ink.ptms.artifex.script.ScriptFileCompiled
  *
+ * 编译成功的脚本文件
+ *
  * @author 坏黑
  * @since 2022/5/16 14:25
  */

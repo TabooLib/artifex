@@ -1,6 +1,8 @@
 package ink.ptms.artifex.script
 
 /**
+ * 脚本容器（运行中的脚本）
+ *
  * @author 坏黑
  * @since 2022/4/17 02:35
  */

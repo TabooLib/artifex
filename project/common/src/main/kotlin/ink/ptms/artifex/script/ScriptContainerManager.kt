@@ -1,6 +1,8 @@
 package ink.ptms.artifex.script
 
 /**
+ * 脚本容器管理器
+ *
  * @author 坏黑
  * @since 2021/12/28 2:37 AM
  */

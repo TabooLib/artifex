@@ -1,16 +1,20 @@
 rootProject.name = "Artifex"
 
 include("plugin")
-include("project:application")
 include("project:common")
-include("project:common-bridge")
-include("project:common-bridge-bukkit")
-include("project:common-bridge-bungee")
-include("project:common-runtime")
-include("project:controller")
-include("project:implementation-bukkit")
-include("project:implementation-bungee")
-include("project:implementation-common-default")
-include("project:implementation-common-project")
-include("project:proxy-bukkit")
-include("project:proxy-bungee")
+// 实现
+include("project:common-impl-default")
+include("project:common-impl-project")
+// 脚本运行环境（核心）
+include("project:common-core")
+// 脚本标准库
+include("project:common-script-api")
+include("project:common-script-api-bukkit")
+include("project:common-script-api-bungee")
+// 运行平台
+include("project:platform-bukkit")
+include("project:platform-bungee")
+include("project:platform-universal-command")
+// jar 代理
+include("project:jar-proxy-bukkit")
+include("project:jar-proxy-bungee")

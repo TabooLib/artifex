@@ -7,6 +7,8 @@ import java.util.zip.ZipInputStream
  * Artifex
  * ink.ptms.artifex.script.ScriptMetaHandler
  *
+ * 脚本元数据处理器
+ *
  * @author 坏黑
  * @since 2022/5/18 23:45
  */
@@ -61,4 +63,19 @@ interface ScriptMetaHandler {
      * 从 ZipInputStream 中获取版本信息（源代码版本）
      */
     fun getScriptVersion(zipInputStream: ZipInputStream): String
+
+    /**
+     * 从文件中获取数据
+     */
+    fun getScriptMetaData(file: File): ScriptMetaData
+
+    /**
+     * 从 FileSet 中获取数据
+     */
+    fun getScriptMetaData(fileSet: FileSet): ScriptMetaData
+
+    /**
+     * 从 ZipInputStream 中获取数据
+     */
+    fun getScriptMetaData(zipInputStream: ZipInputStream): ScriptMetaData
 }

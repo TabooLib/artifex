@@ -6,6 +6,8 @@ import java.io.File
  * Artifex
  * ink.ptms.artifex.script.ScriptFileFinder
  *
+ * 脚本文件搜索器
+ *
  * @author 坏黑
  * @since 2022/6/9 21:46
  */

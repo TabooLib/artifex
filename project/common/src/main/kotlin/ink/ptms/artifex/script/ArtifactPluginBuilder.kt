@@ -6,6 +6,8 @@ import taboolib.common.platform.Platform
  * Artifex
  * ink.ptms.artifex.script.ArtifactPluginBuilder
  *
+ * 脚本（构件）构建器
+ *
  * @author 坏黑
  * @since 2022/6/14 14:15
  */

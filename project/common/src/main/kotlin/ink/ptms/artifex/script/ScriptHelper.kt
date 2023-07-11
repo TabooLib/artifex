@@ -170,6 +170,7 @@ interface ScriptHelper {
      *
      * @param report 脚本执行报告
      * @param sender 接收者
+     * @param detailError 是否显示详细错误
      */
-    fun printScriptResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender)
+    fun printScriptResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender, detailError: Boolean)
 }

@@ -9,6 +9,8 @@ import java.util.function.Consumer
  * Artifex
  * ink.ptms.artifex.script.ScriptProjectIdentifier
  *
+ * 脚本工程标识符
+ *
  * @author 坏黑
  * @since 2022/6/11 15:29
  */

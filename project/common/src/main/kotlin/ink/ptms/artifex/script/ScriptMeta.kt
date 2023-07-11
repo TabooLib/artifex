@@ -7,6 +7,8 @@ import java.io.File
  * Artifex
  * ink.ptms.artifex.script.ScriptMeta
  *
+ * 脚本元数据
+ *
  * @author 坏黑
  * @since 2022/5/18 23:46
  */

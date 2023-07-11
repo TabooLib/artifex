@@ -6,6 +6,8 @@ import java.io.File
  * Artifex
  * ink.ptms.artifex.script.ScriptEnvironment
  *
+ * 脚本环境
+ *
  * @author 坏黑
  * @since 2022/5/16 14:10
  */

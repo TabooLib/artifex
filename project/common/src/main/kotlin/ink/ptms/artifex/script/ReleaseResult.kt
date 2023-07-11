@@ -4,6 +4,8 @@ package ink.ptms.artifex.script
  * Artifex
  * ink.ptms.artifex.script.ReleaseResult
  *
+ * 脚本释放结果
+ *
  * @author 坏黑
  * @since 2022/6/12 17:31
  */

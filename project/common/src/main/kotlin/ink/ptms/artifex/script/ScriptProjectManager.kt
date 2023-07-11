@@ -7,6 +7,8 @@ import java.util.zip.ZipInputStream
  * Artifex
  * ink.ptms.artifex.script.ScriptProjectManager
  *
+ * 脚本工程管理器
+ *
  * @author 坏黑
  * @since 2022/5/24 00:01
  */

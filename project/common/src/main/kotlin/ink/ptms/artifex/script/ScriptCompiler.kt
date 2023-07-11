@@ -1,5 +1,6 @@
 package ink.ptms.artifex.script
 
+import taboolib.library.asm.commons.Remapper
 import java.io.File
 import java.io.InputStream
 import java.util.concurrent.CompletableFuture
@@ -7,6 +8,8 @@ import java.util.concurrent.Executors
 import java.util.function.Consumer
 
 /**
+ * 脚本编译器
+ *
  * @author 坏黑
  * @since 2022/5/15 23:21
  */
@@ -46,6 +49,16 @@ interface ScriptCompiler {
      * 生成源文件
      */
     fun toScriptSource(main: String, inputStream: InputStream): ScriptSource
+
+    /**
+     * 设置 Remapper
+     */
+    fun setRemapper(remapper: Remapper)
+
+    /**
+     * 获取当前 Remapper
+     */
+    fun getRemapper(): Remapper
 
     /**
      * 脚本编译配置
@@ -105,6 +118,6 @@ interface ScriptCompiler {
         /**
          * 当编译失败时调用
          */
-        fun onFailure(func: Runnable)
+        fun onFailure(func: Consumer<Throwable>)
     }
 }

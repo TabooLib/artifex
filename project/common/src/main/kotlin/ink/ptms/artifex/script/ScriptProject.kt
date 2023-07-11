@@ -7,6 +7,8 @@ import taboolib.module.configuration.Configuration
  * Artifex
  * ink.ptms.artifex.script.ScriptProject
  *
+ * 脚本工程
+ *
  * @author 坏黑
  * @since 2022/5/23 23:55
  */

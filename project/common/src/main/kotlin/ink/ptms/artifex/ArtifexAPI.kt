@@ -58,6 +58,11 @@ interface ArtifexAPI {
     fun getScriptContainerManager(): ScriptContainerManager
 
     /**
+     * 获取脚本事件总线
+     */
+    fun getScriptEventBus(): ScriptEventBus
+
+    /**
      * 获取运行库文件
      */
     fun getRuntimeLibraryFile(): List<File>

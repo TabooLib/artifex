@@ -1,5 +1,8 @@
 package ink.ptms.artifex
 
+import taboolib.common.platform.Awake
+import taboolib.common.platform.Schedule
+
 /**
  * Artifex
  * ink.ptms.artifex.Artifex
@@ -10,6 +13,7 @@ package ink.ptms.artifex
 object Artifex {
 
     private var api: ArtifexAPI? = null
+    private var serverStarted = false
 
     /**
      * 获取开发者接口
@@ -19,9 +23,21 @@ object Artifex {
     }
 
     /**
+     * 服务器是否完全启动
+     */
+    fun isServerStarted(): Boolean {
+        return serverStarted
+    }
+
+    /**
      * 注册开发者接口
      */
     fun register(api: ArtifexAPI) {
         this.api = api
+    }
+
+    @Schedule(delay = 20)
+    private fun active() {
+        serverStarted = true
     }
 }

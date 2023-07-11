@@ -18,12 +18,14 @@ interface ScriptSimpleEvaluator {
      * @param script 脚本
      * @param sender 汇报接收者
      * @param loggingRunning 是否打印运行信息
+     * @param detailError 是否打印详细错误信息
      * @param prepare 编译前回调函数
      */
     fun prepareEvaluation(
         script: ScriptMeta,
         sender: ProxyCommandSender,
         loggingRunning: Boolean = true,
+        detailError: Boolean = false,
         prepare: Runnable = Runnable { },
     ): ScriptTaskEvaluator
 
@@ -37,6 +39,7 @@ interface ScriptSimpleEvaluator {
      * @param loggingRunning 是否打印运行信息
      * @param forceCompile 是否强制编译
      * @param save 是否保存编译后的文件
+     * @param detailError 是否打印详细错误信息
      * @param prepare 编译前回调函数
      */
     fun prepareEvaluation(
@@ -47,6 +50,7 @@ interface ScriptSimpleEvaluator {
         loggingRunning: Boolean = true,
         forceCompile: Boolean = false,
         save: Boolean = true,
+        detailError: Boolean = false,
         prepare: Runnable = Runnable { },
     ): ScriptTaskEvaluator?
 
@@ -58,6 +62,14 @@ interface ScriptSimpleEvaluator {
      * @param runArgs 运行参数
      * @param providedProperties 编译参数
      * @param forceCompile 是否强制编译
+     * @param detailError 是否打印详细错误信息
      */
-    fun reload(file: File, sender: ProxyCommandSender, runArgs: Map<String, Any>, providedProperties: Map<String, Any>, forceCompile: Boolean = false)
+    fun reload(
+        file: File,
+        sender: ProxyCommandSender,
+        runArgs: Map<String, Any> = emptyMap(),
+        providedProperties: Map<String, Any> = emptyMap(),
+        forceCompile: Boolean = false,
+        detailError: Boolean = false
+    )
 }

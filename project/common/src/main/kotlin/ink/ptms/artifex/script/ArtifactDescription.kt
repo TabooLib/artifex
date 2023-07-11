@@ -7,6 +7,8 @@ import taboolib.module.configuration.Type
  * Artifex
  * ink.ptms.artifex.script.ArtifactDescription
  *
+ * 脚本（构件）描述文件
+ *
  * @author 坏黑
  * @since 2022/6/14 13:22
  */

@@ -3,6 +3,8 @@ package ink.ptms.artifex.script
 import java.io.File
 
 /**
+ * 编译成功的脚本
+ *
  * @author 坏黑
  * @since 2022/5/15 23:20
  */
@@ -24,7 +26,7 @@ interface ScriptCompiled {
     fun otherImportScripts(): List<String>
 
     /**
-     * 运行脚本
+     * 运行脚本（不会触发 [ScriptEvaluateEvent] 事件）
      *
      * @param id 脚本序号
      * @param props 脚本运行参数
@@ -32,7 +34,7 @@ interface ScriptCompiled {
     fun invoke(id: String, props: ScriptRuntimeProperty): ScriptResult<ScriptResult.Result>
 
     /**
-     * 运行脚本
+     * 运行脚本（不会触发 [ScriptEvaluateEvent] 事件）
      *
      * @param configuration 脚本运行配置
      */

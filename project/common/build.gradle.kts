@@ -14,12 +14,16 @@ taboolib {
         "module-effect",
         "module-database",
     )
-    install("expansion-player-database", "expansion-command-helper")
+    install(
+        "expansion-command-helper",
+        "expansion-player-database",
+        "expansion-persistent-container-object"
+    )
     options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
     classifier = null
     version = taboolib_version
-    relocate("io.github.lukehutch", "taboolib.library")
-    relocate("taboolib.common.OpenAPI", "!ink.ptms.artifex.taboolib.common")
+//    relocate("io.github.lukehutch", "taboolib.library")
+//    relocate("taboolib.common.OpenAPI", "!ink.ptms.artifex.taboolib.common")
 }
 
 dependencies {
