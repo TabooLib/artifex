@@ -94,7 +94,6 @@ ink.ptms.artifex.library.um
 -org.bukkit.plugin.messaging
 -org.bukkit.scheduler
 -org.bukkit.scoreboard
--org.bukkit.util
 -org.bukkit.util.io
 -org.bukkit.util.noise
 -org.bukkit.util.permissions

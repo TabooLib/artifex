@@ -1,4 +1,4 @@
-package ink.ptms.artifex.command
+package ink.ptms.artifex.scriptcommand
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.ArtifactDescription
@@ -8,6 +8,7 @@ import taboolib.common.io.newFile
 import taboolib.common.platform.Platform
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.CommandBody
+import taboolib.common.platform.command.CommandHeader
 import taboolib.common.platform.command.decimal
 import taboolib.common.platform.command.subCommand
 import taboolib.common.platform.function.submitAsync
@@ -22,6 +23,7 @@ import java.util.concurrent.TimeUnit
  * @author 坏黑
  * @since 2022/5/19 11:46
  */
+@CommandHeader(name = "artifexproject", aliases = ["artp"], permission = "artifex.command")
 object CommandProject {
 
     val projectManager: ScriptProjectManager

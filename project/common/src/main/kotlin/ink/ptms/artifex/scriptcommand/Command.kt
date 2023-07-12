@@ -1,4 +1,4 @@
-package ink.ptms.artifex.command
+package ink.ptms.artifex.scriptcommand
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.*

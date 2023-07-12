@@ -15,9 +15,8 @@ dependencies {
     implementation(project(":project:common-script-api-bukkit"))
     implementation(project(":project:common-script-api-bungee"))
     // 运行平台
-    implementation(project(":project:platform-bukkit"))
-    implementation(project(":project:platform-bungee"))
-    implementation(project(":project:platform-universal-command"))
+    implementation(project(":project:bootstrap-bukkit"))
+    implementation(project(":project:bootstrap-bungee"))
     // 逻辑实现
     implementation(project(":project:common-impl-default"))
     implementation(project(":project:common-impl-project"))
