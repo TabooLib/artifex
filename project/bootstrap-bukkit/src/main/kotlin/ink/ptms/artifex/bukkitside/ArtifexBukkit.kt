@@ -9,9 +9,7 @@ import taboolib.common.platform.Awake
 import taboolib.common.platform.PlatformFactory
 import taboolib.common.platform.Plugin
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
-import taboolib.library.asm.commons.Remapper
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.nms.MinecraftRemapper
 import java.io.File
