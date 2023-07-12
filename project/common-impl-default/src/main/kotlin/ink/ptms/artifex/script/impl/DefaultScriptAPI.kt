@@ -92,7 +92,7 @@ object DefaultScriptAPI : ArtifexAPI {
                 it.onSuccess { c ->
                     val result = c.invoke("preheat", property)
                     val script = result.value()?.instance as? Script
-                    script?.container()?.releaseSafely(true)
+                    script?.container()?.releaseNow()
                 }
             }
         }

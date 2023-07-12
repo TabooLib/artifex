@@ -25,10 +25,10 @@ import java.util.concurrent.ConcurrentHashMap
 class DefaultScriptEnvironment : ScriptEnvironment {
 
     val pluginImports = ConcurrentHashMap<String, List<String>>()
-    val globalImports = ArrayList<String>()
+    val globalImports = HashSet<String>()
 
     override fun getGlobalImports(): List<String> {
-        return globalImports
+        return globalImports.toList()
     }
 
     override fun getClasspath(input: List<Class<*>>): List<File> {

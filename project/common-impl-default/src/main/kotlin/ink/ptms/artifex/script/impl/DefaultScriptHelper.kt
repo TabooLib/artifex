@@ -3,6 +3,7 @@ package ink.ptms.artifex.script.impl
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.*
 import taboolib.common.io.digest
+import taboolib.common.io.newFolder
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.util.unsafeLazy
@@ -22,11 +23,11 @@ class DefaultScriptHelper : ScriptHelper {
     val simpleEvaluator = DefaultScriptSimpleEvaluator()
 
     val baseScriptFolder by unsafeLazy {
-        if (DefaultScriptAPI.scriptFolder.isNullOrBlank()) File(getDataFolder(), "scripts") else File(DefaultScriptAPI.scriptFolder!!)
+        if (DefaultScriptAPI.scriptFolder.isNullOrBlank()) newFolder(getDataFolder(), "scripts") else newFolder(DefaultScriptAPI.scriptFolder!!)
     }
 
     val buildFolder by unsafeLazy {
-        File(baseScriptFolder,".build/")
+        newFolder(baseScriptFolder,".build/")
     }
 
     override fun getSimpleCompiler(): ScriptSimpleCompiler {
