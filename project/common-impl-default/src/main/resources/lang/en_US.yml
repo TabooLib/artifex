@@ -73,3 +73,4 @@ project-release: '&7[Artifex] &7Releasing {0}...'
 project-loaded: '&7[Artifex] &7Loaded {0} projects.'
 
 loaded-imports: '&7[Artifex] &7Loaded {0} global imports, {1} plugin imports.'
+preheat: '&7[Artifex] &7Preheating...'

@@ -57,6 +57,11 @@ class ScriptRuntimeProperty {
     val compileOptions = arrayListOf("-Xskip-metadata-version-check", "-Xjvm-default=all")
 
     /**
+     * 预热模式
+     */
+    var preheatMode = false
+
+    /**
      * 签名
      */
     fun digest(): String {

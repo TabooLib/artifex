@@ -4,7 +4,7 @@ import ink.ptms.artifex.kotlin.*
 import ink.ptms.artifex.script.*
 import kotlinx.coroutines.runBlocking
 import taboolib.common.io.digest
-import taboolib.common.platform.function.info
+import taboolib.common.platform.function.console
 import taboolib.library.asm.commons.Remapper
 import java.io.File
 import java.io.InputStream
@@ -126,7 +126,7 @@ object ArtScriptCompiler : ScriptCompiler {
 
         var configuration: ScriptCompiler.Configuration = KotlinCompilationConfiguration(ScriptRuntimeProperty())
         var source: SourceCode? = null
-        var onReport: Consumer<ScriptResult.Diagnostic>? = null
+        var onReport: Consumer<ScriptResult.Diagnostic>? = Consumer { r -> Artifex.api().getScriptHelper().printScriptResult(r, console()) }
         var onSuccess: Consumer<ScriptCompiled>? = null
         var onFailure: Consumer<Throwable>? = null
 

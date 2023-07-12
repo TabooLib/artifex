@@ -172,5 +172,5 @@ interface ScriptHelper {
      * @param sender 接收者
      * @param detailError 是否显示详细错误
      */
-    fun printScriptResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender, detailError: Boolean)
+    fun printScriptResult(report: ScriptResult.Diagnostic, sender: ProxyCommandSender, detailError: Boolean = false)
 }

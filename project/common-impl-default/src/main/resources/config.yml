@@ -2,3 +2,6 @@
 ignore-warning: []
 # 脚本路径 为空则默认在插件目录下
 script-folder: ""
+# 预热语句
+preheat-statement: |-
+  println("[Artifex] Preheat done (${System.currentTimeMillis() - time}ms)! For help, type \"art\"")

@@ -20,8 +20,14 @@ class KotlinCompilationConfiguration(val props: ScriptRuntimeProperty) : ScriptC
         updateClasspath(props.defaultClasspath)
         baseClass(ArtScript::class)
         defaultImports(Art::class, Include::class, Import::class, ImportMinecraftServer::class, CompilerOptions::class)
-        defaultImports.append(Artifex.api().getScriptEnvironment().getGlobalImports())
-        defaultImports.append(props.defaultImports)
+        if (props.preheatMode) {
+            println("[Artifex] Preheat classpath: ${classpath.size}")
+        }
+        // 仅非预热模式下加载全局引用
+        else {
+            defaultImports.append(Artifex.api().getScriptEnvironment().getGlobalImports())
+            defaultImports.append(props.defaultImports)
+        }
         jvm {
             compilerOptions("-jvm-target", props.jvmTarget)
             // 自定义参数

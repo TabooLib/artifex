@@ -6,23 +6,20 @@ import ink.ptms.artifex.PlatformHelper
 import ink.ptms.artifex.script.*
 import taboolib.common.LifeCycle
 import taboolib.common.io.digest
-import taboolib.common.io.getInstance
 import taboolib.common.io.newFile
 import taboolib.common.io.taboolibId
 import taboolib.common.platform.Awake
 import taboolib.common.platform.PlatformFactory
 import taboolib.common.platform.SkipTo
-import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.getJarFile
-import taboolib.common.platform.function.info
-import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common.platform.function.*
 import taboolib.common.util.resettableLazy
 import taboolib.library.jarrelocator.JarRelocator
 import taboolib.library.jarrelocator.Relocation
-import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
+import taboolib.module.lang.sendLang
 import java.io.File
+import java.util.concurrent.Executors
 
 /**
  * Artifex
@@ -38,9 +35,26 @@ object DefaultScriptAPI : ArtifexAPI {
     lateinit var conf: Configuration
         private set
 
+    /**
+     * 忽略警告
+     */
     val ignoreWarning by resettableLazy { conf.getStringList("ignore-warning") }
+
+    /**
+     * 脚本文件夹
+     */
     val scriptFolder by resettableLazy { conf.getString("script-folder") }
 
+    /**
+     * 预热语句
+     */
+    val preheatStatement by resettableLazy {
+        conf.getString("preheat-statement") ?: "println(\"[Artifex] Preheat done (\${System.currentTimeMillis() - time}ms)! For help, type \\\"art\\\"\")"
+    }
+
+    /**
+     * 依赖是否加载完成
+     */
     var isDependenciesLoaded = false
 
     var helper = DefaultScriptHelper()
@@ -60,6 +74,29 @@ object DefaultScriptAPI : ArtifexAPI {
     @Awake(LifeCycle.LOAD)
     fun init() {
         Artifex.api().getScriptEnvironment().setupGlobalImports()
+    }
+
+    @Awake(LifeCycle.ENABLE)
+    fun enable() {
+        val service = Executors.newSingleThreadExecutor()
+        service.submit {
+            // 发送预热消息
+            console().sendLang("preheat")
+            // 定义预热数据
+            val property = ScriptRuntimeProperty.fromProvidedProperties(mapOf("time" to System.currentTimeMillis()))
+            property.preheatMode = true
+            // 预热
+            Artifex.api().getScriptCompiler().compile {
+                it.configuration(property)
+                it.source(Artifex.api().getScriptCompiler().toScriptSource("preheat", preheatStatement))
+                it.onSuccess { c ->
+                    val result = c.invoke("preheat", property)
+                    val script = result.value()?.instance as? Script
+                    script?.container()?.releaseSafely(true)
+                }
+            }
+        }
+        service.shutdown()
     }
 
     @Awake(LifeCycle.DISABLE)
@@ -171,8 +208,8 @@ object DefaultScriptAPI : ArtifexAPI {
             val newFile = newFile(getDataFolder(), "runtime/plugin.jar")
             // 恢复被重定向的 TabooLib 和 Kotlin
             JarRelocator(tempFile, newFile, listOf(
-                Relocation("kotlin1820", "kotlin"),
-                Relocation("ink.ptms.artifex.$taboolibId", taboolibId),
+                    Relocation("kotlin1820", "kotlin"),
+                    Relocation("ink.ptms.artifex.$taboolibId", taboolibId),
             )).run()
         }
     }

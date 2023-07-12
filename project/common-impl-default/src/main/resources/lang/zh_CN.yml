@@ -77,3 +77,4 @@ project-release: '&7[Artifex] &7正在释放 {0}...'
 project-loaded: '&7[Artifex] &7已加载 {0} 个项目.'
 
 loaded-imports: '&7[Artifex] &7已加载 {0} 条全局引用, {1} 条插件引用.'
+preheat: '&7[Artifex] &7正在预热...'

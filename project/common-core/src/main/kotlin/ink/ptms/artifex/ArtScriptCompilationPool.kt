@@ -69,7 +69,7 @@ class ArtScriptCompilationPool(val builder: ArtScriptCompiler.BuilderImpl) : Scr
                 ArtScriptCompiler.compile(ArtScriptCompiler.CompilerImpl().also {
                     it.configuration = configuration
                     it.source = sourceCode
-                    it.onReport = builder.onReport
+                    builder.onReport?.let { r -> it.onReport = r }
                 })?.let { future.complete(it) }
             } catch (ex: Throwable) {
                 ex.printStackTrace()
