@@ -3,6 +3,9 @@ package ink.ptms.artifex.scripting.bukkit.plugin
 import ink.ptms.artifex.script.Script
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
+import taboolib.common.platform.function.isPrimaryThread
+import taboolib.common.platform.function.submit
+import taboolib.common.util.sync
 
 fun Script.placeholderAPI(identifier: String, request: (Player?, String) -> String) {
     if (runCatching { Class.forName("me.clip.placeholderapi.expansion.PlaceholderExpansion") }.isFailure) {
@@ -27,5 +30,12 @@ fun Script.placeholderAPI(identifier: String, request: (Player?, String) -> Stri
         }
     }
     expansion.register()
-    container().resource("@PlaceholderAPI:${expansion.identifier}") { expansion.unregister() }
+    container().resource("@PlaceholderAPI:${expansion.identifier}") {
+        // 返回主线程注销
+        if (isPrimaryThread) {
+            expansion.unregister()
+        } else {
+            submit { expansion.unregister() }
+        }
+    }
 }
