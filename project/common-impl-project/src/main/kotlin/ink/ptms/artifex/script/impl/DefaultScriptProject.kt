@@ -2,9 +2,17 @@ package ink.ptms.artifex.script.impl
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.*
+import taboolib.common.env.Dependency
+import taboolib.common.env.DependencyDownloader
+import taboolib.common.env.DependencyScope
+import taboolib.common.env.Repository
+import taboolib.common.io.newFile
 import taboolib.common.platform.ProxyCommandSender
+import taboolib.common.platform.function.getDataFolder
+import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.sendLang
+import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.ArrayList
@@ -20,11 +28,41 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
 
     private val exchangeData = ConcurrentHashMap<String, Any>()
     private val runningScripts = ArrayList<Script>()
+    private val downloader = DependencyDownloader(newFile(getDataFolder(), "runtime/libraries", folder = true)).also {
+        it.addRepository(Repository("https://maven.aliyun.com/repository/central"))
+        repositories.forEach { repo ->
+            it.addRepository(Repository(repo))
+        }
+    }
 
     val runningId = UUID.randomUUID().toString()
 
     val main: List<String>
         get() = identifier.root().getStringList("main")
+
+    val repositories: List<String>
+        get() = identifier.root().getStringList("repositories")
+
+    val dependencies: List<Dependency>
+        get() = identifier.root().getList("dependencies")!!.mapNotNull {
+            var dependency: Dependency? = null
+            when (it) {
+                is ConfigurationSection -> {
+                    val groupId = it.getString("group")
+                    val artifactId = it.getString("artifact")
+                    val version = it.getString("version")
+                    dependency = Dependency(groupId, artifactId, version, DependencyScope.RUNTIME)
+                }
+                is String -> {
+                    val args = it.split(":")
+                    val groupId = args[0]
+                    val artifactId = args[1]
+                    val version = args[2]
+                    dependency = Dependency(groupId, artifactId, version, DependencyScope.RUNTIME)
+                }
+            }
+            return@mapNotNull dependency
+        }
 
     val autoMount: Boolean
         get() = identifier.root().getBoolean("auto-mount")
@@ -151,7 +189,11 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
             .afterEval {
                 runningScripts += it
                 it.container().exchangeData()["@Project"] = this@DefaultScriptProject
-            }.apply(ScriptRuntimeProperty(mapOf("@Id" to runningId), mapOf()))
+            }.apply(ScriptRuntimeProperty(mapOf("@Id" to runningId), mapOf()).apply {
+                // 依赖文件
+                downloader
+                defaultClasspath
+            })
     }
 
     /**

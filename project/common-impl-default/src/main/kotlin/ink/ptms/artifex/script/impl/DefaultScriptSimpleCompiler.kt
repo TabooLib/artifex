@@ -72,7 +72,10 @@ class DefaultScriptSimpleCompiler : ScriptSimpleCompiler {
             if (loggingBefore) {
                 sender.sendLang("command-script-compile-info", providedProperties)
             }
-        }.apply(ScriptRuntimeProperty.fromProvidedProperties(providedProperties))
+        }.apply(ScriptRuntimeProperty.fromProvidedProperties(providedProperties).apply {
+            // 加载依赖
+            defaultClasspath
+        })
         // 释放编译文件
         if (save) {
             compiled?.generateScriptJar(newFile(helper.buildFolder(), "${script.nameWithoutExtension}.jar"))
