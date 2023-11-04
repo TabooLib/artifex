@@ -106,7 +106,7 @@ class DefaultScriptSimpleEvaluator : ScriptSimpleEvaluator {
             sender.sendLang("command-script-is-running", file.nameWithoutExtension)
             return null
         }
-        if (helper.getSimpleCompiler().compileCheck(file, sender, providedProperties, loggingCompile, forceCompile, save, detailError)) {
+        if (helper.getSimpleCompiler().compileCheck(file, sender, providedProperties, listOf(), loggingCompile, forceCompile, save, detailError)) {
             val buildFile = File(helper.buildFolder(), "${file.nameWithoutExtension}.jar")
             if (buildFile.exists()) {
                 return prepareEvaluationByJarFile(buildFile, sender, loggingRunning, detailError, prepare)
@@ -115,7 +115,14 @@ class DefaultScriptSimpleEvaluator : ScriptSimpleEvaluator {
         return null
     }
 
-    override fun reload(file: File, sender: ProxyCommandSender, runArgs: Map<String, Any>, providedProperties: Map<String, Any>, forceCompile: Boolean, detailError: Boolean) {
+    override fun reload(
+        file: File,
+        sender: ProxyCommandSender,
+        runArgs: Map<String, Any>,
+        providedProperties: Map<String, Any>,
+        forceCompile: Boolean,
+        detailError: Boolean
+    ) {
         if (!helper.isScriptFileRunning(file, sender)) {
             sender.sendLang("command-script-is-not-running", file.nameWithoutExtension)
             return

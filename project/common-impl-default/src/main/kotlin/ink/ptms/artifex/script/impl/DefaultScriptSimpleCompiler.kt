@@ -64,6 +64,7 @@ class DefaultScriptSimpleCompiler : ScriptSimpleCompiler {
         script: File,
         sender: ProxyCommandSender,
         providedProperties: Map<String, Any>,
+        classpath: List<File>,
         loggingBefore: Boolean,
         save: Boolean,
         detailError: Boolean,
@@ -74,7 +75,7 @@ class DefaultScriptSimpleCompiler : ScriptSimpleCompiler {
             }
         }.apply(ScriptRuntimeProperty.fromProvidedProperties(providedProperties).apply {
             // 加载依赖
-            defaultClasspath
+            defaultClasspath.addAll(classpath)
         })
         // 释放编译文件
         if (save) {
@@ -98,6 +99,7 @@ class DefaultScriptSimpleCompiler : ScriptSimpleCompiler {
         file: File,
         sender: ProxyCommandSender,
         providedProperties: Map<String, Any>,
+        classpath: List<File>,
         logging: Boolean,
         forceCompile: Boolean,
         save: Boolean,
@@ -126,23 +128,23 @@ class DefaultScriptSimpleCompiler : ScriptSimpleCompiler {
                         sender.sendLang("command-script-recompiled", version, currentVersion)
                     }
                     // 重新编译
-                    compileByProvidedProperties(file, sender, providedProperties, logging, save, detailError) ?: return false
+                    compileByProvidedProperties(file, sender, providedProperties, classpath, logging, save, detailError) ?: return false
                 }
                 val event = ScriptCompileCheckEvent(file, sender, providedProperties, logging, save, detailError, buildFile, version, currentVersion)
                 Artifex.api().getScriptEventBus().call(event)
                 // 重新编译
                 if (event.recompile) {
-                    compileByProvidedProperties(file, sender, providedProperties, logging, save, detailError) ?: return false
+                    compileByProvidedProperties(file, sender, providedProperties, classpath, logging, save, detailError) ?: return false
                 }
                 return event.checkResult
             } else {
-                compileByProvidedProperties(file, sender, providedProperties, logging, save, detailError) ?: return false
+                compileByProvidedProperties(file, sender, providedProperties, classpath, logging, save, detailError) ?: return false
             }
         } else {
             if (!forceCompile && logging) {
                 sender.sendLang("command-script-compile")
             }
-            compileByProvidedProperties(file, sender, providedProperties, logging, save, detailError) ?: return false
+            compileByProvidedProperties(file, sender, providedProperties, classpath, logging, save, detailError) ?: return false
         }
         return true
     }

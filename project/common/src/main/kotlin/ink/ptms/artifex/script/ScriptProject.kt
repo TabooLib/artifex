@@ -2,6 +2,7 @@ package ink.ptms.artifex.script
 
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.module.configuration.Configuration
+import java.io.File
 
 /**
  * Artifex
@@ -43,6 +44,11 @@ interface ScriptProject : Exchanges {
      * 获取构造器
      */
     fun constructor(): ScriptProjectConstructor
+
+    /**
+     * 从配置文件的依赖中获取 classpath
+     */
+    fun getClasspathByDependencies(): List<File>
 
     /**
      * 运行脚本工程

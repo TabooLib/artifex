@@ -9,6 +9,8 @@ import taboolib.common.env.Repository
 import taboolib.common.io.newFile
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.function.getDataFolder
+import taboolib.common.util.ResettableLazy
+import taboolib.common.util.resettableLazy
 import taboolib.library.configuration.ConfigurationSection
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.sendLang
@@ -44,7 +46,7 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
         get() = identifier.root().getStringList("repositories")
 
     val dependencies: List<Dependency>
-        get() = identifier.root().getList("dependencies")!!.mapNotNull {
+        get() = identifier.root().getList("dependencies")?.mapNotNull {
             var dependency: Dependency? = null
             when (it) {
                 is ConfigurationSection -> {
@@ -62,10 +64,16 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
                 }
             }
             return@mapNotNull dependency
-        }
+        } ?: listOf()
 
     val autoMount: Boolean
         get() = identifier.root().getBoolean("auto-mount")
+
+    val classpath by resettableLazy("project.$runningId") {
+        downloader.loadDependency(downloader.repositories.toList(), dependencies).map {
+            it.findFile(downloader.baseDir, "jar")
+        }
+    }
 
     /**
      * 检查脚本是否可以启动
@@ -106,6 +114,10 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
         return constructor
     }
 
+    override fun getClasspathByDependencies(): List<File> {
+        return classpath
+    }
+
     override fun run(sender: ProxyCommandSender, forceCompile: Boolean, logging: Boolean): Boolean {
         if (checkScripts(sender)) {
             if (logging) {
@@ -136,6 +148,7 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
             return false // 若未成功编译则不会继续执行
         }
         releaseAll(sender, false)
+        ResettableLazy.reset("project.$runningId")
         scripts.forEach { runScript(it, sender) }
         if (logging) {
             sender.sendLang("command-project-reloaded", name())
@@ -191,8 +204,7 @@ abstract class DefaultScriptProject(val identifier: ScriptProjectIdentifier, val
                 it.container().exchangeData()["@Project"] = this@DefaultScriptProject
             }.apply(ScriptRuntimeProperty(mapOf("@Id" to runningId), mapOf()).apply {
                 // 依赖文件
-                downloader
-                defaultClasspath
+                defaultClasspath.addAll(getClasspathByDependencies())
             })
     }
 

@@ -47,6 +47,7 @@ class DefaultDevScriptProject(identifier: ScriptProjectIdentifier, constructor: 
             if (helper.getSimpleCompiler().compileCheck(
                     scriptFile,
                     sender,
+                    classpath = getClasspathByDependencies(),
                     providedProperties = emptyMap(),
                     forceCompile = forceCompile
                 )) {
