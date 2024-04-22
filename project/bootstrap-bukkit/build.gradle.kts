@@ -12,7 +12,7 @@ taboolib {
         }
     }
     install("common", "platform-bukkit")
-    install("module-nms", "module-nms-util", "module-ui", "module-ai")
+    install("module-nms", "module-nms-util", "module-ui", "module-ai", "module-ai", "module-navigation")
     options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
     classifier = null
     version = taboolib_version

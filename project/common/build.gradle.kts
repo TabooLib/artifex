@@ -17,7 +17,12 @@ taboolib {
     install(
         "expansion-command-helper",
         "expansion-player-database",
-        "expansion-persistent-container-object"
+        "expansion-persistent-container-object",
+        "expansion-alkaid-redis",
+        "expansion-geek-tool",
+        "expansion-lang-tools",
+        "expansion-ioc",
+        "expansion-player-fake-op"
     )
     options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
     classifier = null
