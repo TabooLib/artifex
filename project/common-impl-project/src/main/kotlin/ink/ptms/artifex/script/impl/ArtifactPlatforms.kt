@@ -13,5 +13,7 @@ enum class ArtifactPlatforms(val platform: Platform, val fileName: String, val m
 
     BUKKIT(Platform.BUKKIT, "plugin.yml", ArtifactBukkitMainBuilder()),
 
-    BUNGEE(Platform.BUNGEE, "bungee.yml", ArtifactBungeeMainBuilder())
+    BUNGEE(Platform.BUNGEE, "bungee.yml", ArtifactBungeeMainBuilder()),
+
+    VELOCITY(Platform.VELOCITY, "velocity-plugin.json", ArtifactVelocityMainBuilder())
 }

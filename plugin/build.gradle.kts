@@ -17,6 +17,7 @@ dependencies {
     // 运行平台
     implementation(project(":project:bootstrap-bukkit"))
     implementation(project(":project:bootstrap-bungee"))
+    implementation(project(":project:bootstrap-velocity"))
     // 逻辑实现
     implementation(project(":project:common-impl-default"))
     implementation(project(":project:common-impl-project"))
@@ -64,9 +65,11 @@ tasks {
                     applyToZip(new, version, "runtime/script-api", "common-script-api")
                     applyToZip(new, version, "runtime/script-api-bukkit", "common-script-api-bukkit")
                     applyToZip(new, version, "runtime/script-api-bungee", "common-script-api-bungee")
+                    applyToZip(new, version, "runtime/script-api-velocity", "common-script-api-velocity")
                     // jar 代理
                     applyToZip(new, version, "proxy/bukkit", "jar-proxy-bukkit")
                     applyToZip(new, version, "proxy/bungee", "jar-proxy-bungee")
+                    applyToZip(new, version, "proxy/velocity", "jar-proxy-velocity")
                 }
             }
             file.delete()

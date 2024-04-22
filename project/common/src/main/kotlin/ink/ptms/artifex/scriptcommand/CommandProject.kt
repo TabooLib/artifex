@@ -4,6 +4,7 @@ import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.ArtifactDescription
 import ink.ptms.artifex.script.ScriptProjectIdentifier
 import ink.ptms.artifex.script.ScriptProjectManager
+import ink.ptms.artifex.script.VelocityArtifactDescription
 import taboolib.common.io.newFile
 import taboolib.common.platform.Platform
 import taboolib.common.platform.ProxyCommandSender
@@ -225,6 +226,7 @@ object CommandProject {
             val artifact = project.buildToArtifactPlugin(sender, source = demand.tags.contains("S")) {
                 it.platform(Platform.BUKKIT, ArtifactDescription(name, main, author, version))
                 it.platform(Platform.BUNGEE, ArtifactDescription(name, main, author, version))
+                it.platform(Platform.VELOCITY, VelocityArtifactDescription(name, main, author, version))
             }
             val consume = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - time)
             if (artifact.isSuccessful()) {

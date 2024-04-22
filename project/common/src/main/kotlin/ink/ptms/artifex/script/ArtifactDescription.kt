@@ -14,7 +14,7 @@ import taboolib.module.configuration.Type
  */
 open class ArtifactDescription(name: String, main: String, author: String, version: String) {
 
-    val file = Configuration.empty(Type.YAML)
+    open val file: Configuration = Configuration.empty(Type.YAML)
 
     init {
         name(name)

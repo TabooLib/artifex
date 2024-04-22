@@ -5,9 +5,7 @@ import ink.ptms.artifex.PlatformHelper
 import ink.ptms.artifex.script.ScriptRemapper
 import org.bukkit.Bukkit
 import taboolib.common.LifeCycle
-import taboolib.common.platform.Awake
-import taboolib.common.platform.PlatformFactory
-import taboolib.common.platform.Plugin
+import taboolib.common.platform.*
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.library.reflex.Reflex.Companion.getProperty
@@ -21,6 +19,7 @@ import java.io.File
  * @author 坏黑
  * @since 2022/5/19 12:16
  */
+@PlatformSide([Platform.BUKKIT])
 object ArtifexBukkit : Plugin(), PlatformHelper  {
 
     @Awake(LifeCycle.INIT)

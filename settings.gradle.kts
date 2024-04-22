@@ -11,9 +11,12 @@ include("project:common-core")
 include("project:common-script-api")
 include("project:common-script-api-bukkit")
 include("project:common-script-api-bungee")
+include("project:common-script-api-velocity")
 // 运行平台
 include("project:bootstrap-bukkit")
 include("project:bootstrap-bungee")
+include("project:bootstrap-velocity")
 // jar 代理
 include("project:jar-proxy-bukkit")
 include("project:jar-proxy-bungee")
+include("project:jar-proxy-velocity")
