@@ -4,8 +4,8 @@ import ink.ptms.artifex.PlatformHelper
 import taboolib.common.LifeCycle
 import taboolib.common.env.RuntimeDependency
 import taboolib.common.platform.*
-import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
+import taboolib.common.platform.service.PlatformAdapter
 import taboolib.common.util.unsafeLazy
 import taboolib.platform.VelocityPlugin
 import java.io.File
@@ -31,9 +31,14 @@ object ArtifexVelocity : Plugin(), PlatformHelper {
     @Awake(LifeCycle.INIT)
     fun init() {
         releaseResourceFile("runtime/velocity-api.jar", true)
+        releaseResourceFile("runtime/adventure-api.jar", true)
     }
 
     override fun onLoad() {
+        val adapter = ArtifexVelocityAdapter()
+        val adapterKey = PlatformFactory.serviceMap.keys.first { it.contains("PlatformAdapter") }
+        PlatformFactory.serviceMap[adapterKey] = adapter
+
         PlatformFactory.awokenMap["ink.ptms.artifex.PlatformHelper"] = this
     }
 

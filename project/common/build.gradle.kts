@@ -21,7 +21,7 @@ taboolib {
         "expansion-alkaid-redis",
         "expansion-geek-tool",
         "expansion-lang-tools",
-        "expansion-ioc",
+//        "expansion-ioc",
         "expansion-player-fake-op"
     )
     options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
