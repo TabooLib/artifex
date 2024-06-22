@@ -26,6 +26,7 @@ dependencies {
     api(project(":project:common"))
     compileOnly(project(":project:common-script-api-bukkit"))
     compileOnly(project(":project:common-script-api-bungee"))
+    compileOnly(project(":project:common-script-api-velocity"))
 }
 
 //tasks {

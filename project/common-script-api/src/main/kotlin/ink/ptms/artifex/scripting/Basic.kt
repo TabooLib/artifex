@@ -7,6 +7,7 @@ import taboolib.common.platform.Platform
 import taboolib.common.platform.command.PermissionDefault
 import taboolib.common.platform.command.component.CommandBase
 import taboolib.common.platform.event.EventPriority
+import taboolib.common.platform.event.PostOrder
 import taboolib.common.platform.function.*
 import taboolib.common.platform.service.PlatformExecutor
 import taboolib.expansion.createHelper
@@ -26,6 +27,8 @@ inline fun <reified T> Script.listen(priority: EventPriority = EventPriority.NOR
     val listener = when (TabooLibCommon.getRunningPlatform()) {
         Platform.BUKKIT -> registerBukkitListener(T::class.java, priority, ignoreCancelled, event)
         Platform.BUNGEE -> registerBungeeListener(T::class.java, priority.level, ignoreCancelled, event)
+        Platform.VELOCITY -> registerVelocityListener(T::class.java, PostOrder.values()[priority.ordinal], event)
+
         else -> error("Unsupported")
     }
     container().resource("listener:${T::class.java.simpleName}") { unregisterListener(listener) }

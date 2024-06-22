@@ -20,12 +20,20 @@ class DefaultArtifactPluginBuilder : ArtifactPluginBuilder {
         // 修正描述
         when (platform) {
             Platform.BUKKIT -> {
-                description["depend"] = description.file.getStringList("depend").toMutableList().also { it.add("Artifex") }
+                description["depend"] =
+                    description.file.getStringList("depend").toMutableList().also { it.add("Artifex") }
                 description["api-version"] = "1.13"
             }
+
             Platform.BUNGEE -> {
-                description["depends"] = description.file.getStringList("depends").toMutableList().also { it.add("Artifex") }
+                description["depends"] =
+                    description.file.getStringList("depends").toMutableList().also { it.add("Artifex") }
             }
+
+            Platform.VELOCITY -> {
+                description["id"] = description.file.getString("name")!!.lowercase()
+            }
+
             else -> {}
         }
         platforms[file] = description

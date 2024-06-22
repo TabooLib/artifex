@@ -1,5 +1,6 @@
 package ink.ptms.artifex.script.impl
 
+import ink.ptms.artifex.script.ArtifactDescription
 import taboolib.common.platform.function.info
 import taboolib.library.asm.ClassReader
 import taboolib.library.asm.ClassVisitor
@@ -16,15 +17,15 @@ import taboolib.library.asm.commons.Remapper
  */
 object ArtifactRemapping {
 
-    fun remap(byteArray: ByteArray, main: String): ByteArray {
+    fun remap(byteArray: ByteArray, main: String, description: ArtifactDescription): ByteArray {
         val classReader = ClassReader(byteArray)
         val classWriter = ClassWriter(ClassWriter.COMPUTE_MAXS)
-        val classVisitor: ClassVisitor = ClassRemapper(classWriter, remapper(main))
+        val classVisitor: ClassVisitor = ClassRemapper(classWriter, remapper(main, description))
         classReader.accept(classVisitor, 0)
         return classWriter.toByteArray()
     }
 
-    private fun remapper(main: String) = object : Remapper() {
+    private fun remapper(main: String, description: ArtifactDescription) = object : Remapper() {
 
         override fun mapType(internalName: String): String {
             return super.mapType(translate(internalName))
@@ -35,7 +36,11 @@ object ArtifactRemapping {
         }
 
         fun translate(key: String): String {
-            return if (key == "artifex/ArtifexPlugin") main.replace('.', '/') else key
+            return when (key) {
+                "artifex/ArtifexPlugin" -> main.replace('.', '/')
+                "@plugin_id@" -> description.file.getString("id")!!
+                else -> key
+            }
         }
     }
 }

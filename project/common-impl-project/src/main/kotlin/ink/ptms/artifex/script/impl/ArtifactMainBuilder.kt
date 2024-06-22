@@ -27,7 +27,7 @@ abstract class ArtifactMainBuilder {
         description.main(main.replace('/', '.'))
         val proxyJar = javaClass.classLoader.getResourceAsStream("proxy/$name.jar")?.readBytes() ?: error("proxy/$name.jar not found")
         val mainClass = getMainClass(proxyJar)
-        return ArtifactMain(main, ArtifactRemapping.remap(mainClass, main))
+        return ArtifactMain(main, ArtifactRemapping.remap(mainClass, main, description))
     }
 
     protected fun getMainClass(byteArray: ByteArray): ByteArray {

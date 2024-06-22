@@ -11,8 +11,8 @@ taboolib {
             name("坏黑")
         }
     }
-    install("common", "platform-bukkit")
-    install("module-nms", "module-nms-util", "module-ui", "module-ai", "module-ai", "module-navigation")
+    install("common", "platform-velocity")
+    install("module-porticus")
     options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
     classifier = null
     version = taboolib_version
@@ -20,8 +20,5 @@ taboolib {
 
 dependencies {
     api(project(":project:common"))
-    api(project(":project:common-impl-default"))
-    compileOnly("ink.ptms:nms-all:1.0.0")
-    compileOnly("ink.ptms.core:v11802:11802:mapped")
-    compileOnly("ink.ptms.core:v11802:11802:universal")
+    compileOnly("io.papermc:velocity:3.3.0:376")
 }
