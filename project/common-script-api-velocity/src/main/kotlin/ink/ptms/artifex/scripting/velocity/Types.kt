@@ -3,11 +3,9 @@ package ink.ptms.artifex.scripting.velocity
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.server.RegisteredServer
-import com.velocitypowered.api.proxy.server.ServerInfo
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.util.unsafeLazy
 import taboolib.platform.VelocityPlugin
-import taboolib.platform.type.VelocityPlayer
 import kotlin.jvm.optionals.getOrNull
 
 /**

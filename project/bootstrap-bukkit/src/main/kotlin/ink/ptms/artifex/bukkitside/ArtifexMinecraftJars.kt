@@ -3,8 +3,7 @@ package ink.ptms.artifex.bukkitside
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.event.ScriptCompileCheckEvent
 import ink.ptms.artifex.script.event.ScriptMetaGenerateEvent
-import ink.ptms.artifex.script.impl.KotlinEnvironments
-import taboolib.common.env.IO
+import taboolib.common.PrimitiveIO
 import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.info
 import taboolib.module.nms.MinecraftVersion
@@ -54,7 +53,8 @@ internal object ArtifexMinecraftJars {
             }
             try {
                 info("Downloading minecraft-server-$ver.jar")
-                IO.downloadFile(URL("https://repo.tabooproject.org/repository/releases/ink/ptms/core/v$ver/$ver-minimize/v$ver-$ver-minimize-mapped.jar"), file)
+
+                PrimitiveIO.downloadFile(URL("https://repo.tabooproject.org/repository/releases/ink/ptms/core/v$ver/$ver-minimize/v$ver-$ver-minimize-mapped.jar"), file)
             } catch (ex: Throwable) {
                 file.delete()
             }
@@ -67,7 +67,7 @@ internal object ArtifexMinecraftJars {
             }
             try {
                 info("Downloading minecraft-server-legacy.jar")
-                IO.downloadFile(URL("https://repo.tabooproject.org/repository/releases/ink/ptms/nms-all/1.0.0/nms-all-1.0.0.jar"), file)
+                PrimitiveIO.downloadFile(URL("https://repo.tabooproject.org/repository/releases/ink/ptms/nms-all/1.0.0/nms-all-1.0.0.jar"), file)
             } catch (ex: Throwable) {
                 file.delete()
             }

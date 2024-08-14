@@ -2,11 +2,11 @@ package ink.ptms.artifex
 
 import org.jetbrains.kotlin.scripting.compiler.plugin.impl.KJvmCompiledModuleInMemoryImpl
 import taboolib.common.platform.function.warning
-import taboolib.library.asm.ClassReader
-import taboolib.library.asm.ClassVisitor
-import taboolib.library.asm.ClassWriter
-import taboolib.library.asm.commons.ClassRemapper
-import taboolib.library.asm.commons.Remapper
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.commons.ClassRemapper
+import org.objectweb.asm.commons.Remapper
 import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
 

@@ -10,6 +10,7 @@ import taboolib.common.platform.function.getDataFolder
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.library.reflex.Reflex.Companion.getProperty
 import taboolib.module.nms.MinecraftRemapper
+import taboolib.module.nms.MinecraftVersion
 import java.io.File
 
 /**
@@ -19,7 +20,7 @@ import java.io.File
  * @author 坏黑
  * @since 2022/5/19 12:16
  */
-@PlatformSide([Platform.BUKKIT])
+@PlatformSide(Platform.BUKKIT)
 object ArtifexBukkit : Plugin(), PlatformHelper  {
 
     @Awake(LifeCycle.INIT)
@@ -30,7 +31,12 @@ object ArtifexBukkit : Plugin(), PlatformHelper  {
             legacyFile.delete()
         }
         // 释放 bukkit api 文件
-        releaseResourceFile("runtime/bukkit-api.jar", true)
+        // 版本检测, 因 1.21以上大改
+        if (MinecraftVersion.major >= 13) {
+            releaseResourceFile("runtime/bukkit-api-1.21.jar", false)
+        } else {
+            releaseResourceFile("runtime/bukkit-api.jar", false)
+        }
     }
 
     override fun plugin(name: String): Any? {

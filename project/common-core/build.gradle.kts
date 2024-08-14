@@ -1,26 +1,12 @@
-val taboolib_version: String by project
-
-plugins {
-    id("io.izzel.taboolib")
-    // id("com.github.johnrengelman.shadow")
-}
-
 taboolib {
-//    install("common")
-//    install("module-lang")
-//    install("module-configuration")
-//    options("skip-taboolib-relocate", "skip-kotlin-relocate", "skip-minimize", "keep-kotlin-module")
-    options("skip-kotlin-relocate", "skip-minimize", "keep-kotlin-module")
-    classifier = null
-    version = taboolib_version
-    exclude("taboolib")
+    version {
+        skipKotlinRelocate = true
+    }
+    subproject = true
 }
 
 dependencies {
     val kotlinVersion = "1.8.20"
-    api("io.izzel.taboolib:common:$taboolib_version")
-    api("io.izzel.taboolib:module-lang:$taboolib_version")
-    api("io.izzel.taboolib:module-configuration:$taboolib_version")
     api(project(":project:common"))
     api("org.jetbrains.kotlin:kotlin-main-kts:$kotlinVersion")
     api("org.jetbrains.kotlin:kotlin-scripting-common:$kotlinVersion")

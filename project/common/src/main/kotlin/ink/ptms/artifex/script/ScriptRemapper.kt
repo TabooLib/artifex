@@ -1,7 +1,7 @@
 package ink.ptms.artifex.script
 
+import org.objectweb.asm.commons.Remapper
 import taboolib.common.io.taboolibId
-import taboolib.library.asm.commons.Remapper
 
 /**
  * Artifex

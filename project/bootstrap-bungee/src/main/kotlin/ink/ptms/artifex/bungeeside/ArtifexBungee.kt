@@ -15,7 +15,7 @@ import java.io.File
  * @author 坏黑
  * @since 2022/5/19 12:15
  */
-@PlatformSide([Platform.BUNGEE])
+@PlatformSide(Platform.BUNGEE)
 object ArtifexBungee : Plugin(), PlatformHelper {
 
     @Awake(LifeCycle.INIT)
@@ -25,7 +25,7 @@ object ArtifexBungee : Plugin(), PlatformHelper {
         if (legacyFile.exists()) {
             legacyFile.delete()
         }
-        releaseResourceFile("runtime/bungee-api.jar", true)
+        releaseResourceFile("runtime/bungee-api.jar", false)
     }
 
     override fun onLoad() {

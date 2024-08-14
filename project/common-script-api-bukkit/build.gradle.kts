@@ -1,27 +1,12 @@
-val taboolib_version: String by project
-
-plugins {
-//    id("io.izzel.taboolib")
-    id("com.github.johnrengelman.shadow")
+taboolib {
+    version {
+        skipKotlinRelocate = true
+    }
+//    exclude("taboolib")
+    subproject = true
 }
 
-//taboolib {
-//    install("common", "common-5")
-//    install("module-configuration", "module-ui", "module-nms", "module-nms-util", "module-kether")
-//    options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
-//    classifier = null
-//    version = taboolib_version
-//    exclude("taboolib")
-//}
-
 dependencies {
-    api("io.izzel.taboolib:common:$taboolib_version")
-    api("io.izzel.taboolib:common-5:$taboolib_version")
-    api("io.izzel.taboolib:module-ui:$taboolib_version")
-    api("io.izzel.taboolib:module-nms:$taboolib_version")
-    api("io.izzel.taboolib:module-nms-util:$taboolib_version")
-    api("io.izzel.taboolib:module-configuration:$taboolib_version")
-    api("io.izzel.taboolib:module-kether:$taboolib_version")
     compileOnly(project(":project:common")) { isTransitive = false }
 //    compileOnly("public:MythicMobs:1.0.1")
 //    compileOnly("public:MythicMobs5:5.0.4")

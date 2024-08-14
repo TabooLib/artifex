@@ -8,10 +8,11 @@ import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.util.unsafeLazy
 import taboolib.platform.VelocityPlugin
 
+
 /**
  * Copied and modified from TrPlugins/TrChat.
  */
-@PlatformSide([Platform.VELOCITY])
+@PlatformSide(Platform.VELOCITY)
 class ArtifexVelocityConsole : ProxyCommandSender {
 
     private val plugin by unsafeLazy { VelocityPlugin.getInstance() }

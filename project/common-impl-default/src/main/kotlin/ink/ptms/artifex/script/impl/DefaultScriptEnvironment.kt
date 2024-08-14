@@ -7,7 +7,6 @@ import taboolib.common.io.newFile
 import taboolib.common.io.taboolibId
 import taboolib.common.platform.function.console
 import taboolib.common.platform.function.getDataFolder
-import taboolib.common.platform.function.info
 import taboolib.common.platform.function.releaseResourceFile
 import taboolib.module.lang.sendLang
 import java.io.File
@@ -36,6 +35,8 @@ class DefaultScriptEnvironment : ScriptEnvironment {
         // 运行库
         dependencies += KotlinEnvironments.getKotlinFiles()
         dependencies += KotlinEnvironments.getFiles(File(getDataFolder(), "runtime"))
+        // taboolib 模块
+        dependencies += KotlinEnvironments.getTabooModules()
         // 插件列表
         dependencies += DefaultScriptAPI.getPlatformHelper().plugins().map { file(it.javaClass) }
         // 预设
@@ -119,6 +120,8 @@ class DefaultScriptEnvironment : ScriptEnvironment {
         // 运行库
         dependencies += KotlinEnvironments.getKotlinFiles()
         dependencies += KotlinEnvironments.getFiles(File(getDataFolder(), "runtime"))
+        // taboolib 模块
+        dependencies += KotlinEnvironments.getTabooModules()
         // 预设
         dependencies += input.map { file(it) }
         return dependencies.filterNotNull()

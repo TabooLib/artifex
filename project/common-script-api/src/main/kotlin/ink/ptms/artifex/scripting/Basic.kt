@@ -2,7 +2,6 @@ package ink.ptms.artifex.scripting
 
 import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.script.Script
-import taboolib.common.TabooLibCommon
 import taboolib.common.platform.Platform
 import taboolib.common.platform.command.PermissionDefault
 import taboolib.common.platform.command.component.CommandBase
@@ -24,7 +23,7 @@ inline fun <reified T> Script.on(priority: EventPriority = EventPriority.NORMAL,
  * 注册监听器
  */
 inline fun <reified T> Script.listen(priority: EventPriority = EventPriority.NORMAL, ignoreCancelled: Boolean = false, noinline event: Closeable.(T) -> Unit) {
-    val listener = when (TabooLibCommon.getRunningPlatform()) {
+    val listener = when (Platform.CURRENT) {
         Platform.BUKKIT -> registerBukkitListener(T::class.java, priority, ignoreCancelled, event)
         Platform.BUNGEE -> registerBungeeListener(T::class.java, priority.level, ignoreCancelled, event)
         Platform.VELOCITY -> registerVelocityListener(T::class.java, PostOrder.values()[priority.ordinal], event)
@@ -77,12 +76,11 @@ fun Script.submit(
     async: Boolean = false,
     delay: Long = 0,
     period: Long = 0,
-    commit: String? = null,
     executor: PlatformExecutor.PlatformTask.() -> Unit,
 ): PlatformExecutor.PlatformTask {
     // 非循环调度器不注册资源
     if (period == 0L) {
-        return taboolib.common.platform.function.submit(now, async, delay, period, commit, executor)
+        return taboolib.common.platform.function.submit(now, async, delay, period, executor)
     }
     // 循环调度器必须在服务器完全启动后创建，否则将无法在 1.12 版本有效释放
     else {
@@ -90,7 +88,7 @@ fun Script.submit(
         taboolib.common.platform.function.submit(delay = if (Artifex.isServerStarted()) 0 else 20) {
             // 如果脚本成功运行，则创建调度器
             if (container().isRunning()) {
-                task = taboolib.common.platform.function.submit(now, async, delay, period, commit, executor)
+                task = taboolib.common.platform.function.submit(now, async, delay, period, executor)
                 container().resource("task-${if (async) "async" else "sync"}:$period") { task!!.cancel() }
             }
         }

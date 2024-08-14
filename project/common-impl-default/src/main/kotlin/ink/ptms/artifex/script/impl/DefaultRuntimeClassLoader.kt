@@ -1,6 +1,7 @@
 package ink.ptms.artifex.script.impl
 
 import ink.ptms.artifex.script.RuntimeClassLoader
+import taboolib.common.TabooLib
 import java.io.File
 import java.io.IOException
 import java.net.URLClassLoader

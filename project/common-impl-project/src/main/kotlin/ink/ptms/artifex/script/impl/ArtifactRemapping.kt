@@ -1,12 +1,11 @@
 package ink.ptms.artifex.script.impl
 
 import ink.ptms.artifex.script.ArtifactDescription
-import taboolib.common.platform.function.info
-import taboolib.library.asm.ClassReader
-import taboolib.library.asm.ClassVisitor
-import taboolib.library.asm.ClassWriter
-import taboolib.library.asm.commons.ClassRemapper
-import taboolib.library.asm.commons.Remapper
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.commons.ClassRemapper
+import org.objectweb.asm.commons.Remapper
 
 /**
  * Artifex

@@ -1,3 +1,10 @@
+taboolib {
+    version {
+        skipKotlinRelocate = true
+    }
+    subproject = true
+}
+
 repositories {
     maven { url = uri("https://repo.tabooproject.org/repository/releases")}
 }

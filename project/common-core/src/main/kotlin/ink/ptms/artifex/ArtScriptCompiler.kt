@@ -3,9 +3,9 @@ package ink.ptms.artifex
 import ink.ptms.artifex.kotlin.*
 import ink.ptms.artifex.script.*
 import kotlinx.coroutines.runBlocking
+import org.objectweb.asm.commons.Remapper
 import taboolib.common.io.digest
 import taboolib.common.platform.function.console
-import taboolib.library.asm.commons.Remapper
 import java.io.File
 import java.io.InputStream
 import java.nio.charset.StandardCharsets

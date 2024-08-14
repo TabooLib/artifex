@@ -1,21 +1,8 @@
-val taboolib_version: String by project
-
-plugins {
-    id("io.izzel.taboolib")
-}
-
 taboolib {
-    description {
-        name(rootProject.name)
-        contributors {
-            name("坏黑")
-        }
+    version {
+        skipKotlinRelocate = true
     }
-    install("common", "platform-bungee")
-    install("module-porticus")
-    options("skip-taboolib-relocate", "skip-minimize", "keep-kotlin-module")
-    classifier = null
-    version = taboolib_version
+    subproject = true
 }
 
 dependencies {

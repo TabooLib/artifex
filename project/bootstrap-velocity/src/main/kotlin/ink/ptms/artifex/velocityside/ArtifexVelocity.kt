@@ -18,20 +18,15 @@ import kotlin.jvm.optionals.getOrNull
  * @author scorez
  * @since 4/21/24 13:43.
  */
-@RuntimeDependency(
-    "!com.mojang:datafixerupper:4.0.26", // 虽然 6.1.0 已经补上该库, 但是 6.0.0 缺失该库
-    test = "!com.mojang.datafixers.kinds.App",
-    repository = "http://sacredcraft.cn:8081/repository/releases"
-)
-@PlatformSide([Platform.VELOCITY])
+@PlatformSide(Platform.VELOCITY)
 object ArtifexVelocity : Plugin(), PlatformHelper {
 
     val plugin by unsafeLazy { VelocityPlugin.getInstance() }
 
     @Awake(LifeCycle.INIT)
     fun init() {
-        releaseResourceFile("runtime/velocity-api.jar", true)
-        releaseResourceFile("runtime/adventure-api.jar", true)
+        releaseResourceFile("runtime/velocity-api.jar", false)
+        releaseResourceFile("runtime/adventure-api.jar", false)
     }
 
     override fun onLoad() {

@@ -1,10 +1,8 @@
 package ink.ptms.artifex.script
 
-import taboolib.library.asm.commons.Remapper
+import org.objectweb.asm.commons.Remapper
 import java.io.File
 import java.io.InputStream
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executors
 import java.util.function.Consumer
 
 /**

@@ -1,3 +1,4 @@
+
 package ink.ptms.artifex.velocityside
 
 import com.velocitypowered.api.command.CommandSource
@@ -19,7 +20,7 @@ import taboolib.platform.type.VelocityPlayer
  * @from TabooLib
  * @since 4/23/24 13:08.
  */
-@PlatformSide([Platform.VELOCITY])
+@PlatformSide(Platform.VELOCITY)
 class ArtifexVelocityAdapter : PlatformAdapter {
 
     private val plugin by unsafeLazy { VelocityPlugin.getInstance() }

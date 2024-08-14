@@ -4,6 +4,8 @@ import ink.ptms.artifex.Artifex
 import ink.ptms.artifex.ArtifexAPI
 import ink.ptms.artifex.PlatformHelper
 import ink.ptms.artifex.script.*
+import me.lucko.jarrelocator.JarRelocator
+import me.lucko.jarrelocator.Relocation
 import taboolib.common.LifeCycle
 import taboolib.common.io.digest
 import taboolib.common.io.newFile
@@ -11,10 +13,11 @@ import taboolib.common.io.taboolibId
 import taboolib.common.platform.Awake
 import taboolib.common.platform.PlatformFactory
 import taboolib.common.platform.SkipTo
-import taboolib.common.platform.function.*
+import taboolib.common.platform.function.console
+import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.getJarFile
+import taboolib.common.platform.function.releaseResourceFile
 import taboolib.common.util.resettableLazy
-import taboolib.library.jarrelocator.JarRelocator
-import taboolib.library.jarrelocator.Relocation
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 import taboolib.module.lang.sendLang
